@@ -1,0 +1,90 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+.next/
+dist/
+build/
+tsconfig.tsbuildinfo/
+
+# Environment files
+.env*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Documentation files
+*.md
+!README.md
+*.puml
+*.txt
+!LICENSE
+
+# Test files
+test.html
+coverage/
+
+# Scripts (keep only essential)
+scripts/*
+!scripts/essential
+!scripts/validate-translations.js
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Git
+.git/
+.gitignore/
+
+# Docker files (prevent recursive copies)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Logs
+logs/
+*.log/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock/
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm/
+
+# Optional REPL history
+.node_repl_history/
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity/
+
+env-config.js

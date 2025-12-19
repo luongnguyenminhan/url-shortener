@@ -1,0 +1,21 @@
+# Runtime base image - installs production dependencies
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install Yarn and security updates
+RUN corepack enable && \
+    apk add --no-cache dumb-init gettext && \
+    addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Copy package files
+COPY package.json yarn.lock ./
+
+# Install production dependencies
+RUN --mount=type=cache,target=/root/.yarn \
+    yarn install --frozen-lockfile --production && \
+    yarn cache clean
+
+# Switch to non-root user
+USER nextjs
