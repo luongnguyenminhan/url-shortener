@@ -13,14 +13,17 @@ COPY package.json yarn.lock ./
 RUN --mount=type=cache,target=/root/.yarn \
     yarn install --frozen-lockfile
 
-# Copy source code
-COPY . .
+# Copy all source files
+COPY tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts ./
+COPY src/ ./src/
+COPY public/ ./public/
+COPY index.html ./
 
 # Build app
 RUN yarn build
 
 # Application stage - uses runtime base image
-FROM ${RUNTIME_IMAGE}
+FROM ${RUNTIME_IMAGE} 
 
 WORKDIR /app
 
@@ -37,16 +40,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
 # Copy node_modules from builder (includes all deps needed)
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
-# Copy entrypoint script
-COPY --chown=nextjs:nodejs entrypoint.sh /entrypoint.sh
-
-RUN chmod +x /entrypoint.sh
-
 # Switch back to nextjs user
 USER nextjs
 
 EXPOSE 3030
 
-# Use entrypoint to generate config and start app
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["dumb-init", "yarn", "preview"]
+# Start Vite preview server on port 3030
+CMD ["yarn", "preview", "--", "--host", "0.0.0.0", "--port", "3030"]

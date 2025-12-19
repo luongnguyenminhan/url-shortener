@@ -7,7 +7,7 @@ WORKDIR /app
 RUN corepack enable && \
     apk add --no-cache dumb-init gettext && \
     addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+    adduser -S nextjs -u 1001 -G nodejs
 
 # Copy package files
 COPY package.json yarn.lock ./

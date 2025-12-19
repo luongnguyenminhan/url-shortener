@@ -6,7 +6,7 @@
 echo "🚀 Generating runtime config from environment variables..."
 
 # Set defaults if not provided
-API_ENDPOINT="${API_ENDPOINT:-https://securescribe.wc504.io.vn/be/api}"
+API_ENDPOINT="${API_ENDPOINT:-http://nginx/api}"
 BRAND_NAME="${BRAND_NAME:-SecureScribe}"
 BRAND_LOGO="${BRAND_LOGO:-/images/logos/logo.png}"
 
@@ -21,6 +21,6 @@ echo "✅ Runtime config generated"
 echo "   API_ENDPOINT: $API_ENDPOINT"
 echo "   BRAND_NAME: $BRAND_NAME"
 
-# Start Vite preview application
-echo "🌐 Starting Vite preview application..."
-exec "$@"
+# Start Vite preview application on port 3030
+echo "🌐 Starting Vite preview application on port 3030..."
+exec yarn preview -- --host 0.0.0.0 --port 3030
