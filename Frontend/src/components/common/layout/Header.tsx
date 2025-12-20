@@ -4,6 +4,7 @@ import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemText, Toolbar 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, ThemeToggle, LanguageSwitcher } from '../ui';
+import { getBrandConfig } from '../../../lib/utils/runtimeConfig';
 
 interface HeaderProps {
     onLogin?: () => void;
@@ -14,6 +15,7 @@ interface HeaderProps {
 export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderProps) {
     const { t } = useTranslation();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const brandConfig = getBrandConfig();
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -46,14 +48,25 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
                     {/* Logo */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
                         <Box
+                            component="img"
+                            src={brandConfig.logo}
+                            alt={brandConfig.name}
+                            sx={{
+                                height: '32px',
+                                width: 'auto',
+                                cursor: 'pointer',
+                            }}
+                        />
+                        <Box
                             sx={{
                                 fontSize: 'var(--font-size-xl)',
                                 fontWeight: 'var(--font-weight-bold)',
                                 color: 'var(--color-primary)',
                                 cursor: 'pointer',
+                                display: { xs: 'none', sm: 'block' }, // Hide on mobile to save space
                             }}
                         >
-                            {t('header.brand')}
+                            {brandConfig.name}
                         </Box>
                     </Box>
 

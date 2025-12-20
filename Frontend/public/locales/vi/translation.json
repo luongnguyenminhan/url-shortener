@@ -85,6 +85,38 @@
     "createAccount": "Tạo Tài khoản Miễn phí",
     "contactSales": "Liên hệ Bán hàng"
   },
+  "footer": {
+    "sections": {
+      "product": {
+        "title": "Sản phẩm",
+        "features": "Tính năng",
+        "pricing": "Giá cả",
+        "security": "Bảo mật"
+      },
+      "company": {
+        "title": "Công ty",
+        "about": "Giới thiệu",
+        "blog": "Blog",
+        "careers": "Tuyển dụng"
+      },
+      "support": {
+        "title": "Hỗ trợ",
+        "helpCenter": "Trung tâm trợ giúp",
+        "contact": "Liên hệ",
+        "status": "Trạng thái"
+      },
+      "newsletter": {
+        "title": "Bản tin",
+        "description": "Đăng ký để nhận cập nhật về tính năng mới"
+      }
+    },
+    "copyright": "© {{year}} {{brand}}. Tất cả quyền được bảo lưu.",
+    "legal": {
+      "privacy": "Quyền riêng tư",
+      "terms": "Điều khoản",
+      "cookies": "Cookie"
+    }
+  },
   "common": {
     "loading": "Đang tải...",
     "error": "Lỗi",

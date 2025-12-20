@@ -85,6 +85,38 @@
     "createAccount": "Create Free Account",
     "contactSales": "Contact Sales"
   },
+  "footer": {
+    "sections": {
+      "product": {
+        "title": "Product",
+        "features": "Features",
+        "pricing": "Pricing",
+        "security": "Security"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About",
+        "blog": "Blog",
+        "careers": "Careers"
+      },
+      "support": {
+        "title": "Support",
+        "helpCenter": "Help Center",
+        "contact": "Contact",
+        "status": "Status"
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "description": "Subscribe to get updates on new features"
+      }
+    },
+    "copyright": "© {{year}} {{brand}}. All rights reserved.",
+    "legal": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

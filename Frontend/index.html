@@ -2,13 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>URL Shortener</title>
+    <title id="page-title">URL Shortener</title>
   </head>
   <body>
     <div id="root"></div>
     <script src="/env-config.js"></script>
+    <script>
+      // Update title and favicon from runtime config
+      if (window.__ENV__) {
+        if (window.__ENV__.BRAND_NAME) {
+          document.getElementById('page-title').textContent = window.__ENV__.BRAND_NAME;
+        }
+        if (window.__ENV__.BRAND_LOGO) {
+          const favicon = document.querySelector('link[rel="icon"]');
+          if (favicon) {
+            favicon.href = window.__ENV__.BRAND_LOGO;
+          }
+        }
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
