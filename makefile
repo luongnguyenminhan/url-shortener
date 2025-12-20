@@ -1,4 +1,4 @@
-.PHONY: help build build-backend-runtime build-backend-app build-frontend-runtime build-frontend-app build-all clean push push-all docker-login up down logs restart ps down-clean env-check
+.PHONY: help build build-push update-runtime-be update-runtime-fe up restart rebuild down logs ps env-check
 
 # Variables
 REGISTRY :=
@@ -29,152 +29,59 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make build              - Build all images"
-	@echo "  make build-backend      - Build backend runtime and app images"
-	@echo "  make build-frontend     - Build frontend runtime and app images"
-	@echo "  make push-all           - Build and push all images to Docker Hub"
-	@echo "  make docker-login       - Login to Docker Hub"
-	@echo "  make up                 - Start all services (docker-compose)"
-	@echo "  make down               - Stop all services"
-	@echo "  make down-clean         - Stop and remove all containers, volumes"
-	@echo "  make logs               - View logs from all services"
+	@echo "  make build              - Build app images (requires runtime images)"
+	@echo "  make build-push         - Build and push app images to Docker Hub"
+	@echo "  make update-runtime-be  - Build and push backend runtime to Docker Hub"
+	@echo "  make update-runtime-fe  - Build and push frontend runtime to Docker Hub"
+	@echo "  make up                 - Start all services"
 	@echo "  make restart            - Restart all services"
-	@echo "  make ps                 - Show running containers"
-	@echo "  make env-check          - Verify .env file exists"
-	@echo "  make clean              - Remove all local images"
+	@echo "  make rebuild            - Rebuild app images and restart services"
 
-## build: Build all images (backend & frontend)
-build: build-backend build-frontend
-	@echo "✅ All images built successfully!"
-	@echo ""
-	@echo "Backend Runtime:  $(BACKEND_RUNTIME_IMAGE)"
-	@echo "Backend App:      $(BACKEND_APP_IMAGE)"
-	@echo "Frontend Runtime: $(FRONTEND_RUNTIME_IMAGE)"
-	@echo "Frontend App:     $(FRONTEND_APP_IMAGE)"
-
-## build-backend: Build backend runtime and app images
-build-backend: build-backend-runtime build-backend-app
-	@echo "✅ Backend images built successfully!"
-
-## build-backend-runtime: Build backend runtime image
-build-backend-runtime:
-	@echo "🔨 Building backend runtime image: $(BACKEND_RUNTIME_IMAGE)"
-	docker build $(DOCKER_BUILD_FLAGS) \
-		-f Backend/build/Dockerfile.runtime \
-		-t $(BACKEND_RUNTIME_IMAGE) \
-		Backend/
-	@echo "✅ Backend runtime image built: $(BACKEND_RUNTIME_IMAGE)"
-
-## build-backend-app: Build backend app image (depends on runtime)
-build-backend-app: build-backend-runtime
-	@echo "🔨 Building backend app image: $(BACKEND_APP_IMAGE)"
+## build: Build app images (backend & frontend) - requires runtime images to exist
+build:
+	@echo "🔨 Building app images..."
+	@docker image inspect $(BACKEND_RUNTIME_IMAGE) >/dev/null 2>&1 || (echo "❌ Backend runtime image $(BACKEND_RUNTIME_IMAGE) does not exist. Run 'make update-runtime-be' first." && exit 1)
+	@docker image inspect $(FRONTEND_RUNTIME_IMAGE) >/dev/null 2>&1 || (echo "❌ Frontend runtime image $(FRONTEND_RUNTIME_IMAGE) does not exist. Run 'make update-runtime-fe' first." && exit 1)
 	docker build $(DOCKER_BUILD_FLAGS) \
 		-f Backend/build/Dockerfile.app \
 		--build-arg RUNTIME_IMAGE=$(BACKEND_RUNTIME_IMAGE) \
 		-t $(BACKEND_APP_IMAGE) \
 		Backend/
-	@echo "✅ Backend app image built: $(BACKEND_APP_IMAGE)"
-
-## build-frontend: Build frontend runtime and app images
-build-frontend: build-frontend-runtime build-frontend-app
-	@echo "✅ Frontend images built successfully!"
-
-## build-frontend-runtime: Build frontend runtime image
-build-frontend-runtime:
-	@echo "🔨 Building frontend runtime image: $(FRONTEND_RUNTIME_IMAGE)"
-	docker build $(DOCKER_BUILD_FLAGS) \
-		-f Frontend/Dockerfile.runtime \
-		-t $(FRONTEND_RUNTIME_IMAGE) \
-		Frontend/
-	@echo "✅ Frontend runtime image built: $(FRONTEND_RUNTIME_IMAGE)"
-
-## build-frontend-app: Build frontend app image (depends on runtime)
-build-frontend-app: build-frontend-runtime
-	@echo "🔨 Building frontend app image: $(FRONTEND_APP_IMAGE)"
 	docker build $(DOCKER_BUILD_FLAGS) \
 		-f Frontend/Dockerfile.app \
 		--build-arg RUNTIME_IMAGE=$(FRONTEND_RUNTIME_IMAGE) \
 		-t $(FRONTEND_APP_IMAGE) \
 		Frontend/
-	@echo "✅ Frontend app image built: $(FRONTEND_APP_IMAGE)"
+	@echo "✅ App images built successfully!"
 
-## clean: Remove all built images
-clean:
-	@echo "🗑️  Cleaning up Docker images..."
-	-docker rmi $(BACKEND_RUNTIME_IMAGE) 2>/dev/null || true
-	-docker rmi $(BACKEND_APP_IMAGE) 2>/dev/null || true
-	-docker rmi $(FRONTEND_RUNTIME_IMAGE) 2>/dev/null || true
-	-docker rmi $(FRONTEND_APP_IMAGE) 2>/dev/null || true
-	@echo "✅ Cleanup complete"
-
-## list: List all local urls images
-list:
-	@echo "Local urls images:"
-	docker images | grep -E "$(REGISTRY)/$(IMAGE_NAME)" || echo "No images found"
-
-## inspect-backend-runtime: Inspect backend runtime image details
-inspect-backend-runtime:
-	docker inspect $(BACKEND_RUNTIME_IMAGE)
-
-## inspect-backend-app: Inspect backend app image details
-inspect-backend-app:
-	docker inspect $(BACKEND_APP_IMAGE)
-
-## inspect-frontend-runtime: Inspect frontend runtime image details
-inspect-frontend-runtime:
-	docker inspect $(FRONTEND_RUNTIME_IMAGE)
-
-## inspect-frontend-app: Inspect frontend app image details
-inspect-frontend-app:
-	docker inspect $(FRONTEND_APP_IMAGE)
-
-## docker-login: Login to Docker Hub
-docker-login:
-	@echo "🔐 Logging in to Docker Hub as $(DOCKERHUB_REGISTRY)..."
-	docker login -u $(DOCKERHUB_REGISTRY)
-	@echo "✅ Successfully logged in to Docker Hub"
-
-## push-all: Build and push all images to Docker Hub
-push-all: build
-	@echo "📤 Pushing all images to Docker Hub..."
-	docker tag $(BACKEND_RUNTIME_IMAGE) $(DOCKERHUB_BACKEND_RUNTIME) && docker push $(DOCKERHUB_BACKEND_RUNTIME)
+## build-push: Build app images and push to Docker Hub
+build-push: build
+	@echo "📤 Pushing app images to Docker Hub..."
 	docker tag $(BACKEND_APP_IMAGE) $(DOCKERHUB_BACKEND_APP) && docker push $(DOCKERHUB_BACKEND_APP)
-	docker tag $(FRONTEND_RUNTIME_IMAGE) $(DOCKERHUB_FRONTEND_RUNTIME) && docker push $(DOCKERHUB_FRONTEND_RUNTIME)
 	docker tag $(FRONTEND_APP_IMAGE) $(DOCKERHUB_FRONTEND_APP) && docker push $(DOCKERHUB_FRONTEND_APP)
-	@echo "✅ All images pushed to Docker Hub successfully!"
-	@echo ""
-	@echo "Backend Runtime:  $(DOCKERHUB_BACKEND_RUNTIME)"
-	@echo "Backend App:      $(DOCKERHUB_BACKEND_APP)"
-	@echo "Frontend Runtime: $(DOCKERHUB_FRONTEND_RUNTIME)"
-	@echo "Frontend App:     $(DOCKERHUB_FRONTEND_APP)"
+	@echo "✅ App images pushed to Docker Hub successfully!"
 
-## push: Push all tagged images to Docker Hub
-push: push-backend-runtime push-backend-app push-frontend-runtime push-frontend-app
-	@echo "✅ All images pushed successfully!"
-
-## push-backend-runtime: Push backend runtime to Docker Hub
-push-backend-runtime:
+## update-runtime-be: Build and push backend runtime image to Docker Hub
+update-runtime-be:
+	@echo "🔨 Building backend runtime image: $(BACKEND_RUNTIME_IMAGE)"
+	docker build $(DOCKER_BUILD_FLAGS) \
+		-f Backend/build/Dockerfile.runtime \
+		-t $(BACKEND_RUNTIME_IMAGE) \
+		Backend/
 	@echo "📤 Pushing $(DOCKERHUB_BACKEND_RUNTIME) to Docker Hub..."
 	docker tag $(BACKEND_RUNTIME_IMAGE) $(DOCKERHUB_BACKEND_RUNTIME) && docker push $(DOCKERHUB_BACKEND_RUNTIME)
-	@echo "✅ Backend runtime pushed"
+	@echo "✅ Backend runtime updated and pushed!"
 
-## push-backend-app: Push backend app to Docker Hub
-push-backend-app:
-	@echo "📤 Pushing $(DOCKERHUB_BACKEND_APP) to Docker Hub..."
-	docker tag $(BACKEND_APP_IMAGE) $(DOCKERHUB_BACKEND_APP) && docker push $(DOCKERHUB_BACKEND_APP)
-	@echo "✅ Backend app pushed"
-
-## push-frontend-runtime: Push frontend runtime to Docker Hub
-push-frontend-runtime:
+## update-runtime-fe: Build and push frontend runtime image to Docker Hub
+update-runtime-fe:
+	@echo "🔨 Building frontend runtime image: $(FRONTEND_RUNTIME_IMAGE)"
+	docker build $(DOCKER_BUILD_FLAGS) \
+		-f Frontend/Dockerfile.runtime \
+		-t $(FRONTEND_RUNTIME_IMAGE) \
+		Frontend/
 	@echo "📤 Pushing $(DOCKERHUB_FRONTEND_RUNTIME) to Docker Hub..."
 	docker tag $(FRONTEND_RUNTIME_IMAGE) $(DOCKERHUB_FRONTEND_RUNTIME) && docker push $(DOCKERHUB_FRONTEND_RUNTIME)
-	@echo "✅ Frontend runtime pushed"
-
-## push-frontend-app: Push frontend app to Docker Hub
-push-frontend-app:
-	@echo "📤 Pushing $(DOCKERHUB_FRONTEND_APP) to Docker Hub..."
-	docker tag $(FRONTEND_APP_IMAGE) $(DOCKERHUB_FRONTEND_APP) && docker push $(DOCKERHUB_FRONTEND_APP)
-	@echo "✅ Frontend app pushed"
+	@echo "✅ Frontend runtime updated and pushed!"
 
 ## env-check: Verify .env file exists
 env-check:
@@ -190,7 +97,7 @@ env-check:
 	fi
 
 ## up: Start all services with docker-compose
-up: env-check build
+up: env-check
 	@echo "🚀 Starting all services..."
 	docker-compose up -d
 	@echo "✅ Services started!"
@@ -206,60 +113,20 @@ down:
 	docker-compose down
 	@echo "✅ Services stopped"
 
-## down-clean: Stop services and remove volumes
-down-clean:
-	@echo "🗑️  Stopping and cleaning up all services and volumes..."
-	docker-compose down -v
-	@echo "✅ Cleanup complete - all containers and volumes removed"
-
-## restart: Restart all services
+## restart: Restart all services (down and up)
 restart: down up
 	@echo "✅ Services restarted"
+
+## rebuild: Stop services, rebuild app images, and restart services
+rebuild: down build up
+	@echo "✅ Services rebuilt and restarted"
 
 ## logs: View logs from all services
 logs:
 	@echo "📋 Streaming logs (press Ctrl+C to exit)..."
 	docker-compose logs -f
 
-## logs-backend: View backend service logs
-logs-backend:
-	docker-compose logs -f backend
-
-## logs-frontend: View frontend service logs
-logs-frontend:
-	docker-compose logs -f frontend
-
-## logs-redis: View redis service logs
-logs-redis:
-	docker-compose logs -f redis
-
-## logs-nginx: View nginx service logs
-logs-nginx:
-	docker-compose logs -f nginx
-
 ## ps: Show running containers
 ps:
 	@echo "🐳 Running containers:"
 	docker-compose ps
-
-## exec-backend: Execute command in backend container
-exec-backend:
-	@read -p "Enter command to execute in backend: " cmd; \
-	docker-compose exec backend $$cmd
-
-## exec-frontend: Execute command in frontend container
-exec-frontend:
-	@read -p "Enter command to execute in frontend: " cmd; \
-	docker-compose exec frontend $$cmd
-
-## shell-backend: Open bash shell in backend container
-shell-backend:
-	docker-compose exec backend /bin/bash
-
-## shell-frontend: Open bash shell in frontend container
-shell-frontend:
-	docker-compose exec frontend /bin/sh
-
-## shell-redis: Open redis-cli in redis container
-shell-redis:
-	docker-compose exec redis redis-cli -a $${REDIS_PASSWORD:-urls123}
