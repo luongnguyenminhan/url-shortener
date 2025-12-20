@@ -163,4 +163,12 @@
 * Traffic logging: async worker
 * Analytics: pre-aggregated MySQL tables
 
-This document defines the **project-level context and business rules** for the URL Shortener platform and is the source of truth for feature scope and behavior.
+---
+
+## Related Documentation
+
+Refer to the following context files for detailed information:
+
+- **`frontend-design-language.md`** - Comprehensive frontend design language, theming system, Material-UI integration, and Tailwind CSS guidelines
+- **`CODING-STRUCTURE.md`** - Frontend component architecture, directory structure, styling patterns, and coding guidelines
+- **`dbcontext.md`** - Database schema and data models (if applicable)
