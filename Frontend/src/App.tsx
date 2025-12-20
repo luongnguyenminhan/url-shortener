@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { Box } from '@mui/material';
+import { useEffect } from 'react';
+import { ThemeProvider, Box } from '@mui/material';
 import { useTheme } from './hooks/useTheme';
 import { createAppTheme } from './theme';
 import { Header, Footer } from './components/common/layout';
@@ -9,8 +7,7 @@ import { Hero, Features, Pricing, CTA } from './components/landing';
 import './styles/globals.css';
 
 function AppContent() {
-  const { theme: mode, toggleTheme } = useTheme();
-  const theme = createAppTheme(mode);
+  const { theme: mode } = useTheme();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', mode);
@@ -61,9 +58,8 @@ export default function App() {
   const theme = createAppTheme(mode);
 
   return (
-    <MuiThemeProvider theme={theme}>
-      <CssBaseline />
+    <ThemeProvider theme={theme}>
       <AppContent />
-    </MuiThemeProvider>
+    </ThemeProvider>
   );
 }
