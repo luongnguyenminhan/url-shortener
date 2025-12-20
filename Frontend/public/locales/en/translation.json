@@ -1,0 +1,96 @@
+{
+  "hero": {
+    "title": "Shorten URLs, Track Performance",
+    "subtitle": "Create custom short URLs, monitor traffic in real-time, and gain actionable insights with LinkShort",
+    "getStarted": "Get Started Free",
+    "learnMore": "Learn More"
+  },
+  "header": {
+    "brand": "LinkShort",
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "about": "About"
+    },
+    "login": "Login",
+    "signUp": "Sign Up",
+    "menu": "Menu"
+  },
+  "form": {
+    "placeholder": "Enter your long URL here...",
+    "shortenUrl": "Shorten URL",
+    "shortening": "Shortening...",
+    "errors": {
+      "emptyUrl": "Please enter a URL",
+      "invalidUrl": "Please enter a valid URL (starting with http:// or https://)",
+      "shortenFailed": "Failed to shorten URL"
+    },
+    "result": {
+      "label": "Your shortened URL:",
+      "copy": "Copy"
+    }
+  },
+  "features": {
+    "title": "Powerful Features",
+    "subtitle": "Everything you need to create, manage, and analyze your short links",
+    "customUrls": {
+      "title": "Custom Short URLs",
+      "description": "Create memorable, branded short links that reflect your identity. Perfect for marketing campaigns and social media."
+    },
+    "analytics": {
+      "title": "Real-time Analytics",
+      "description": "Track clicks, geographic location, device type, and referrer sources. Make data-driven decisions instantly."
+    },
+    "security": {
+      "title": "Enterprise Security",
+      "description": "Bank-level encryption, HTTPS support, and compliance standards. Your data is always protected and secure."
+    }
+  },
+  "pricing": {
+    "title": "Simple Pricing",
+    "subtitle": "Choose the plan that works best for you. Upgrade or downgrade anytime.",
+    "mostPopular": "Most Popular",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "Forever",
+      "description": "Perfect for getting started",
+      "features": {
+        "urls": "5 URLs per week",
+        "analytics": "Basic analytics",
+        "support": "Standard support",
+        "branding": "LinkShort branding"
+      },
+      "cta": "Get Started"
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "$9.99",
+      "period": "Per month",
+      "description": "For professionals and businesses",
+      "features": {
+        "unlimited": "Unlimited URLs",
+        "analytics": "Advanced analytics",
+        "support": "Priority support",
+        "branding": "Custom branding",
+        "api": "API access",
+        "team": "Team collaboration"
+      },
+      "cta": "Start Free Trial"
+    }
+  },
+  "cta": {
+    "title": "Ready to Get Started?",
+    "description": "Join thousands of users who are shortening URLs and tracking performance with LinkShort. Sign up today and get 5 free URL shortens.",
+    "createAccount": "Create Free Account",
+    "contactSales": "Contact Sales"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close"
+  }
+}

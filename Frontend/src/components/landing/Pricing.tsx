@@ -1,4 +1,5 @@
 import { Box, Container, Typography, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../common/ui';
 import { Button } from '../common/ui';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -8,35 +9,37 @@ interface PricingProps {
 }
 
 export function Pricing({ onSelectPlan }: PricingProps) {
+    const { t } = useTranslation();
+
     const plans = [
         {
-            name: 'Free',
-            price: '$0',
-            period: 'Forever',
-            description: 'Perfect for getting started',
+            name: t('pricing.free.name'),
+            price: t('pricing.free.price'),
+            period: t('pricing.free.period'),
+            description: t('pricing.free.description'),
             features: [
-                '5 URLs per week',
-                'Basic analytics',
-                'Standard support',
-                'LinkShort branding',
+                t('pricing.free.features.urls'),
+                t('pricing.free.features.analytics'),
+                t('pricing.free.features.support'),
+                t('pricing.free.features.branding'),
             ],
-            cta: 'Get Started',
+            cta: t('pricing.free.cta'),
             highlighted: false,
         },
         {
-            name: 'Premium',
-            price: '$9.99',
-            period: 'Per month',
-            description: 'For professionals and businesses',
+            name: t('pricing.premium.name'),
+            price: t('pricing.premium.price'),
+            period: t('pricing.premium.period'),
+            description: t('pricing.premium.description'),
             features: [
-                'Unlimited URLs',
-                'Advanced analytics',
-                'Priority support',
-                'Custom branding',
-                'API access',
-                'Team collaboration',
+                t('pricing.premium.features.unlimited'),
+                t('pricing.premium.features.analytics'),
+                t('pricing.premium.features.support'),
+                t('pricing.premium.features.branding'),
+                t('pricing.premium.features.api'),
+                t('pricing.premium.features.team'),
             ],
-            cta: 'Start Free Trial',
+            cta: t('pricing.premium.cta'),
             highlighted: true,
         },
     ];
@@ -61,7 +64,7 @@ export function Pricing({ onSelectPlan }: PricingProps) {
                             color: 'var(--text-primary)',
                         }}
                     >
-                        Simple Pricing
+                        {t('pricing.title')}
                     </Typography>
                     <Typography
                         sx={{
@@ -71,7 +74,7 @@ export function Pricing({ onSelectPlan }: PricingProps) {
                             margin: '0 auto',
                         }}
                     >
-                        Choose the plan that works best for you. Upgrade or downgrade anytime.
+                        {t('pricing.subtitle')}
                     </Typography>
                 </Box>
 
@@ -96,28 +99,40 @@ export function Pricing({ onSelectPlan }: PricingProps) {
                                     flexDirection: 'column',
                                     transform: plan.highlighted ? 'scale(1.05)' : 'scale(1)',
                                     borderColor: plan.highlighted ? 'var(--color-primary)' : 'var(--border-primary)',
-                                    borderWidth: plan.highlighted ? '2px' : '1px',
+                                    borderWidth: plan.highlighted ? '3px' : '1px',
                                     position: 'relative',
                                     transition: 'all var(--transition-normal)',
                                     overflow: plan.highlighted ? 'visible' : 'hidden',
+                                    backgroundColor: plan.highlighted ? 'var(--bg-primary)' : 'var(--bg-secondary)',
+                                    boxShadow: plan.highlighted
+                                        ? 'var(--shadow-lg)'
+                                        : 'var(--shadow-sm)',
+                                    '&:hover': {
+                                        transform: plan.highlighted ? 'scale(1.08)' : 'scale(1.02)',
+                                        boxShadow: plan.highlighted
+                                            ? 'var(--shadow-xl)'
+                                            : 'var(--shadow-md)',
+                                    },
                                 }}
                             >
                                 {plan.highlighted && (
                                     <Box
                                         sx={{
                                             position: 'absolute',
-                                            top: '-12px',
+                                            top: '-14px',
                                             left: '50%',
                                             transform: 'translateX(-50%)',
                                             backgroundColor: 'var(--color-primary)',
                                             color: 'var(--text-inverse)',
-                                            padding: 'var(--spacing-xs) var(--spacing-md)',
+                                            padding: 'var(--spacing-sm) var(--spacing-lg)',
                                             borderRadius: 'var(--radius-full)',
                                             fontSize: 'var(--font-size-sm)',
                                             fontWeight: 'var(--font-weight-bold)',
+                                            zIndex: 10,
+                                            border: '2px solid var(--bg-primary)',
                                         }}
                                     >
-                                        Most Popular
+                                        {t('pricing.mostPopular')}
                                     </Box>
                                 )}
 
@@ -148,7 +163,7 @@ export function Pricing({ onSelectPlan }: PricingProps) {
                                             sx={{
                                                 fontSize: 'var(--font-size-4xl)',
                                                 fontWeight: 'var(--font-weight-bold)',
-                                                color: 'var(--color-primary)',
+                                                color: plan.highlighted ? 'var(--color-primary)' : 'var(--text-primary)',
                                             }}
                                         >
                                             {plan.price}
@@ -166,7 +181,7 @@ export function Pricing({ onSelectPlan }: PricingProps) {
                                     <Button
                                         variant={plan.highlighted ? 'contained' : 'outlined'}
                                         fullWidth
-                                        onClick={() => onSelectPlan?.(plan.name.toLowerCase() as 'free' | 'paid')}
+                                        onClick={() => onSelectPlan?.(index === 0 ? 'free' : 'paid')}
                                         sx={{ marginBottom: 'var(--spacing-lg)' }}
                                     >
                                         {plan.cta}

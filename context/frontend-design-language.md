@@ -3,6 +3,30 @@
 ## Overview
 This document outlines the frontend design language for the URL Shortener application, incorporating Material-UI (MUI) as the primary component library, Tailwind CSS for utility-first styling, and comprehensive theming strategies.
 
+## ⚠️ CRITICAL DESIGN RESTRICTIONS
+
+### PROHIBITED ELEMENTS
+The following design elements are **STRICTLY FORBIDDEN** in this project:
+
+#### ❌ **NEVER USE GRADIENTS**
+- No CSS gradients (`linear-gradient`, `radial-gradient`, `conic-gradient`)
+- No background gradients on any components
+- No text gradients or gradient overlays
+- Use solid colors only from the defined color palette
+
+#### ❌ **NEVER USE UNICODE ICONS OR EMOJIS**
+- No emoji characters (🚀, ⭐, 🔥, ⚡, 💡, etc.)
+- No Unicode symbols as icons
+- No emoji-based visual elements
+- Use only Material-UI icons (`@mui/icons-material`) or approved icon libraries
+- For decorative elements, use CSS shapes, borders, or approved SVG icons
+
+#### ✅ **APPROVED ALTERNATIVES**
+- **For backgrounds**: Use solid colors from `--bg-primary`, `--bg-secondary`, `--bg-tertiary`
+- **For icons**: Use Material-UI icons like `CheckCircleIcon`, `StarIcon`, `ArrowForwardIcon`
+- **For emphasis**: Use color, typography, spacing, and shadows from the design system
+- **For visual hierarchy**: Use size, weight, and positioning instead of gradients
+
 ## Design System Architecture
 
 ### Core Technologies
@@ -472,6 +496,14 @@ module.exports = {
   background-color: #1976d2;
   color: #212121;
 }
+
+/* ❌ STRICTLY FORBIDDEN */
+.my-component {
+  background: linear-gradient(45deg, #1976d2, #1565c0); /* NO GRADIENTS */
+}
+.my-component::before {
+  content: "🚀"; /* NO EMOJIS */
+}
 ```
 
 #### 2. **Structure CSS Variables Hierarchically**
@@ -593,15 +625,33 @@ function App() {
 ### Component Usage
 ```jsx
 import { Button, TextField, Card } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // ✅ APPROVED
+import StarIcon from '@mui/icons-material/Star'; // ✅ APPROVED
 
 function MyComponent() {
   return (
     <Card>
       <TextField label="URL" variant="outlined" />
-      <Button variant="contained" color="primary">
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<CheckCircleIcon />} // ✅ Use MUI icons only
+      >
         Shorten URL
       </Button>
     </Card>
+  );
+}
+
+// ❌ STRICTLY FORBIDDEN
+function BadComponent() {
+  return (
+    <div>
+      <span>🚀</span> {/* NO EMOJIS */}
+      <div style={{ background: 'linear-gradient(45deg, red, blue)' }}> {/* NO GRADIENTS */}
+        Content
+      </div>
+    </div>
   );
 }
 ```
@@ -945,6 +995,9 @@ module.exports = {
 - Maintain consistent spacing with theme.spacing
 - Implement proper color contrast ratios
 - Test components in both light and dark modes
+- **NEVER use CSS gradients** - use solid colors from the design system
+- **NEVER use Unicode icons or emojis** - use Material-UI icons only
+- **ALWAYS use approved visual elements** - gradients and emojis are strictly prohibited
 
 ## Migration Guide
 

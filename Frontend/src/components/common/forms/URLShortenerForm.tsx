@@ -1,5 +1,6 @@
 import { Alert, Box, CircularProgress } from '@mui/material';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input } from '../ui';
 
 interface URLShortenerFormProps {
@@ -9,6 +10,7 @@ interface URLShortenerFormProps {
 }
 
 export function URLShortenerForm({ onSubmit, loading = false, error }: URLShortenerFormProps) {
+    const { t } = useTranslation();
     const [url, setUrl] = useState('');
     const [result, setResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -27,12 +29,12 @@ export function URLShortenerForm({ onSubmit, loading = false, error }: URLShorte
         e.preventDefault();
 
         if (!url.trim()) {
-            setIsError('Please enter a URL');
+            setIsError(t('form.errors.emptyUrl'));
             return;
         }
 
         if (!isValidUrl(url)) {
-            setIsError('Please enter a valid URL (starting with http:// or https://)');
+            setIsError(t('form.errors.invalidUrl'));
             return;
         }
 
@@ -49,7 +51,7 @@ export function URLShortenerForm({ onSubmit, loading = false, error }: URLShorte
                 setResult('linkshort.io/abc123');
             }
         } catch (err) {
-            setIsError((err as Error).message || 'Failed to shorten URL');
+            setIsError((err as Error).message || t('form.errors.shortenFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -75,7 +77,7 @@ export function URLShortenerForm({ onSubmit, loading = false, error }: URLShorte
                 }}
             >
                 <Input
-                    placeholder="Enter your long URL here..."
+                    placeholder={t('form.placeholder')}
                     value={url}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
                     disabled={isLoading || loading}
@@ -97,10 +99,10 @@ export function URLShortenerForm({ onSubmit, loading = false, error }: URLShorte
                     {isLoading || loading ? (
                         <>
                             <CircularProgress size={20} color="inherit" />
-                            Shortening...
+                            {t('form.shortening')}
                         </>
                     ) : (
-                        'Shorten URL'
+                        t('form.shortenUrl')
                     )}
                 </Button>
             </Box>
@@ -116,7 +118,7 @@ export function URLShortenerForm({ onSubmit, loading = false, error }: URLShorte
                     }}
                 >
                     <Box sx={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-sm)' }}>
-                        Your shortened URL:
+                        {t('form.result.label')}
                     </Box>
                     <Box
                         sx={{
@@ -150,7 +152,7 @@ export function URLShortenerForm({ onSubmit, loading = false, error }: URLShorte
                                 minWidth: '100px',
                             }}
                         >
-                            Copy
+                            {t('form.result.copy')}
                         </Button>
                     </Box>
                 </Box>

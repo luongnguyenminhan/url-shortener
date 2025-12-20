@@ -1,4 +1,5 @@
 import { Box, Container, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { URLShortenerForm } from '../common/forms';
 import { Button } from '../common/ui';
 
@@ -8,6 +9,8 @@ interface HeroProps {
 }
 
 export function Hero({ onShortenUrl, onSignup }: HeroProps) {
+    const { t } = useTranslation();
+
     return (
         <Box
             component="section"
@@ -64,7 +67,7 @@ export function Hero({ onShortenUrl, onSignup }: HeroProps) {
                             color: '#ffffff',
                         }}
                     >
-                        Shorten URLs, Track Performance
+                        {t('hero.title')}
                     </Typography>
 
                     {/* Subheading */}
@@ -79,7 +82,7 @@ export function Hero({ onShortenUrl, onSignup }: HeroProps) {
                             color: 'rgba(255, 255, 255, 0.9)',
                         }}
                     >
-                        Create custom short URLs, monitor traffic in real-time, and gain actionable insights with LinkShort
+                        {t('hero.subtitle')}
                     </Typography>
 
                     {/* URL Shortener Form */}
@@ -116,7 +119,7 @@ export function Hero({ onShortenUrl, onSignup }: HeroProps) {
                                 },
                             }}
                         >
-                            Get Started Free
+                            {t('hero.getStarted')}
                         </Button>
                         <Button
                             variant="outlined"
@@ -131,7 +134,7 @@ export function Hero({ onShortenUrl, onSignup }: HeroProps) {
                                 },
                             }}
                         >
-                            Learn More
+                            {t('hero.learnMore')}
                         </Button>
                     </Box>
                 </Box>

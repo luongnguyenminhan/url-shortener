@@ -1,25 +1,28 @@
 import { Box, Container, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../common/ui';
 import LinkIcon from '@mui/icons-material/Link';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SecurityIcon from '@mui/icons-material/Security';
 
 export function Features() {
+    const { t } = useTranslation();
+
     const features = [
         {
             icon: <LinkIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
-            title: 'Custom Short URLs',
-            description: 'Create memorable, branded short links that reflect your identity. Perfect for marketing campaigns and social media.',
+            title: t('features.customUrls.title'),
+            description: t('features.customUrls.description'),
         },
         {
             icon: <AnalyticsIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
-            title: 'Real-time Analytics',
-            description: 'Track clicks, geographic location, device type, and referrer sources. Make data-driven decisions instantly.',
+            title: t('features.analytics.title'),
+            description: t('features.analytics.description'),
         },
         {
             icon: <SecurityIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
-            title: 'Enterprise Security',
-            description: 'Bank-level encryption, HTTPS support, and compliance standards. Your data is always protected and secure.',
+            title: t('features.security.title'),
+            description: t('features.security.description'),
         },
     ];
 
@@ -43,7 +46,7 @@ export function Features() {
                             color: 'var(--text-primary)',
                         }}
                     >
-                        Powerful Features
+                        {t('features.title')}
                     </Typography>
                     <Typography
                         sx={{
@@ -53,7 +56,7 @@ export function Features() {
                             margin: '0 auto',
                         }}
                     >
-                        Everything you need to create, manage, and analyze your short links
+                        {t('features.subtitle')}
                     </Typography>
                 </Box>
 

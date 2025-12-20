@@ -1,4 +1,5 @@
 import { Box, Container, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../common/ui';
 
 interface CTAProps {
@@ -6,6 +7,8 @@ interface CTAProps {
 }
 
 export function CTA({ onGetStarted }: CTAProps) {
+    const { t } = useTranslation();
+
     return (
         <Box
             component="section"
@@ -24,9 +27,10 @@ export function CTA({ onGetStarted }: CTAProps) {
                         fontSize: { xs: 'var(--font-size-3xl)', md: 'var(--font-size-4xl)' },
                         fontWeight: 'var(--font-weight-bold)',
                         marginBottom: 'var(--spacing-md)',
+                        color: '#ffffff',
                     }}
                 >
-                    Ready to Get Started?
+                    {t('cta.title')}
                 </Typography>
 
                 <Typography
@@ -35,10 +39,10 @@ export function CTA({ onGetStarted }: CTAProps) {
                         marginBottom: 'var(--spacing-2xl)',
                         opacity: 0.95,
                         lineHeight: 'var(--line-height-relaxed)',
+                        color: '#ffffff',
                     }}
                 >
-                    Join thousands of users who are shortening URLs and tracking performance with LinkShort. Sign up today and get
-                    5 free URL shortens.
+                    {t('cta.description')}
                 </Typography>
 
                 <Box
@@ -61,7 +65,7 @@ export function CTA({ onGetStarted }: CTAProps) {
                             },
                         }}
                     >
-                        Create Free Account
+                        {t('cta.createAccount')}
                     </Button>
                     <Button
                         variant="outlined"
@@ -76,7 +80,7 @@ export function CTA({ onGetStarted }: CTAProps) {
                             },
                         }}
                     >
-                        Contact Sales
+                        {t('cta.contactSales')}
                     </Button>
                 </Box>
             </Container>

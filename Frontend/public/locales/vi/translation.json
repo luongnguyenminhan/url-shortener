@@ -1,0 +1,96 @@
+{
+  "hero": {
+    "title": "Rút gọn URL, Theo dõi Hiệu suất",
+    "subtitle": "Tạo URL ngắn tùy chỉnh, giám sát lưu lượng truy cập thời gian thực và thu thập thông tin chi tiết có thể hành động với LinkShort",
+    "getStarted": "Bắt đầu Miễn phí",
+    "learnMore": "Tìm hiểu Thêm"
+  },
+  "header": {
+    "brand": "LinkShort",
+    "nav": {
+      "features": "Tính năng",
+      "pricing": "Giá cả",
+      "about": "Giới thiệu"
+    },
+    "login": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "menu": "Menu"
+  },
+  "form": {
+    "placeholder": "Nhập URL dài của bạn ở đây...",
+    "shortenUrl": "Rút gọn URL",
+    "shortening": "Đang rút gọn...",
+    "errors": {
+      "emptyUrl": "Vui lòng nhập URL",
+      "invalidUrl": "Vui lòng nhập URL hợp lệ (bắt đầu bằng http:// hoặc https://)",
+      "shortenFailed": "Không thể rút gọn URL"
+    },
+    "result": {
+      "label": "URL rút gọn của bạn:",
+      "copy": "Sao chép"
+    }
+  },
+  "features": {
+    "title": "Tính năng Mạnh mẽ",
+    "subtitle": "Mọi thứ bạn cần để tạo, quản lý và phân tích các liên kết ngắn của mình",
+    "customUrls": {
+      "title": "URL Ngắn Tùy chỉnh",
+      "description": "Tạo các liên kết ngắn dễ nhớ, có thương hiệu phản ánh danh tính của bạn. Hoàn hảo cho các chiến dịch marketing và mạng xã hội."
+    },
+    "analytics": {
+      "title": "Phân tích Thời gian Thực",
+      "description": "Theo dõi số lần nhấp, vị trí địa lý, loại thiết bị và nguồn giới thiệu. Ra quyết định dựa trên dữ liệu ngay lập tức."
+    },
+    "security": {
+      "title": "Bảo mật Doanh nghiệp",
+      "description": "Mã hóa cấp ngân hàng, hỗ trợ HTTPS và tiêu chuẩn tuân thủ. Dữ liệu của bạn luôn được bảo vệ và an toàn."
+    }
+  },
+  "pricing": {
+    "title": "Giá cả Đơn giản",
+    "subtitle": "Chọn gói phù hợp nhất với bạn. Nâng cấp hoặc hạ cấp bất cứ lúc nào.",
+    "mostPopular": "Phổ biến Nhất",
+    "free": {
+      "name": "Miễn phí",
+      "price": "$0",
+      "period": "Mãi mãi",
+      "description": "Hoàn hảo để bắt đầu",
+      "features": {
+        "urls": "5 URL mỗi tuần",
+        "analytics": "Phân tích cơ bản",
+        "support": "Hỗ trợ tiêu chuẩn",
+        "branding": "Thương hiệu LinkShort"
+      },
+      "cta": "Bắt đầu"
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "$9.99",
+      "period": "Mỗi tháng",
+      "description": "Dành cho chuyên gia và doanh nghiệp",
+      "features": {
+        "unlimited": "URL không giới hạn",
+        "analytics": "Phân tích nâng cao",
+        "support": "Hỗ trợ ưu tiên",
+        "branding": "Thương hiệu tùy chỉnh",
+        "api": "Truy cập API",
+        "team": "Hợp tác nhóm"
+      },
+      "cta": "Bắt đầu Dùng thử Miễn phí"
+    }
+  },
+  "cta": {
+    "title": "Sẵn sàng Bắt đầu?",
+    "description": "Tham gia cùng hàng nghìn người dùng đang rút gọn URL và theo dõi hiệu suất với LinkShort. Đăng ký ngay hôm nay và nhận 5 lần rút gọn URL miễn phí.",
+    "createAccount": "Tạo Tài khoản Miễn phí",
+    "contactSales": "Liên hệ Bán hàng"
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "close": "Đóng"
+  }
+}

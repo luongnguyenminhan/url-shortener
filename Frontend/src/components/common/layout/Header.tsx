@@ -2,7 +2,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemText, Toolbar } from '@mui/material';
 import { useState } from 'react';
-import { Button, ThemeToggle } from '../ui';
+import { useTranslation } from 'react-i18next';
+import { Button, ThemeToggle, LanguageSwitcher } from '../ui';
 
 interface HeaderProps {
     onLogin?: () => void;
@@ -11,6 +12,7 @@ interface HeaderProps {
 }
 
 export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderProps) {
+    const { t } = useTranslation();
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleDrawerToggle = () => {
@@ -18,9 +20,9 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
     };
 
     const navItems = [
-        { label: 'Features', href: '#features' },
-        { label: 'Pricing', href: '#pricing' },
-        { label: 'About', href: '#about' },
+        { label: t('header.nav.features'), href: '#features' },
+        { label: t('header.nav.pricing'), href: '#pricing' },
+        { label: t('header.nav.about'), href: '#about' },
     ];
 
     return (
@@ -51,7 +53,7 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
                                 cursor: 'pointer',
                             }}
                         >
-                            LinkShort
+                            {t('header.brand')}
                         </Box>
                     </Box>
 
@@ -90,6 +92,7 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
                             gap: 'var(--spacing-md)',
                         }}
                     >
+                        <LanguageSwitcher />
                         <ThemeToggle />
 
                         {!isAuthenticated && (
@@ -100,10 +103,10 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
                                     onClick={onLogin}
                                     sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
                                 >
-                                    Login
+                                    {t('header.login')}
                                 </Button>
                                 <Button variant="contained" size="small" onClick={onSignup}>
-                                    Sign Up
+                                    {t('header.signUp')}
                                 </Button>
                             </>
                         )}
@@ -134,7 +137,7 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
                     }}
                 >
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 'var(--spacing-lg)' }}>
-                        <Box sx={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)' }}>Menu</Box>
+                        <Box sx={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)' }}>{t('header.menu')}</Box>
                         <IconButton size="small" onClick={handleDrawerToggle}>
                             <CloseIcon />
                         </IconButton>
@@ -163,10 +166,10 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
                     {!isAuthenticated && (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
                             <Button variant="text" fullWidth onClick={onLogin}>
-                                Login
+                                {t('header.login')}
                             </Button>
                             <Button variant="contained" fullWidth onClick={onSignup}>
-                                Sign Up
+                                {t('header.signUp')}
                             </Button>
                         </Box>
                     )}
