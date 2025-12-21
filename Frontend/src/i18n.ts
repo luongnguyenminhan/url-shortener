@@ -11,7 +11,7 @@ i18n
         fallbackLng: 'en',
         debug: import.meta.env.DEV,
         defaultNS: 'translation',
-        ns: ['translation', 'common'],
+        ns: ['translation', 'common', 'auth'],
         interpolation: {
             escapeValue: false
         },
