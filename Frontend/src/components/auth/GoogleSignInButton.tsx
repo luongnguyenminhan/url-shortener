@@ -30,13 +30,13 @@ export function GoogleSignInButton({ disabled = false }: GoogleSignInButtonProps
       await loginWithGoogle();
       showToast({
         type: 'success',
-        message: t('google_login_success', 'Signed in with Google!'),
+        message: t('common.google_login_success', 'Signed in with Google!'),
       });
     } catch (error) {
       console.error('Google sign-in error:', error);
       showToast({
         type: 'error',
-        message: t('google_login_error', 'Failed to sign in with Google.'),
+        message: t('common.google_login_error', 'Failed to sign in with Google.'),
       });
     }
   };
@@ -82,7 +82,7 @@ export function GoogleSignInButton({ disabled = false }: GoogleSignInButtonProps
           <CircularProgress size={20} sx={{ color: 'var(--text-primary)' }} />
         </Box>
       ) : (
-        t('google_button', 'Continue with Google')
+        t('common.google_button', 'Continue with Google')
       )}
     </Button>
   );
