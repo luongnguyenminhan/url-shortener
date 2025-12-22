@@ -12,9 +12,8 @@ RUN corepack enable && \
 # Copy package files
 COPY package.json yarn.lock ./
 
-# Install production dependencies
-RUN --mount=type=cache,target=/root/.yarn \
-    yarn install --frozen-lockfile --production && \
+# Install production dependencies (with layer caching)
+RUN yarn install --frozen-lockfile --production && \
     yarn cache clean
 
 # Switch to non-root user

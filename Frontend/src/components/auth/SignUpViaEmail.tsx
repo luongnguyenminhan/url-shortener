@@ -43,17 +43,11 @@ export function SignUpViaEmail({ onSwitchMode }: SignUpViaEmailProps) {
   const onSubmit = async (values: SignUpValues) => {
     try {
       await signupWithEmail(values.email, values.password, values.confirm);
-      showToast({
-        type: 'success',
-        message: t('signup.success', 'Account created successfully! Please verify your email.'),
-      });
+      showToast('success', t('signup.success', 'Account created successfully! Please verify your email.'));
       onSwitchMode?.('login');
     } catch (error) {
-      console.error('Signup error:', error);
-      showToast({
-        type: 'error',
-        message: t('signup.error', 'Signup failed. Please try again.'),
-      });
+      console.error('Sign-up error:', error);
+      showToast('error', t('signup.error', 'Sign-up failed. Please try again.'));
     }
   };
 

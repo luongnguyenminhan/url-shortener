@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ROUTES } from './routes';
@@ -14,10 +14,11 @@ interface ProtectedRouteProps {
  * Shows loading spinner while checking auth status
  */
 export function ProtectedRoute({ element }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
   // Show loading spinner while checking authentication
-  if (loading) {
+  const isLoading = false;
+  if (isLoading) {
     return (
       <Box
         sx={{

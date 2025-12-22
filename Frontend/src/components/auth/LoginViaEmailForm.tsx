@@ -39,16 +39,10 @@ export function LoginViaEmailForm({ onSwitchMode }: LoginViaEmailFormProps) {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       await loginWithEmail(data.email, data.password);
-      showToast({
-        type: 'success',
-        message: t('login.success', 'Login successful!'),
-      });
+      showToast('success', t('login.success', 'Login successful!'));
     } catch (error) {
       console.error('Login error:', error);
-      showToast({
-        type: 'error',
-        message: t('login.error', 'Login failed. Please try again.'),
-      });
+      showToast('error', t('login.error', 'Login failed. Please try again.'));
     }
   };
 

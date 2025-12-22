@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "@/hooks/useTheme";
 import { ThemeToggle } from "../common/ui/ThemeToggle";
 import { getBrandConfig } from "../../lib/utils/runtimeConfig";
 
@@ -26,7 +25,6 @@ type AuthLayoutProps = {
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
     const muiTheme = useMuiTheme();
-    const { theme: currentTheme } = useTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down("lg"));
     const { t } = useTranslation("auth");
 
