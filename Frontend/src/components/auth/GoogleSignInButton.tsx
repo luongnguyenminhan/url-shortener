@@ -28,16 +28,10 @@ export function GoogleSignInButton({ disabled = false }: GoogleSignInButtonProps
   const handleGoogleSignIn = async () => {
     try {
       await loginWithGoogle();
-      showToast({
-        type: 'success',
-        message: t('common.google_login_success', 'Signed in with Google!'),
-      });
+      showToast('success', t('common.google_login_success', 'Signed in with Google!'));
     } catch (error) {
       console.error('Google sign-in error:', error);
-      showToast({
-        type: 'error',
-        message: t('common.google_login_error', 'Failed to sign in with Google.'),
-      });
+      showToast('error', t('common.google_login_error', 'Failed to sign in with Google.'));
     }
   };
 

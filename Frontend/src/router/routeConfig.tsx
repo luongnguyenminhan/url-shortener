@@ -1,84 +1,12 @@
-import { RouteObject } from 'react-router-dom';
+import type { RouteObject } from 'react-router-dom';
 import { ROUTES } from './routes';
 import { ProtectedRoute } from './ProtectedRoute';
 
 // Page components
 import App from '../App';
-import NotFound from '../pages/errors/NotFound';
 
-// Lazy load page components for better performance
-import { lazy } from 'react';
-
-// Auth pages
-const LoginPage = lazy(() =>
-  import('../pages/auth/Login').then((module) => ({
-    default: module.LoginPage,
-  }))
-);
-const SignupPage = lazy(() =>
-  import('../pages/auth/Signup').then((module) => ({
-    default: module.SignupPage,
-  }))
-);
-const PasswordResetPage = lazy(() =>
-  import('../pages/auth/PasswordReset').then((module) => ({
-    default: module.PasswordResetPage,
-  }))
-);
-const EmailVerificationPage = lazy(() =>
-  import('../pages/auth/EmailVerification').then((module) => ({
-    default: module.EmailVerificationPage,
-  }))
-);
-
-// Protected pages
-const DashboardPage = lazy(() =>
-  import('../pages/dashboard/Dashboard').then((module) => ({
-    default: module.DashboardPage,
-  }))
-);
-const LinksPage = lazy(() =>
-  import('../pages/links/Links').then((module) => ({
-    default: module.LinksPage,
-  }))
-);
-const LinkDetailPage = lazy(() =>
-  import('../pages/links/LinkDetail').then((module) => ({
-    default: module.LinkDetailPage,
-  }))
-);
-const CreateLinkPage = lazy(() =>
-  import('../pages/links/CreateLink').then((module) => ({
-    default: module.CreateLinkPage,
-  }))
-);
-const EditLinkPage = lazy(() =>
-  import('../pages/links/EditLink').then((module) => ({
-    default: module.EditLinkPage,
-  }))
-);
-const AnalyticsPage = lazy(() =>
-  import('../pages/analytics/Analytics').then((module) => ({
-    default: module.AnalyticsPage,
-  }))
-);
-const SettingsPage = lazy(() =>
-  import('../pages/settings/Settings').then((module) => ({
-    default: module.SettingsPage,
-  }))
-);
-const ProfilePage = lazy(() =>
-  import('../pages/profile/Profile').then((module) => ({
-    default: module.ProfilePage,
-  }))
-);
-
-// Error pages
-const ServerErrorPage = lazy(() =>
-  import('../pages/errors/ServerError').then((module) => ({
-    default: module.ServerErrorPage,
-  }))
-);
+// Placeholder pages for routes
+const PlaceholderPage = () => <div>Page Coming Soon</div>;
 
 /**
  * Main route configuration
@@ -88,74 +16,74 @@ export const routeConfig: RouteObject[] = [
   {
     path: ROUTES.HOME,
     element: <App />,
-    errorElement: <NotFound />,
+    errorElement: <div>Error Loading Page</div>,
     children: [
       // Public auth routes
       {
         path: ROUTES.LOGIN,
-        element: <LoginPage />,
+        element: <PlaceholderPage />,
       },
       {
         path: ROUTES.SIGNUP,
-        element: <SignupPage />,
+        element: <PlaceholderPage />,
       },
       {
         path: ROUTES.PASSWORD_RESET,
-        element: <PasswordResetPage />,
+        element: <PlaceholderPage />,
       },
       {
         path: ROUTES.EMAIL_VERIFICATION,
-        element: <EmailVerificationPage />,
+        element: <PlaceholderPage />,
       },
 
       // Protected routes
       {
         path: ROUTES.DASHBOARD,
-        element: <ProtectedRoute element={<DashboardPage />} />,
+        element: <ProtectedRoute element={<PlaceholderPage />} />,
       },
       {
         path: ROUTES.LINKS,
-        element: <ProtectedRoute element={<LinksPage />} />,
+        element: <ProtectedRoute element={<PlaceholderPage />} />,
       },
       {
         path: ROUTES.LINK_DETAIL,
-        element: <ProtectedRoute element={<LinkDetailPage />} />,
+        element: <ProtectedRoute element={<PlaceholderPage />} />,
       },
       {
         path: ROUTES.CREATE_LINK,
-        element: <ProtectedRoute element={<CreateLinkPage />} />,
+        element: <ProtectedRoute element={<PlaceholderPage />} />,
       },
       {
         path: ROUTES.EDIT_LINK,
-        element: <ProtectedRoute element={<EditLinkPage />} />,
+        element: <ProtectedRoute element={<PlaceholderPage />} />,
       },
       {
         path: ROUTES.ANALYTICS,
-        element: <ProtectedRoute element={<AnalyticsPage />} />,
+        element: <ProtectedRoute element={<PlaceholderPage />} />,
       },
       {
         path: ROUTES.SETTINGS,
-        element: <ProtectedRoute element={<SettingsPage />} />,
+        element: <ProtectedRoute element={<PlaceholderPage />} />,
       },
       {
         path: ROUTES.PROFILE,
-        element: <ProtectedRoute element={<ProfilePage />} />,
+        element: <ProtectedRoute element={<PlaceholderPage />} />,
       },
 
       // Error routes
       {
         path: ROUTES.NOT_FOUND,
-        element: <NotFound />,
+        element: <PlaceholderPage />,
       },
       {
         path: ROUTES.SERVER_ERROR,
-        element: <ServerErrorPage />,
+        element: <PlaceholderPage />,
       },
 
       // Catch all - must be last
       {
         path: ROUTES.WILDCARD,
-        element: <NotFound />,
+        element: <PlaceholderPage />,
       },
     ],
   },

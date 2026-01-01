@@ -38,17 +38,11 @@ export function ForgotPasswordForm({ onSwitchMode }: ForgotPasswordFormProps) {
   const onSubmit = async (values: ForgotValues) => {
     try {
       await sendPasswordReset(values.email);
-      showToast({
-        type: 'success',
-        message: t('forgot.sent', 'Password reset link sent to your email!'),
-      });
+      showToast('success', t('forgot.sent', 'Password reset link sent to your email!'));
       onSwitchMode?.('login');
     } catch (error) {
       console.error('Password reset error:', error);
-      showToast({
-        type: 'error',
-        message: t('forgot.error', 'Failed to send reset link. Please try again.'),
-      });
+      showToast('error', t('forgot.error', 'Failed to send reset link. Please try again.'));
     }
   };
 

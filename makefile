@@ -4,7 +4,7 @@
 REGISTRY :=
 DOCKERHUB_REGISTRY := luongnguyenminhan
 IMAGE_NAME := urls
-DOCKER_BUILD_FLAGS := --progress=plain
+DOCKER_BUILD_FLAGS := 
 
 # Local images
 BACKEND_RUNTIME_IMAGE := $(IMAGE_NAME):backend-runtime
