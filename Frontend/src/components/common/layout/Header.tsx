@@ -1,24 +1,40 @@
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemText, Toolbar } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemText, Toolbar, Avatar, Menu, MenuItem } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, ThemeToggle, LanguageSwitcher } from '../ui';
 import { getBrandConfig } from '../../../lib/utils/runtimeConfig';
+import { useAuth } from '../../../context/AuthContext';
 
 interface HeaderProps {
     onLogin?: () => void;
     onSignup?: () => void;
-    isAuthenticated?: boolean;
 }
 
-export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderProps) {
+export function Header({ onLogin, onSignup }: HeaderProps) {
     const { t } = useTranslation();
+    const { user, isAuthenticated, logout } = useAuth();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const brandConfig = getBrandConfig();
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
+    };
+
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleLogout = async () => {
+        handleMenuClose();
+        await logout();
     };
 
     const navItems = [
@@ -108,21 +124,100 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
                         <LanguageSwitcher />
                         <ThemeToggle />
 
-                        {!isAuthenticated && (
-                            <>
-                                <Button
-                                    variant="text"
-                                    size="small"
-                                    onClick={onLogin}
-                                    sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+                    {!isAuthenticated && (
+                        <>
+                            <Button
+                                variant="text"
+                                size="small"
+                                onClick={onLogin}
+                                sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+                            >
+                                {t('header.login')}
+                            </Button>
+                            <Button variant="contained" size="small" onClick={onSignup}>
+                                {t('header.signUp')}
+                            </Button>
+                        </>
+                    )}
+
+                    {isAuthenticated && user && (
+                        <Box>
+                            <Box
+                                onClick={handleMenuOpen}
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 'var(--spacing-md)',
+                                    cursor: 'pointer',
+                                    padding: 'var(--spacing-xs) var(--spacing-sm)',
+                                    borderRadius: '8px',
+                                    transition: 'background-color var(--transition-fast)',
+                                    '&:hover': {
+                                        backgroundColor: 'var(--bg-secondary)',
+                                    },
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: { xs: 'none', sm: 'flex' },
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: 'var(--spacing-sm)',
+                                        height: 32,
+                                    }}
                                 >
-                                    {t('header.login')}
-                                </Button>
-                                <Button variant="contained" size="small" onClick={onSignup}>
-                                    {t('header.signUp')}
-                                </Button>
-                            </>
-                        )}
+                                    <Box sx={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', lineHeight: 1 }}>
+                                        {user.name || user.email}
+                                    </Box>
+                                </Box>
+                                <Avatar
+                                    src={user.avatar_url}
+                                    alt={user.name || user.email}
+                                    sx={{
+                                        width: 32,
+                                        height: 32,
+                                        backgroundColor: 'var(--color-primary)',
+                                        color: 'white',
+                                        flexShrink: 0,
+                                        '& img': {
+                                            objectFit: 'cover',
+                                            objectPosition: 'center',
+                                        },
+                                    }}
+                                >
+                                    {!user.avatar_url && (user.name?.[0] || user.email?.[0]?.toUpperCase())}
+                                </Avatar>
+                            </Box>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={handleMenuClose}
+                                sx={{
+                                    '& .MuiPaper-root': {
+                                        backgroundColor: 'var(--bg-primary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-primary)',
+                                    },
+                                }}
+                            >
+                                <MenuItem disabled>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
+                                        <Box sx={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-bold)' }}>
+                                            {user.name || 'User'}
+                                        </Box>
+                                        <Box sx={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>
+                                            {user.email}
+                                        </Box>
+                                    </Box>
+                                </MenuItem>
+                                <MenuItem onClick={handleLogout} sx={{ color: 'var(--text-primary)' }}>
+                                    <LogoutIcon sx={{ mr: 1 }} />
+                                    {t('header.logout') || 'Logout'}
+                                </MenuItem>
+                            </Menu>
+                        </Box>
+                    )}
 
                         {/* Mobile Menu */}
                         <IconButton
@@ -183,6 +278,50 @@ export function Header({ onLogin, onSignup, isAuthenticated = false }: HeaderPro
                             </Button>
                             <Button variant="contained" fullWidth onClick={onSignup}>
                                 {t('header.signUp')}
+                            </Button>
+                        </Box>
+                    )}
+
+                    {isAuthenticated && user && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 'var(--spacing-md)',
+                                    padding: 'var(--spacing-md)',
+                                    backgroundColor: 'var(--bg-secondary)',
+                                    borderRadius: '8px',
+                                }}
+                            >
+                                <Avatar
+                                    src={user.avatar_url}
+                                    alt={user.name || user.email}
+                                    sx={{
+                                        width: 40,
+                                        height: 40,
+                                        backgroundColor: 'var(--color-primary)',
+                                        color: 'white',
+                                        flexShrink: 0,
+                                        '& img': {
+                                            objectFit: 'cover',
+                                            objectPosition: 'center',
+                                        },
+                                    }}
+                                >
+                                    {!user.avatar_url && (user.name?.[0] || user.email?.[0]?.toUpperCase())}
+                                </Avatar>
+                                <Box sx={{ minWidth: 0 }}>
+                                    <Box sx={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-bold)' }}>
+                                        {user.name || 'User'}
+                                    </Box>
+                                    <Box sx={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>
+                                        {user.email}
+                                    </Box>
+                                </Box>
+                            </Box>
+                            <Button variant="outlined" fullWidth onClick={handleLogout} startIcon={<LogoutIcon />}>
+                                {t('header.logout') || 'Logout'}
                             </Button>
                         </Box>
                     )}

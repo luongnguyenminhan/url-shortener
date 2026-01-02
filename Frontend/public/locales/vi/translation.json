@@ -14,7 +14,8 @@
     },
     "login": "Đăng nhập",
     "signUp": "Đăng ký",
-    "menu": "Menu"
+    "menu": "Menu",
+    "logout": "Đăng xuất"
   },
   "form": {
     "placeholder": "Nhập URL dài của bạn ở đây...",

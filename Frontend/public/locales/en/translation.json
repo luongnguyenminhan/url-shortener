@@ -14,7 +14,8 @@
     },
     "login": "Login",
     "signUp": "Sign Up",
-    "menu": "Menu"
+    "menu": "Menu",
+    "logout": "Logout"
   },
   "form": {
     "placeholder": "Enter your long URL here...",

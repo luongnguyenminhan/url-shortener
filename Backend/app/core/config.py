@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     # CORS Configuration
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str,
-        BeforeValidator(lambda x: x.split(",") if isinstance(x, str) else x),
+        BeforeValidator(lambda x: x if x == "*" or isinstance(x, list) else x.split(",")),
     ] = []
 
     # Project Configuration
