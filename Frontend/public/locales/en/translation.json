@@ -1,7 +1,7 @@
 {
   "hero": {
-    "title": "Shorten URLs, Track Performance",
-    "subtitle": "Create custom short URLs, monitor traffic in real-time, and gain actionable insights with LinkShort",
+    "title": "Streamline Your Photo Proofing Workflow",
+    "subtitle": "Upload photos, collaborate with clients, manage reviews, and deliver final images with our intuitive photo proofing platform",
     "getStarted": "Get Started Free",
     "learnMore": "Learn More"
   },
@@ -32,18 +32,18 @@
   },
   "features": {
     "title": "Powerful Features",
-    "subtitle": "Everything you need to create, manage, and analyze your short links",
-    "customUrls": {
-      "title": "Custom Short URLs",
-      "description": "Create memorable, branded short links that reflect your identity. Perfect for marketing campaigns and social media."
+    "subtitle": "Everything you need to streamline your photo proofing workflow from upload to delivery",
+    "workflow": {
+      "title": "Streamlined Workflow",
+      "description": "Upload photos, let clients select their favorites, and manage the entire editing and review process in one seamless platform."
     },
-    "analytics": {
-      "title": "Real-time Analytics",
-      "description": "Track clicks, geographic location, device type, and referrer sources. Make data-driven decisions instantly."
+    "review": {
+      "title": "Client Collaboration",
+      "description": "Clients can select photos, add comments, and review edited versions. Collaborate effectively with clear feedback and approval workflows."
     },
-    "security": {
-      "title": "Enterprise Security",
-      "description": "Bank-level encryption, HTTPS support, and compliance standards. Your data is always protected and secure."
+    "versionControl": {
+      "title": "Version Management",
+      "description": "Track original and edited versions of each photo. Clients can compare versions and approve final images with confidence."
     }
   },
   "pricing": {
@@ -56,10 +56,10 @@
       "period": "Forever",
       "description": "Perfect for getting started",
       "features": {
-        "urls": "5 URLs per week",
-        "analytics": "Basic analytics",
+        "urls": "Unlimited projects",
+        "analytics": "Basic features",
         "support": "Standard support",
-        "branding": "LinkShort branding"
+        "branding": "Standard branding"
       },
       "cta": "Get Started"
     },
@@ -69,8 +69,8 @@
       "period": "Per month",
       "description": "For professionals and businesses",
       "features": {
-        "unlimited": "Unlimited URLs",
-        "analytics": "Advanced analytics",
+        "unlimited": "Unlimited projects",
+        "analytics": "Advanced features",
         "support": "Priority support",
         "branding": "Custom branding",
         "api": "API access",
@@ -81,9 +81,9 @@
   },
   "cta": {
     "title": "Ready to Get Started?",
-    "description": "Join thousands of users who are shortening URLs and tracking performance with LinkShort. Sign up today and get 5 free URL shortens.",
+    "description": "Join photographers and studios who are streamlining their photo proofing workflow. Sign up today and start managing your projects with ease.",
     "createAccount": "Create Free Account",
-    "contactSales": "Contact Sales"
+    "learnMore": "Learn More"
   },
   "footer": {
     "sections": {

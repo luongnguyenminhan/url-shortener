@@ -1,13 +1,17 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlmodel import Session, SQLModel, create_engine
 
 from app.core.config import settings
 
-
-class Base(DeclarativeBase):
-    """Base class for all database models"""
-    pass
-
+# Import all models to ensure they are registered
+from app.models import (  # noqa: F401
+    BaseModel,
+    ClientSession,
+    Photo,
+    PhotoComment,
+    PhotoVersion,
+    Project,
+    User,
+)
 
 engine = create_engine(
     str(settings.SQLALCHEMY_DATABASE_URI),
@@ -15,18 +19,13 @@ engine = create_engine(
     echo=False,  # Set to True for SQL debugging
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 
 def get_db():
     """Database session dependency for FastAPI"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    with Session(engine) as session:
+        yield session
 
 
 def create_tables():
     """Create all tables defined in models"""
-    Base.metadata.create_all(bind=engine)
+    SQLModel.metadata.create_all(engine)

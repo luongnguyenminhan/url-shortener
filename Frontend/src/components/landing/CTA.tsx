@@ -14,7 +14,7 @@ export function CTA({ onGetStarted }: CTAProps) {
             component="section"
             id="cta"
             sx={{
-                background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                backgroundColor: 'var(--color-primary)',
                 color: '#ffffff',
                 padding: { xs: 'var(--spacing-3xl) var(--spacing-lg)', md: 'var(--spacing-3xl) var(--spacing-lg)' },
                 textAlign: 'center',
@@ -70,7 +70,7 @@ export function CTA({ onGetStarted }: CTAProps) {
                     <Button
                         variant="outlined"
                         size="large"
-                        href="mailto:support@linkshort.io"
+                        href="#features"
                         sx={{
                             borderColor: '#ffffff',
                             color: '#ffffff',
@@ -80,7 +80,7 @@ export function CTA({ onGetStarted }: CTAProps) {
                             },
                         }}
                     >
-                        {t('cta.contactSales')}
+                        {t('cta.learnMore')}
                     </Button>
                 </Box>
             </Container>

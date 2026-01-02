@@ -18,12 +18,6 @@ export function LandingPage() {
     goLogin(); // Redirect to auth page with signup mode
   };
 
-  const handleShortenUrl = async (url: string) => {
-    console.log('Shortening URL:', url);
-    // TODO: Call API to shorten URL
-    return 'linkshort.io/example';
-  };
-
   return (
     <Box
       sx={{
@@ -37,7 +31,7 @@ export function LandingPage() {
       <Header onLogin={handleLogin} onSignup={handleSignup} />
 
       <Box component="main" sx={{ flex: 1 }}>
-        <Hero onShortenUrl={handleShortenUrl} onSignup={handleSignup} />
+        <Hero onSignup={handleSignup} />
         <Features />
         <Pricing onSelectPlan={(plan) => console.log('Selected plan:', plan)} />
         <CTA onGetStarted={handleSignup} />

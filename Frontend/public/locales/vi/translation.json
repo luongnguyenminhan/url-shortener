@@ -1,7 +1,7 @@
 {
   "hero": {
-    "title": "Rút gọn URL, Theo dõi Hiệu suất",
-    "subtitle": "Tạo URL ngắn tùy chỉnh, giám sát lưu lượng truy cập thời gian thực và thu thập thông tin chi tiết có thể hành động với LinkShort",
+    "title": "Tối Ưu Quy Trình Chọn Ảnh Của Bạn",
+    "subtitle": "Tải ảnh lên, cộng tác với khách hàng, quản lý đánh giá và giao ảnh cuối cùng với nền tảng chọn ảnh trực quan của chúng tôi",
     "getStarted": "Bắt đầu Miễn phí",
     "learnMore": "Tìm hiểu Thêm"
   },
@@ -32,18 +32,18 @@
   },
   "features": {
     "title": "Tính năng Mạnh mẽ",
-    "subtitle": "Mọi thứ bạn cần để tạo, quản lý và phân tích các liên kết ngắn của mình",
-    "customUrls": {
-      "title": "URL Ngắn Tùy chỉnh",
-      "description": "Tạo các liên kết ngắn dễ nhớ, có thương hiệu phản ánh danh tính của bạn. Hoàn hảo cho các chiến dịch marketing và mạng xã hội."
+    "subtitle": "Mọi thứ bạn cần để tối ưu quy trình chọn ảnh từ tải lên đến giao hàng",
+    "workflow": {
+      "title": "Quy Trình Tối Ưu",
+      "description": "Tải ảnh lên, để khách hàng chọn ảnh yêu thích và quản lý toàn bộ quá trình chỉnh sửa và đánh giá trên một nền tảng liền mạch."
     },
-    "analytics": {
-      "title": "Phân tích Thời gian Thực",
-      "description": "Theo dõi số lần nhấp, vị trí địa lý, loại thiết bị và nguồn giới thiệu. Ra quyết định dựa trên dữ liệu ngay lập tức."
+    "review": {
+      "title": "Cộng Tác Khách Hàng",
+      "description": "Khách hàng có thể chọn ảnh, thêm nhận xét và xem lại các phiên bản đã chỉnh sửa. Cộng tác hiệu quả với quy trình phản hồi và phê duyệt rõ ràng."
     },
-    "security": {
-      "title": "Bảo mật Doanh nghiệp",
-      "description": "Mã hóa cấp ngân hàng, hỗ trợ HTTPS và tiêu chuẩn tuân thủ. Dữ liệu của bạn luôn được bảo vệ và an toàn."
+    "versionControl": {
+      "title": "Quản Lý Phiên Bản",
+      "description": "Theo dõi các phiên bản gốc và đã chỉnh sửa của mỗi bức ảnh. Khách hàng có thể so sánh các phiên bản và phê duyệt ảnh cuối cùng với sự tự tin."
     }
   },
   "pricing": {
@@ -56,10 +56,10 @@
       "period": "Mãi mãi",
       "description": "Hoàn hảo để bắt đầu",
       "features": {
-        "urls": "5 URL mỗi tuần",
-        "analytics": "Phân tích cơ bản",
+        "urls": "Dự án không giới hạn",
+        "analytics": "Tính năng cơ bản",
         "support": "Hỗ trợ tiêu chuẩn",
-        "branding": "Thương hiệu LinkShort"
+        "branding": "Thương hiệu tiêu chuẩn"
       },
       "cta": "Bắt đầu"
     },
@@ -69,8 +69,8 @@
       "period": "Mỗi tháng",
       "description": "Dành cho chuyên gia và doanh nghiệp",
       "features": {
-        "unlimited": "URL không giới hạn",
-        "analytics": "Phân tích nâng cao",
+        "unlimited": "Dự án không giới hạn",
+        "analytics": "Tính năng nâng cao",
         "support": "Hỗ trợ ưu tiên",
         "branding": "Thương hiệu tùy chỉnh",
         "api": "Truy cập API",
@@ -81,9 +81,9 @@
   },
   "cta": {
     "title": "Sẵn sàng Bắt đầu?",
-    "description": "Tham gia cùng hàng nghìn người dùng đang rút gọn URL và theo dõi hiệu suất với LinkShort. Đăng ký ngay hôm nay và nhận 5 lần rút gọn URL miễn phí.",
+    "description": "Tham gia cùng các nhiếp ảnh gia và studio đang tối ưu quy trình chọn ảnh của họ. Đăng ký ngay hôm nay và bắt đầu quản lý dự án của bạn một cách dễ dàng.",
     "createAccount": "Tạo Tài khoản Miễn phí",
-    "contactSales": "Liên hệ Bán hàng"
+    "learnMore": "Tìm hiểu Thêm"
   },
   "footer": {
     "sections": {

@@ -1,14 +1,12 @@
 import { Box, Container, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { URLShortenerForm } from '../common/forms';
 import { Button } from '../common/ui';
 
 interface HeroProps {
-    onShortenUrl?: (url: string) => Promise<string>;
     onSignup?: () => void;
 }
 
-export function Hero({ onShortenUrl, onSignup }: HeroProps) {
+export function Hero({ onSignup }: HeroProps) {
     const { t } = useTranslation();
 
     return (
@@ -16,7 +14,7 @@ export function Hero({ onShortenUrl, onSignup }: HeroProps) {
             component="section"
             id="hero"
             sx={{
-                background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                backgroundColor: 'var(--color-primary)',
                 color: '#ffffff',
                 padding: { xs: 'var(--spacing-3xl) var(--spacing-lg)', md: 'var(--spacing-3xl) var(--spacing-lg)' },
                 position: 'relative',
@@ -84,17 +82,6 @@ export function Hero({ onShortenUrl, onSignup }: HeroProps) {
                     >
                         {t('hero.subtitle')}
                     </Typography>
-
-                    {/* URL Shortener Form */}
-                    <Box
-                        sx={{
-                            width: '100%',
-                            maxWidth: '600px',
-                            marginTop: 'var(--spacing-2xl)',
-                        }}
-                    >
-                        <URLShortenerForm onSubmit={onShortenUrl} />
-                    </Box>
 
                     {/* CTA Button */}
                     <Box

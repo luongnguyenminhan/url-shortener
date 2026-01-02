@@ -80,7 +80,6 @@ client_review (clients review edited hình)
 * `owner_id` (FK → User.id)
 * `title` (tên project)
 * `status` (enum: draft, client_selecting, pending_edit, client_review, completed)
-* `client_token` (unique, không expires)
 * `created_at`
 * `updated_at`
 
@@ -223,7 +222,6 @@ Files: [image1.jpg, image2.jpg, ..., imageN.jpg]
 4. If all files processed successfully:
    a. Project.status → `client_selecting`
    b. Project.updated_at = now()
-   c. Generate client_token (if not exist)
    d. Return success + client share link
 
 **Validation Rules:**
@@ -259,7 +257,6 @@ Files: [image1.jpg, image2.jpg, ..., imageN.jpg]
   "project_id": "uuid",
   "status": "client_selecting",
   "total_uploaded": 10,
-  "client_token": "token_xyz",
   "client_share_url": "https://app.com/client/token_xyz",
   "photos": [
     {
@@ -858,6 +855,7 @@ Automatic transition:
 **Completion Event:**
 - Photographer receives notification (in-app): "Project completed!"
 - Clients can download approved images
+- Project auto-deletion scheduled if expired_date is set
 
 ❌ Photographer cannot edit approved photos
 ❌ Cannot split approval (all or nothing)
@@ -990,20 +988,11 @@ PhotoVersion {
 **Automatic Process:**
 1. Gather all approved photos
 2. For each approved photo:
-   - Include latest edited version (PhotoVersion where version_type=edited, max version_number)
+   - Include latest edited version (PhotoVersion where version_type=edited)
    - Skip original
    - Skip unselected
-3. Generate download URL + token
-4. Create DownloadRecord:
-   ```
-   id: UUID
-   project_id: UUID
-   download_token: String (unique)
-   created_at: DateTime
-   expires_at: NULL (permanent)
-   file_count: Integer
-   total_size: Integer
-   ```
+3. Generate download URL
+4. Create ZIP file and serve directly (no separate token needed)
 
 ### Client Download:
 
@@ -1049,8 +1038,8 @@ approved_images.zip
 ```
 
 ### Security:
-- Download token unique per project
-- No session required (anyone with token can download)
+- Project token required for download
+- No session required (anyone with project token can download)
 - No expiration (permanent)
 - No bandwidth limit (MVP accepts all)
 - No IP restriction (MVP allows download from anywhere)
@@ -1174,7 +1163,6 @@ PhotoComment
 ├── content: String
 ├── round: Integer  ← Track which review round (1, 2, 3...)
 ├── created_at: DateTime
-├── created_by_client_token: String  ← Which client commented
 └── is_visible: Boolean  ← Future: per-client hide option
 ```
 

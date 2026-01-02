@@ -1,28 +1,28 @@
 import { Box, Container, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../common/ui';
-import LinkIcon from '@mui/icons-material/Link';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import SecurityIcon from '@mui/icons-material/Security';
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
+import RateReviewIcon from '@mui/icons-material/RateReview';
+import EditIcon from '@mui/icons-material/Edit';
 
 export function Features() {
     const { t } = useTranslation();
 
     const features = [
         {
-            icon: <LinkIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
-            title: t('features.customUrls.title'),
-            description: t('features.customUrls.description'),
+            icon: <PhotoLibraryIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
+            title: t('features.workflow.title'),
+            description: t('features.workflow.description'),
         },
         {
-            icon: <AnalyticsIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
-            title: t('features.analytics.title'),
-            description: t('features.analytics.description'),
+            icon: <RateReviewIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
+            title: t('features.review.title'),
+            description: t('features.review.description'),
         },
         {
-            icon: <SecurityIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
-            title: t('features.security.title'),
-            description: t('features.security.description'),
+            icon: <EditIcon sx={{ fontSize: 48, color: 'var(--color-primary)' }} />,
+            title: t('features.versionControl.title'),
+            description: t('features.versionControl.description'),
         },
     ];
 
