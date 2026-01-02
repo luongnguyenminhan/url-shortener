@@ -18,6 +18,7 @@ export const ROUTES = {
 
   // Protected routes
   DASHBOARD: '/dashboard',
+  PROJECTS: '/projects',
   LINKS: '/links',
   LINK_DETAIL: '/links/:id',
   SETTINGS: '/settings',

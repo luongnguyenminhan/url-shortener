@@ -17,6 +17,7 @@ export function AppRouter() {
 
       {/* Unified auth route for login/signup/forgot password */}
       <Route path={ROUTES.LOGIN} element={<AuthPage />} />
+      <Route path={ROUTES.AUTH} element={<AuthPage />} />
       <Route path={ROUTES.SIGNUP} element={<AuthPage />} />
       <Route path={ROUTES.PASSWORD_RESET} element={<AuthPage />} />
 

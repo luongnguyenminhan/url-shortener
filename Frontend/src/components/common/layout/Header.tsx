@@ -1,7 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemText, Toolbar, Avatar, Menu, MenuItem } from '@mui/material';
+import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemText, Toolbar, Avatar, Menu, MenuItem, Tooltip } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, ThemeToggle, LanguageSwitcher } from '../ui';
@@ -158,19 +158,29 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                                     },
                                 }}
                             >
-                                <Box
-                                    sx={{
-                                        display: { xs: 'none', sm: 'flex' },
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: 'var(--spacing-sm)',
-                                        height: 32,
-                                    }}
-                                >
-                                    <Box sx={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', lineHeight: 1 }}>
-                                        {user.name || user.email}
+                                <Tooltip title={user.name || user.email} placement="bottom">
+                                    <Box
+                                        sx={{
+                                            display: { xs: 'none', sm: 'flex' },
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 'var(--spacing-sm)',
+                                            height: 32,
+                                        }}
+                                    >
+                                        <Box sx={{ 
+                                            fontSize: 'var(--font-size-sm)', 
+                                            color: 'var(--text-primary)', 
+                                            lineHeight: 1,
+                                            maxWidth: '150px',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {user.name || user.email}
+                                        </Box>
                                     </Box>
-                                </Box>
+                                </Tooltip>
                                 <Avatar
                                     src={user.avatar_url}
                                     alt={user.name || user.email}
@@ -203,12 +213,30 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                             >
                                 <MenuItem disabled>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                                        <Box sx={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-bold)' }}>
-                                            {user.name || 'User'}
-                                        </Box>
-                                        <Box sx={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>
-                                            {user.email}
-                                        </Box>
+                                        <Tooltip title={user.name || 'User'} placement="right">
+                                            <Box sx={{ 
+                                                fontSize: 'var(--font-size-sm)', 
+                                                fontWeight: 'var(--font-weight-bold)',
+                                                maxWidth: '200px',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap'
+                                            }}>
+                                                {user.name || 'User'}
+                                            </Box>
+                                        </Tooltip>
+                                        <Tooltip title={user.email} placement="right">
+                                            <Box sx={{ 
+                                                fontSize: 'var(--font-size-xs)', 
+                                                color: 'var(--text-secondary)',
+                                                maxWidth: '200px',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap'
+                                            }}>
+                                                {user.email}
+                                            </Box>
+                                        </Tooltip>
                                     </Box>
                                 </MenuItem>
                                 <MenuItem onClick={handleLogout} sx={{ color: 'var(--text-primary)' }}>
@@ -312,12 +340,28 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                                     {!user.avatar_url && (user.name?.[0] || user.email?.[0]?.toUpperCase())}
                                 </Avatar>
                                 <Box sx={{ minWidth: 0 }}>
-                                    <Box sx={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-bold)' }}>
-                                        {user.name || 'User'}
-                                    </Box>
-                                    <Box sx={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>
-                                        {user.email}
-                                    </Box>
+                                    <Tooltip title={user.name || 'User'} placement="top">
+                                        <Box sx={{ 
+                                            fontSize: 'var(--font-size-sm)', 
+                                            fontWeight: 'var(--font-weight-bold)',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {user.name || 'User'}
+                                        </Box>
+                                    </Tooltip>
+                                    <Tooltip title={user.email} placement="top">
+                                        <Box sx={{ 
+                                            fontSize: 'var(--font-size-xs)', 
+                                            color: 'var(--text-secondary)',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {user.email}
+                                        </Box>
+                                    </Tooltip>
                                 </Box>
                             </Box>
                             <Button variant="outlined" fullWidth onClick={handleLogout} startIcon={<LogoutIcon />}>
