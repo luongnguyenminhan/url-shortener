@@ -10,7 +10,9 @@
     "nav": {
       "features": "Tính năng",
       "pricing": "Giá cả",
-      "about": "Giới thiệu"
+      "about": "Giới thiệu",
+      "dashboard": "Bảng điều khiển",
+      "project": "Dự án của tôi"
     },
     "login": "Đăng nhập",
     "signUp": "Đăng ký",

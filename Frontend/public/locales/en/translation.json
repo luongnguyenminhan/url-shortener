@@ -10,7 +10,9 @@
     "nav": {
       "features": "Features",
       "pricing": "Pricing",
-      "about": "About"
+      "about": "About",
+      "dashboard": "Dashboard",
+      "project": "My Projects"
     },
     "login": "Login",
     "signUp": "Sign Up",

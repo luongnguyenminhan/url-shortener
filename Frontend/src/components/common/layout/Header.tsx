@@ -39,13 +39,17 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
 
     const navItems = [
         { label: t('header.nav.features'), href: '#features' },
-        { label: t('header.nav.pricing'), href: '#pricing' },
         { label: t('header.nav.about'), href: '#about' },
     ];
 
+    const authenticatedNavItems = [
+        { label: t('header.nav.dashboard') || 'Dashboard', href: '/dashboard' },
+        { label: t('header.nav.project') || 'My Projects', href: '/projects' },
+    ];
+
     return (
-        <>
-            <AppBar
+            <>
+                <AppBar
                 position="sticky"
                 sx={{
                     backgroundColor: 'var(--bg-primary)',
@@ -94,7 +98,7 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                             alignItems: 'center',
                         }}
                     >
-                        {navItems.map((item) => (
+                        {(isAuthenticated ? authenticatedNavItems : navItems).map((item) => (
                             <Box
                                 key={item.label}
                                 component="a"
@@ -280,7 +284,7 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                     </Box>
 
                     <List sx={{ flex: 1 }}>
-                        {navItems.map((item) => (
+                        {(isAuthenticated ? authenticatedNavItems : navItems).map((item) => (
                             <ListItem
                                 key={item.label}
                                 component="a"
