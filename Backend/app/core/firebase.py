@@ -1,12 +1,13 @@
-import logging
+"""Firebase Admin SDK initialization"""
 import os
 
 import firebase_admin
 from firebase_admin import credentials
 
 from app.core.config import settings
+from app.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def initialize_firebase():

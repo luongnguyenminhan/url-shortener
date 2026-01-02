@@ -17,16 +17,10 @@ class BaseModel(SQLModel):
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
-        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
     )
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
-        sa_column=Column(
-            DateTime(timezone=True),
-            server_default=func.now(),
-            onupdate=func.now(),
-        ),
     )
 
     class Config:

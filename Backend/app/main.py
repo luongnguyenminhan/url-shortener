@@ -2,7 +2,11 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 
+from app.api import register_routers
+from app.core.config import settings
+from app.core.firebase import initialize_firebase
 from app.db import create_tables
+from app.utils.logging import setup_logging, FastAPILoggingMiddleware, get_logger
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     """
@@ -67,8 +71,30 @@ app = FastAPI(
     generate_unique_id_function=custom_generate_unique_id,
 )
 
+# Set custom OpenAPI schema
+app.openapi = custom_openapi
+
+# Add colorful logging middleware
+app.add_middleware(FastAPILoggingMiddleware)
+
 
 @app.on_event("startup")
 def startup_event():
-    """Initialize database tables on application startup"""
+    """Initialize database tables, logging, and services on application startup"""
+    # Setup colorful logging
+    setup_logging(settings.LOG_LEVEL)
+    logger = get_logger(__name__)
+
+    # Initialize Firebase
+    try:
+        initialize_firebase()
+    except Exception as e:
+        logger.error(f"Failed to initialize Firebase: {e}", exc_info=True)
+        raise
+
+    # Initialize database tables
     create_tables()
+
+    # Register API routers
+    register_routers(app)
+    logger.info("Application startup completed")

@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     # Project Configuration
     PROJECT_NAME: str = "UrlsBE"
 
+    # Logging Configuration
+    LOG_LEVEL: str = "INFO"
+
     # Database Configuration
     POSTGRES_SERVER: str = "db"
     POSTGRES_PORT: int = 5432
