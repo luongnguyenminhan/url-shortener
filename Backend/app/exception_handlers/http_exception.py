@@ -1,8 +1,9 @@
-from fastapi import Request, HTTPException
-from fastapi.responses import JSONResponse
 from typing import Any, Optional
-from app.schemas.common import ApiResponse
 
+from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
+
+from app.schemas.common import ApiResponse
 
 # ============================================================================
 # Custom Exception inheriting from HTTPException
@@ -43,7 +44,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
                 data=None
             ).model_dump()
         )
-    
+
     if exc.status_code == 403 and exc.detail == "Not authenticated":
         return JSONResponse(
             status_code=401,
@@ -53,19 +54,19 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
                 data=None
             ).model_dump()
         )
-    
+
     # Extract error code, message, and data from AppException
     error_code = None
     message = exc.detail
     data = None
-    
+
     if isinstance(exc, AppException):
         message = exc.message
         data = exc.data
     elif isinstance(exc.detail, dict):
         message = exc.detail.get("message", str(exc.detail))
         data = exc.detail.get("data")
-    
+
     return JSONResponse(
         status_code=exc.status_code,
         content=ApiResponse(
@@ -74,7 +75,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
             data=data
         ).model_dump()
     )
-    
+
 async def custom_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=400,
