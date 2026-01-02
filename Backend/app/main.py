@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 
+from app.db import create_tables
+
 def custom_generate_unique_id(route: APIRoute) -> str:
     """
     Custom function to generate unique operation IDs for OpenAPI schema.
@@ -64,3 +66,9 @@ app = FastAPI(
     root_path="/be",
     generate_unique_id_function=custom_generate_unique_id,
 )
+
+
+@app.on_event("startup")
+def startup_event():
+    """Initialize database tables on application startup"""
+    create_tables()
