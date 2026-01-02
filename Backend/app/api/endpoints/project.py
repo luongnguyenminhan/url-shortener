@@ -1,0 +1,168 @@
+"""Project API endpoints"""
+from typing import List
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlmodel import Session
+
+from app.core.config import settings
+from app.core.constant.messages import MessageConstants
+from app.db import get_db
+from app.models.user import User
+from app.schemas.common import ApiResponse, PaginationSortSearchSchema, pagination_params_dep
+from app.schemas.project import (
+    ProjectCreate,
+    ProjectResponse,
+    ProjectStatusUpdate,
+    ProjectUpdate,
+)
+from app.services import project_service
+from app.utils.auth import get_current_user
+
+router = APIRouter(prefix=f"{settings.API_V1_STR}/projects", tags=["Projects"])
+
+
+@router.post(
+    "",
+    response_model=ApiResponse[ProjectResponse],
+    status_code=status.HTTP_201_CREATED,
+    summary="Create project",
+    description="Create a new project",
+)
+def create_project(
+    project_data: ProjectCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[ProjectResponse]:
+    """Create a new project for authenticated user"""
+    project = project_service.create_project(db, current_user, project_data)
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_CREATED,
+        data=project,
+    )
+
+
+@router.get(
+    "",
+    response_model=ApiResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List user projects",
+    description="Get all projects owned by authenticated user",
+)
+def list_projects(
+    pagination_params: PaginationSortSearchSchema = Depends(pagination_params_dep),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse:
+    """Get all projects owned by authenticated user"""
+    result = project_service.get_user_projects(db, current_user, pagination_params)
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_LIST_RETRIEVED,
+        data=result["projects"],
+        meta=result["meta"],
+    )
+
+
+@router.get(
+    "/{project_id}",
+    response_model=ApiResponse[ProjectResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get project",
+    description="Get a specific project by ID",
+)
+def get_project(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[ProjectResponse]:
+    """Get a specific project by ID"""
+    project = project_service.get_project_by_id(db, current_user, project_id)
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MessageConstants.PROJECT_NOT_FOUND,
+        )
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_RETRIEVED,
+        data=project,
+    )
+
+
+@router.put(
+    "/{project_id}",
+    response_model=ApiResponse[ProjectResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Update project",
+    description="Update a specific project",
+)
+def update_project(
+    project_id: UUID,
+    update_data: ProjectUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[ProjectResponse]:
+    """Update a specific project"""
+    project = project_service.update_project(db, current_user, project_id, update_data)
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_UPDATED,
+        data=project,
+    )
+
+
+@router.patch(
+    "/{project_id}/status",
+    response_model=ApiResponse[ProjectResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Update project status",
+    description="Update the status of a project",
+)
+def update_project_status(
+    project_id: UUID,
+    status_update: ProjectStatusUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[ProjectResponse]:
+    """Update the status of a project"""
+    project = project_service.update_project_status(
+        db, current_user, project_id, status_update.status
+    )
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MessageConstants.PROJECT_NOT_FOUND,
+        )
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_STATUS_UPDATED,
+        data=project,
+    )
+
+
+@router.delete(
+    "/{project_id}",
+    response_model=ApiResponse[dict],
+    status_code=status.HTTP_200_OK,
+    summary="Delete project",
+    description="Delete a specific project",
+)
+def delete_project(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[dict]:
+    """Delete a specific project"""
+    success = project_service.delete_project(db, current_user, project_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MessageConstants.PROJECT_NOT_FOUND,
+        )
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_DELETED,
+        data={"id": str(project_id)},
+    )
