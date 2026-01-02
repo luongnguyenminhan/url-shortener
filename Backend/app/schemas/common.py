@@ -23,6 +23,7 @@ class ApiResponse(BaseModel, Generic[T]):
     message: Optional[str] = None
     data: Optional[T] = None
     errors: Optional[List[str]] = None
+    meta: Optional[dict] = None
 
 
 class PaginatedResponse(ApiResponse[List[T]], Generic[T]):
