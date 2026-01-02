@@ -35,8 +35,8 @@ jobs:
 
     - name: Pull runtime images
       run: |
-        docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-dev || docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-prod || echo "Runtime images not found, will use latest"
-        docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-dev || docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-prod || echo "Runtime images not found, will use latest"
+        docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-dev || echo "Backend runtime-dev image not found"
+        docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-dev || echo "Frontend runtime-dev image not found"
 
     - name: Build and push backend app image
       uses: docker/build-push-action@v5
@@ -89,8 +89,8 @@ jobs:
 
     - name: Pull runtime images
       run: |
-        docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-prod || docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-dev || echo "Runtime images not found, will use latest"
-        docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-prod || docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-dev || echo "Runtime images not found, will use latest"
+        docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-prod || echo "Backend runtime-prod image not found"
+        docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-prod || echo "Frontend runtime-prod image not found"
 
     - name: Build and push backend app image
       uses: docker/build-push-action@v5

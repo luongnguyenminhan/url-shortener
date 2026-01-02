@@ -81,23 +81,31 @@ The production server must have:
 
 ## Runtime Images
 
-**Important**: Runtime images (`backend-runtime` and `frontend-runtime`) should be built and pushed separately before running this workflow. You can use the provided Makefile:
+**Important**: Runtime images (`backend-runtime` and `frontend-runtime`) must be built and pushed to Docker Hub BEFORE running the CI pipeline. The workflow will only pull these pre-built images.
+
+### Build Runtime Images First:
 
 ```bash
-# Build and push backend runtime (creates -dev and -prod versions)
+# Build and push backend runtime (creates -dev and -prod versions for linux/amd64)
 make update-runtime-be
 
-# Build and push frontend runtime (creates -dev and -prod versions)
+# Build and push frontend runtime (creates -dev and -prod versions for linux/amd64)
 make update-runtime-fe
 ```
 
 This will create and push:
-- `luongnguyenminhan/url-shortener:backend-runtime-dev`
-- `luongnguyenminhan/url-shortener:backend-runtime-prod`
-- `luongnguyenminhan/url-shortener:frontend-runtime-dev`
-- `luongnguyenminhan/url-shortener:frontend-runtime-prod`
+- `luongnguyenminhan/url-shortener:backend-runtime-dev` (linux/amd64)
+- `luongnguyenminhan/url-shortener:backend-runtime-prod` (linux/amd64)
+- `luongnguyenminhan/url-shortener:frontend-runtime-dev` (linux/amd64)
+- `luongnguyenminhan/url-shortener:frontend-runtime-prod` (linux/amd64)
 
-The workflow will pull these pre-built runtime images instead of building them each time, which improves build speed and consistency.
+### CI Pipeline Behavior:
+1. **Pull** pre-built runtime images from Docker Hub
+2. **Build** application images using these runtime images
+3. **Push** application images to Docker Hub
+4. **Deploy** (production only)
+
+**Runtime images must be built with linux/amd64 platform support for compatibility with self-hosted runners.**
 
 ## Usage
 
@@ -147,8 +155,9 @@ You can also trigger the workflow manually using the "workflow_dispatch" event:
 
 4. **Runtime Images Not Found**
    - Ensure runtime images are built and pushed using `make update-runtime-be` and `make update-runtime-fe`
-   - These commands create both `-dev` and `-prod` tagged versions
+   - These commands create both `-dev` and `-prod` tagged versions for linux/amd64
    - Check that images exist in Docker Hub with correct tags (`-dev` or `-prod`)
+   - Verify your self-hosted runners can access Docker Hub
 
 5. **Environment Variables Missing**
    - Check that `REDIS_PASSWORD` secret is set
