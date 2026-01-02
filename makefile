@@ -31,8 +31,8 @@ help:
 	@echo "Examples:"
 	@echo "  make build              - Build app images (requires runtime images)"
 	@echo "  make build-push         - Build and push app images to Docker Hub"
-	@echo "  make update-runtime-be  - Build and push backend runtime to Docker Hub"
-	@echo "  make update-runtime-fe  - Build and push frontend runtime to Docker Hub"
+	@echo "  make update-runtime-be  - Build and push backend runtime to Docker Hub (dev & prod)"
+	@echo "  make update-runtime-fe  - Build and push frontend runtime to Docker Hub (dev & prod)"
 	@echo "  make up                 - Start all services"
 	@echo "  make restart            - Restart all services"
 	@echo "  make rebuild            - Rebuild app images and restart services"
@@ -61,27 +61,31 @@ build-push: build
 	docker tag $(FRONTEND_APP_IMAGE) $(DOCKERHUB_FRONTEND_APP) && docker push $(DOCKERHUB_FRONTEND_APP)
 	@echo "✅ App images pushed to Docker Hub successfully!"
 
-## update-runtime-be: Build and push backend runtime image to Docker Hub
+## update-runtime-be: Build and push backend runtime image to Docker Hub (dev & prod versions)
 update-runtime-be:
 	@echo "🔨 Building backend runtime image: $(BACKEND_RUNTIME_IMAGE)"
 	docker build $(DOCKER_BUILD_FLAGS) \
 		-f Backend/build/Dockerfile.runtime \
 		-t $(BACKEND_RUNTIME_IMAGE) \
 		Backend/
-	@echo "📤 Pushing $(DOCKERHUB_BACKEND_RUNTIME) to Docker Hub..."
+	@echo "📤 Pushing backend runtime images to Docker Hub..."
 	docker tag $(BACKEND_RUNTIME_IMAGE) $(DOCKERHUB_BACKEND_RUNTIME) && docker push $(DOCKERHUB_BACKEND_RUNTIME)
-	@echo "✅ Backend runtime updated and pushed!"
+	docker tag $(BACKEND_RUNTIME_IMAGE) $(DOCKERHUB_BACKEND_RUNTIME)-dev && docker push $(DOCKERHUB_BACKEND_RUNTIME)-dev
+	docker tag $(BACKEND_RUNTIME_IMAGE) $(DOCKERHUB_BACKEND_RUNTIME)-prod && docker push $(DOCKERHUB_BACKEND_RUNTIME)-prod
+	@echo "✅ Backend runtime updated and pushed (dev & prod versions)!"
 
-## update-runtime-fe: Build and push frontend runtime image to Docker Hub
+## update-runtime-fe: Build and push frontend runtime image to Docker Hub (dev & prod versions)
 update-runtime-fe:
 	@echo "🔨 Building frontend runtime image: $(FRONTEND_RUNTIME_IMAGE)"
 	docker build $(DOCKER_BUILD_FLAGS) \
 		-f Frontend/Dockerfile.runtime \
 		-t $(FRONTEND_RUNTIME_IMAGE) \
 		Frontend/
-	@echo "📤 Pushing $(DOCKERHUB_FRONTEND_RUNTIME) to Docker Hub..."
+	@echo "📤 Pushing frontend runtime images to Docker Hub..."
 	docker tag $(FRONTEND_RUNTIME_IMAGE) $(DOCKERHUB_FRONTEND_RUNTIME) && docker push $(DOCKERHUB_FRONTEND_RUNTIME)
-	@echo "✅ Frontend runtime updated and pushed!"
+	docker tag $(FRONTEND_RUNTIME_IMAGE) $(DOCKERHUB_FRONTEND_RUNTIME)-dev && docker push $(DOCKERHUB_FRONTEND_RUNTIME)-dev
+	docker tag $(FRONTEND_RUNTIME_IMAGE) $(DOCKERHUB_FRONTEND_RUNTIME)-prod && docker push $(DOCKERHUB_FRONTEND_RUNTIME)-prod
+	@echo "✅ Frontend runtime updated and pushed (dev & prod versions)!"
 
 ## env-check: Verify .env file exists
 env-check:

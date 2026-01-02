@@ -84,12 +84,18 @@ The production server must have:
 **Important**: Runtime images (`backend-runtime` and `frontend-runtime`) should be built and pushed separately before running this workflow. You can use the provided Makefile:
 
 ```bash
-# Build and push backend runtime
+# Build and push backend runtime (creates -dev and -prod versions)
 make update-runtime-be
 
-# Build and push frontend runtime
+# Build and push frontend runtime (creates -dev and -prod versions)
 make update-runtime-fe
 ```
+
+This will create and push:
+- `luongnguyenminhan/url-shortener:backend-runtime-dev`
+- `luongnguyenminhan/url-shortener:backend-runtime-prod`
+- `luongnguyenminhan/url-shortener:frontend-runtime-dev`
+- `luongnguyenminhan/url-shortener:frontend-runtime-prod`
 
 The workflow will pull these pre-built runtime images instead of building them each time, which improves build speed and consistency.
 
@@ -141,6 +147,7 @@ You can also trigger the workflow manually using the "workflow_dispatch" event:
 
 4. **Runtime Images Not Found**
    - Ensure runtime images are built and pushed using `make update-runtime-be` and `make update-runtime-fe`
+   - These commands create both `-dev` and `-prod` tagged versions
    - Check that images exist in Docker Hub with correct tags (`-dev` or `-prod`)
 
 5. **Environment Variables Missing**
