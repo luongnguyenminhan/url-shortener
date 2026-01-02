@@ -1,0 +1,199 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*.*.*'
+  workflow_dispatch:
+
+env:
+  REGISTRY: luongnguyenminhan
+  BACKEND_RUNTIME_IMAGE: luongnguyenminhan/url-shortener:backend-runtime
+  BACKEND_APP_IMAGE: luongnguyenminhan/url-shortener:backend
+  FRONTEND_RUNTIME_IMAGE: luongnguyenminhan/url-shortener:frontend-runtime
+  FRONTEND_APP_IMAGE: luongnguyenminhan/url-shortener:frontend
+
+jobs:
+  build-and-push-development:
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push backend runtime image
+      uses: docker/build-push-action@v5
+      with:
+        context: Backend/
+        file: Backend/build/Dockerfile.runtime
+        push: true
+        tags: ${{ env.BACKEND_RUNTIME_IMAGE }}-dev
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push frontend runtime image
+      uses: docker/build-push-action@v5
+      with:
+        context: Frontend/
+        file: Frontend/Dockerfile.runtime
+        push: true
+        tags: ${{ env.FRONTEND_RUNTIME_IMAGE }}-dev
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push backend app image
+      uses: docker/build-push-action@v5
+      with:
+        context: Backend/
+        file: Backend/build/Dockerfile.app
+        push: true
+        tags: ${{ env.BACKEND_APP_IMAGE }}-dev
+        build-args: |
+          RUNTIME_IMAGE=${{ env.BACKEND_RUNTIME_IMAGE }}-dev
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push frontend app image
+      uses: docker/build-push-action@v5
+      with:
+        context: Frontend/
+        file: Frontend/Dockerfile.app
+        push: true
+        tags: ${{ env.FRONTEND_APP_IMAGE }}-dev
+        build-args: |
+          RUNTIME_IMAGE=${{ env.FRONTEND_RUNTIME_IMAGE }}-dev
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Update Docker Hub description
+      if: github.ref == 'refs/heads/main'
+      uses: peter-evans/dockerhub-description@v4
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        repository: ${{ env.REGISTRY }}/url-shortener
+
+  build-and-push-production:
+    runs-on: self-hosted
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push backend runtime image
+      uses: docker/build-push-action@v5
+      with:
+        context: Backend/
+        file: Backend/build/Dockerfile.runtime
+        push: true
+        tags: ${{ env.BACKEND_RUNTIME_IMAGE }}-prod
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push frontend runtime image
+      uses: docker/build-push-action@v5
+      with:
+        context: Frontend/
+        file: Frontend/Dockerfile.runtime
+        push: true
+        tags: ${{ env.FRONTEND_RUNTIME_IMAGE }}-prod
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push backend app image
+      uses: docker/build-push-action@v5
+      with:
+        context: Backend/
+        file: Backend/build/Dockerfile.app
+        push: true
+        tags: ${{ env.BACKEND_APP_IMAGE }}-prod
+        build-args: |
+          RUNTIME_IMAGE=${{ env.BACKEND_RUNTIME_IMAGE }}-prod
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push frontend app image
+      uses: docker/build-push-action@v5
+      with:
+        context: Frontend/
+        file: Frontend/Dockerfile.app
+        push: true
+        tags: ${{ env.FRONTEND_APP_IMAGE }}-prod
+        build-args: |
+          RUNTIME_IMAGE=${{ env.FRONTEND_RUNTIME_IMAGE }}-prod
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push-production
+    runs-on: self-hosted
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to production server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        port: ${{ secrets.PRODUCTION_PORT || 22 }}
+        script: |
+          cd /opt/url-shortener
+
+          # Create .env file if it doesn't exist
+          if [ ! -f .env ]; then
+            cat > .env << EOF
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          DEBUG=false
+          EOF
+          fi
+
+          # Pull latest images
+          docker pull ${{ env.BACKEND_APP_IMAGE }}-prod
+          docker pull ${{ env.FRONTEND_APP_IMAGE }}-prod
+          docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-prod
+          docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-prod
+
+          # Tag images for local use (matching docker-compose.yml)
+          docker tag ${{ env.BACKEND_APP_IMAGE }}-prod urls:backend
+          docker tag ${{ env.FRONTEND_APP_IMAGE }}-prod urls:frontend
+
+          # Stop existing services
+          docker-compose down || true
+
+          # Start services
+          docker-compose up -d
+
+          # Wait for services to be healthy
+          echo "Waiting for services to start..."
+          sleep 30
+
+          # Check service status
+          docker-compose ps
+
+          echo "Deployment completed successfully!"
