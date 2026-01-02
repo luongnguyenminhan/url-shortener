@@ -8,21 +8,21 @@ The deployment pipeline handles two environments:
 
 ### Development (main branch)
 - **Trigger**: Push to `main` branch
-- **Process**: Build and push Docker images with `-dev` suffix to Docker Hub
+- **Process**: Pull runtime images, build and push app images with `-dev` suffix to Docker Hub
 - **Images**:
-  - `luongnguyenminhan/url-shortener:backend-runtime-dev`
-  - `luongnguyenminhan/url-shortener:backend-dev`
-  - `luongnguyenminhan/url-shortener:frontend-runtime-dev`
-  - `luongnguyenminhan/url-shortener:frontend-dev`
+  - Pull: `luongnguyenminhan/url-shortener:backend-runtime-dev`
+  - Pull: `luongnguyenminhan/url-shortener:frontend-runtime-dev`
+  - Build: `luongnguyenminhan/url-shortener:backend-dev`
+  - Build: `luongnguyenminhan/url-shortener:frontend-dev`
 
 ### Production (version tags)
 - **Trigger**: Push version tags (e.g., `1.0.0`, `2.1.3`)
-- **Process**: Build and push Docker images with `-prod` suffix, then deploy to production server
+- **Process**: Pull runtime images, build and push app images with `-prod` suffix, then deploy to production server
 - **Images**:
-  - `luongnguyenminhan/url-shortener:backend-runtime-prod`
-  - `luongnguyenminhan/url-shortener:backend-prod`
-  - `luongnguyenminhan/url-shortener:frontend-runtime-prod`
-  - `luongnguyenminhan/url-shortener:frontend-prod`
+  - Pull: `luongnguyenminhan/url-shortener:backend-runtime-prod`
+  - Pull: `luongnguyenminhan/url-shortener:frontend-runtime-prod`
+  - Build: `luongnguyenminhan/url-shortener:backend-prod`
+  - Build: `luongnguyenminhan/url-shortener:frontend-prod`
 
 ## Required GitHub Secrets
 
@@ -79,6 +79,20 @@ The production server must have:
     └── nginx.conf
 ```
 
+## Runtime Images
+
+**Important**: Runtime images (`backend-runtime` and `frontend-runtime`) should be built and pushed separately before running this workflow. You can use the provided Makefile:
+
+```bash
+# Build and push backend runtime
+make update-runtime-be
+
+# Build and push frontend runtime
+make update-runtime-fe
+```
+
+The workflow will pull these pre-built runtime images instead of building them each time, which improves build speed and consistency.
+
 ## Usage
 
 ### Development Deployment
@@ -125,7 +139,11 @@ You can also trigger the workflow manually using the "workflow_dispatch" event:
    - Create `/opt/url-shortener` directory on the server
    - Copy `docker-compose.yml`, `makefile`, and `nginx/` directory
 
-4. **Environment Variables Missing**
+4. **Runtime Images Not Found**
+   - Ensure runtime images are built and pushed using `make update-runtime-be` and `make update-runtime-fe`
+   - Check that images exist in Docker Hub with correct tags (`-dev` or `-prod`)
+
+5. **Environment Variables Missing**
    - Check that `REDIS_PASSWORD` secret is set
    - The `.env` file will be created automatically on first deployment
 

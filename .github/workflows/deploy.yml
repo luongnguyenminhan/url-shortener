@@ -33,25 +33,10 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push backend runtime image
-      uses: docker/build-push-action@v5
-      with:
-        context: Backend/
-        file: Backend/build/Dockerfile.runtime
-        push: true
-        tags: ${{ env.BACKEND_RUNTIME_IMAGE }}-dev
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Build and push frontend runtime image
-      uses: docker/build-push-action@v5
-      with:
-        context: Frontend/
-        file: Frontend/Dockerfile.runtime
-        push: true
-        tags: ${{ env.FRONTEND_RUNTIME_IMAGE }}-dev
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+    - name: Pull runtime images
+      run: |
+        docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-dev || docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-prod || echo "Runtime images not found, will use latest"
+        docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-dev || docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-prod || echo "Runtime images not found, will use latest"
 
     - name: Build and push backend app image
       uses: docker/build-push-action@v5
@@ -102,25 +87,10 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push backend runtime image
-      uses: docker/build-push-action@v5
-      with:
-        context: Backend/
-        file: Backend/build/Dockerfile.runtime
-        push: true
-        tags: ${{ env.BACKEND_RUNTIME_IMAGE }}-prod
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Build and push frontend runtime image
-      uses: docker/build-push-action@v5
-      with:
-        context: Frontend/
-        file: Frontend/Dockerfile.runtime
-        push: true
-        tags: ${{ env.FRONTEND_RUNTIME_IMAGE }}-prod
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+    - name: Pull runtime images
+      run: |
+        docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-prod || docker pull ${{ env.BACKEND_RUNTIME_IMAGE }}-dev || echo "Runtime images not found, will use latest"
+        docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-prod || docker pull ${{ env.FRONTEND_RUNTIME_IMAGE }}-dev || echo "Runtime images not found, will use latest"
 
     - name: Build and push backend app image
       uses: docker/build-push-action@v5
