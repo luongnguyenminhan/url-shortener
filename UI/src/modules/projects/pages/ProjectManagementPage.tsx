@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ProjectCard, ProjectToolbar, ProjectFormDialog, DeleteConfirmDialog } from '../components';
+import { ProjectList, ProjectToolbar, ProjectFormDialog, DeleteConfirmDialog, ShareProjectDialog } from '../components';
 import type { ProjectResponse, ProjectCreate, ProjectUpdate } from '@/types/project.type';
 import type { PhotoWithVersions } from '@/types/photo.type';
 import type { PaginationMeta } from '@/types/common.type';
@@ -10,13 +11,11 @@ import {
     Container,
     Typography,
     Button,
-    Paper,
     Pagination,
     CircularProgress,
     Alert,
 } from '@mui/material';
 import {
-    Search as SearchIcon,
     Add as AddIcon,
 } from '@mui/icons-material';
 
@@ -60,6 +59,7 @@ const mockPhotosMap: Record<string, PhotoWithVersions[]> = {
 };
 
 export default function ProjectManagementPage() {
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -72,6 +72,7 @@ export default function ProjectManagementPage() {
     // Dialog states
     const [formDialogOpen, setFormDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [shareDialogOpen, setShareDialogOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<ProjectResponse | null>(null);
     const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
@@ -104,7 +105,7 @@ export default function ProjectManagementPage() {
         fetchProjects();
     }, [page, searchQuery]);
 
-    const handleAction = (projectId: string, action: 'open' | 'start' | 'details' | 'archive' | 'edit' | 'delete') => {
+    const handleAction = (projectId: string, action: 'open' | 'start' | 'details' | 'archive' | 'edit' | 'delete' | 'share') => {
         const project = projects.find(p => p.id === projectId);
 
         if (action === 'edit' && project) {
@@ -114,9 +115,13 @@ export default function ProjectManagementPage() {
         } else if (action === 'delete' && project) {
             setSelectedProject(project);
             setDeleteDialogOpen(true);
+        } else if (action === 'share' && project) {
+            setSelectedProject(project);
+            setShareDialogOpen(true);
+        } else if (action === 'details' || action === 'open') {
+            navigate(`/admin/projects/${projectId}`);
         } else {
             console.log(`Action ${action} on project ${projectId}`);
-            // TODO: Implement other action handlers
         }
     };
 
@@ -206,27 +211,13 @@ export default function ProjectManagementPage() {
                     </Box>
                 ) : (
                     <>
-                        {/* Projects Grid */}
-                        <Box sx={{
-                            display: 'grid',
-                            gridTemplateColumns: {
-                                xs: '1fr',
-                                sm: 'repeat(2, 1fr)',
-                                lg: 'repeat(3, 1fr)',
-                                xl: 'repeat(4, 1fr)'
-                            },
-                            gap: 3,
-                            mb: 4
-                        }}>
-                            {projects.map((project) => (
-                                <ProjectCard
-                                    key={project.id}
-                                    project={project}
-                                    photos={mockPhotosMap[project.id] || []}
-                                    onAction={handleAction}
-                                />
-                            ))}
-                        </Box>
+                        <ProjectList
+                            projects={projects}
+                            loading={loading}
+                            searchQuery={searchQuery}
+                            photosMap={mockPhotosMap}
+                            onAction={handleAction}
+                        />
 
                         {/* Pagination */}
                         {totalPages > 1 && (
@@ -241,26 +232,6 @@ export default function ProjectManagementPage() {
                                     showLastButton
                                 />
                             </Box>
-                        )}
-
-                        {/* Empty State */}
-                        {projects.length === 0 && !loading && (
-                            <Paper
-                                sx={{
-                                    py: 8,
-                                    textAlign: 'center',
-                                    bgcolor: 'background.paper',
-                                    mt: 4
-                                }}
-                            >
-                                <SearchIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                                <Typography variant="h6" color="text.secondary">
-                                    {t('projects.noProjectsFound')}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                                    {searchQuery ? t('projects.tryDifferentSearch') : t('projects.createFirstProject')}
-                                </Typography>
-                            </Paper>
                         )}
                     </>
                 )}
@@ -278,6 +249,13 @@ export default function ProjectManagementPage() {
                     open={deleteDialogOpen}
                     onClose={() => setDeleteDialogOpen(false)}
                     onConfirm={handleDeleteProject}
+                    projectTitle={selectedProject?.title || ''}
+                />
+
+                <ShareProjectDialog
+                    open={shareDialogOpen}
+                    onClose={() => setShareDialogOpen(false)}
+                    projectId={selectedProject?.id || null}
                     projectTitle={selectedProject?.title || ''}
                 />
             </Container>

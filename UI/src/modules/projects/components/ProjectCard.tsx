@@ -11,10 +11,7 @@ import {
     Chip,
     Box,
     IconButton,
-    LinearProgress,
     Button,
-    Avatar,
-    AvatarGroup,
     Menu,
     MenuItem,
     ListItemIcon,
@@ -22,10 +19,11 @@ import {
 } from '@mui/material';
 import {
     MoreVert as MoreVertIcon,
-    CheckCircle as CheckCircleIcon,
     ArrowForward as ArrowForwardIcon,
     Edit as EditIcon,
     Delete as DeleteIcon,
+    AccessTime as AccessTimeIcon,
+    PhotoLibrary as PhotoLibraryIcon,
 } from '@mui/icons-material';
 
 interface ProjectCardProps {
@@ -35,12 +33,12 @@ interface ProjectCardProps {
 }
 
 // Map project status to UI colors
-const statusConfig: Record<string, { color: 'primary' | 'warning' | 'error' | 'success' | 'info' | 'default' }> = {
-    [ProjectStatus.DRAFT]: { color: 'primary' },
-    [ProjectStatus.CLIENT_SELECTING]: { color: 'warning' },
-    [ProjectStatus.PENDING_EDIT]: { color: 'info' },
-    [ProjectStatus.CLIENT_REVIEW]: { color: 'info' },
-    [ProjectStatus.COMPLETED]: { color: 'success' },
+const statusConfig: Record<ProjectStatus, { color: 'primary' | 'warning' | 'error' | 'success' | 'info' | 'default', label: string }> = {
+    [ProjectStatus.DRAFT]: { color: 'default', label: 'Draft' }, // Neutral for draft
+    [ProjectStatus.CLIENT_SELECTING]: { color: 'warning', label: 'Client Selecting' },
+    [ProjectStatus.PENDING_EDIT]: { color: 'info', label: 'Pending Edit' },
+    [ProjectStatus.CLIENT_REVIEW]: { color: 'info', label: 'Client Review' },
+    [ProjectStatus.COMPLETED]: { color: 'success', label: 'Completed' },
 };
 
 export function ProjectCard({ project, photos = [], onAction }: ProjectCardProps) {
@@ -68,18 +66,9 @@ export function ProjectCard({ project, photos = [], onAction }: ProjectCardProps
 
     // Get thumbnail image from first photo
     const thumbnailUrl = photos[0]?.photo_versions?.find((v: any) => v.version_type === 'original')?.image_url
-        || 'https://images.unsplash.com/photo-1606216794079-c6c2ba0ba06c?w=400&h=300&fit=crop';
+        || 'https://cdn4.iconfinder.com/data/icons/24x24-grid-line-symbols-3-1/1024/photo_album_app_software_mobile-512.png';
 
     const photoCount = photos.length;
-
-    // Calculate progress based on status
-    const getProgress = () => {
-        if (project.status === ProjectStatus.COMPLETED) return 100;
-        if (project.status === ProjectStatus.CLIENT_REVIEW) return 75;
-        if (project.status === ProjectStatus.PENDING_EDIT) return 50;
-        if (project.status === ProjectStatus.CLIENT_SELECTING) return 25;
-        return 5;
-    };
 
     const getActionButton = () => {
         if (project.status === ProjectStatus.DRAFT) {
@@ -116,12 +105,9 @@ export function ProjectCard({ project, photos = [], onAction }: ProjectCardProps
     };
 
     const statusStyle = statusConfig[project.status] || statusConfig[ProjectStatus.DRAFT];
-    const progress = getProgress();
-    const formattedDate = new Date(project.created_at).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
+
+    // Format date
+    const formattedDate = new Date(project.created_at).toLocaleDateString();
 
     // Get status translation key
     const getStatusKey = () => {
@@ -136,123 +122,175 @@ export function ProjectCard({ project, photos = [], onAction }: ProjectCardProps
 
     return (
         <Card
+            elevation={0}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100%',
-                transition: 'all 0.2s',
+                borderRadius: 3,
+                border: '1px solid',
+                borderColor: 'divider',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                overflow: 'visible', // Allow menu to not be clipped if needed, though usually hidden is safer. keeping hidden for image
+                position: 'relative',
                 '&:hover': {
-                    boxShadow: 4,
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 12px 24px -10px rgba(0, 0, 0, 0.15)',
+                    borderColor: 'primary.main',
                 }
             }}
         >
-            <CardMedia
-                component="div"
-                sx={{
-                    height: 200,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundImage: `url('${thumbnailUrl}')`,
-                }}
-            />
+            <Box sx={{ position: 'relative' }}>
+                <CardMedia
+                    component="div"
+                    sx={{
+                        height: 200,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundImage: `url('${thumbnailUrl}')`,
+                        borderTopLeftRadius: 12,
+                        borderTopRightRadius: 12,
+                    }}
+                />
+
+                {/* Status Badge Overlay */}
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 12,
+                        left: 12,
+                        display: 'flex',
+                        gap: 1
+                    }}
+                >
+                    <Chip
+                        label={t(`projects.status.${getStatusKey()}`)}
+                        color={statusStyle.color}
+                        size="small"
+                        sx={{
+                            fontWeight: 600,
+                            backdropFilter: 'blur(4px)',
+                            boxShadow: 1
+                        }}
+                    />
+                </Box>
+
+                {/* More Menu Button Overlay */}
+                <IconButton
+                    size="small"
+                    onClick={handleMenuClick}
+                    sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        backdropFilter: 'blur(4px)',
+                        '&:hover': {
+                            bgcolor: 'rgba(255, 255, 255, 0.95)',
+                        }
+                    }}
+                >
+                    <MoreVertIcon fontSize="small" />
+                </IconButton>
+            </Box>
 
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2.5 }}>
                 {/* Header */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-                    <Box sx={{ flex: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
-                            <Typography variant="h6" component="h3" fontWeight="bold" sx={{ fontSize: '1.1rem' }}>
-                                {project.title}
-                            </Typography>
-                            <Chip
-                                label={t(`projects.status.${getStatusKey()}`)}
-                                color={statusStyle.color}
-                                size="small"
-                                sx={{ height: 24 }}
-                            />
-                        </Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                            Client: {project.client_notes || 'No client info'} • {formattedDate}
-                        </Typography>
-                    </Box>
-                    <IconButton size="small" sx={{ mt: -1 }} onClick={handleMenuClick}>
-                        <MoreVertIcon fontSize="small" />
-                    </IconButton>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={handleMenuClose}
+                <Box sx={{ mb: 2 }}>
+                    <Typography
+                        variant="h6"
+                        component="h3"
+                        fontWeight="700"
+                        noWrap
+                        title={project.title}
+                        sx={{ fontSize: '1.1rem', mb: 0.5 }}
                     >
-                        <MenuItem onClick={handleEdit}>
-                            <ListItemIcon>
-                                <EditIcon fontSize="small" />
-                            </ListItemIcon>
-                            <ListItemText>{t('common.edit')}</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={handleDelete}>
-                            <ListItemIcon>
-                                <DeleteIcon fontSize="small" />
-                            </ListItemIcon>
-                            <ListItemText>{t('common.delete')}</ListItemText>
-                        </MenuItem>
-                    </Menu>
+                        {project.title}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, color: 'text.secondary' }}>
+                        <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            {formattedDate}
+                        </Typography>
+                        {project.expired_days !== undefined && (
+                            <Typography
+                                variant="caption"
+                                color={(project.expired_days ?? 0) <= 5 ? 'error.main' : 'text.secondary'}
+                                sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 500 }}
+                            >
+                                <AccessTimeIcon sx={{ fontSize: 14 }} />
+                                {project.expired_days} {t('common.daysLeft')}
+                            </Typography>
+                        )}
+                    </Box>
                 </Box>
 
-                {/* Members & Photos Info */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1.5 }}>
-                    <AvatarGroup max={2} sx={{
-                        '& .MuiAvatar-root': {
-                            width: 32,
-                            height: 32,
-                            fontSize: '0.875rem',
-                            border: '2px solid white'
-                        }
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                    PaperProps={{
+                        elevation: 3,
+                        sx: { borderRadius: 2, minWidth: 150, mt: 1 }
+                    }}
+                >
+                    <MenuItem onClick={handleEdit}>
+                        <ListItemIcon>
+                            <EditIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>{t('common.edit')}</ListItemText>
+                    </MenuItem>
+                    <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+                        <ListItemIcon>
+                            <DeleteIcon fontSize="small" color="error" />
+                        </ListItemIcon>
+                        <ListItemText>{t('common.delete')}</ListItemText>
+                    </MenuItem>
+                </Menu>
+
+                {/* Details */}
+                {project.client_notes && (
+                    <Box sx={{
+                        mb: 2,
+                        p: 1.5,
+                        bgcolor: 'action.hover',
+                        borderRadius: 2,
+                        border: '1px dashed',
+                        borderColor: 'divider'
                     }}>
-                        <Avatar alt="Member 1" src="https://i.pravatar.cc/150?img=1" />
-                        {photoCount > 50 && <Avatar alt="Member 2" src="https://i.pravatar.cc/150?img=2" />}
-                        {photoCount > 100 && <Avatar alt="Member 3" src="https://i.pravatar.cc/150?img=3" />}
-                    </AvatarGroup>
-                    <Typography variant="body2" color="text.secondary" fontWeight="medium">
-                        {photoCount} {t('projects.photos')}
-                    </Typography>
-                </Box>
+                        <Typography variant="caption" color="text.secondary" fontWeight="600" display="block" mb={0.5}>
+                            {t('projects.clientNotes')}:
+                        </Typography>
+                        <Typography variant="body2" color="text.primary" sx={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            lineHeight: 1.4
+                        }}>
+                            {project.client_notes}
+                        </Typography>
+                    </Box>
+                )}
 
                 {/* Footer */}
                 <Box
                     sx={{
                         mt: 'auto',
-                        pt: 2.5,
-                        borderTop: 1,
-                        borderColor: 'divider',
+                        pt: 2,
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}
                 >
-                    {project.status !== ProjectStatus.COMPLETED ? (
-                        <Box sx={{ flex: 1, maxWidth: 160 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.75 }}>
-                                <Typography variant="caption" color="text.secondary" fontWeight="medium">
-                                    {t('projects.progress')}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                                    {progress}%
-                                </Typography>
-                            </Box>
-                            <LinearProgress
-                                variant="determinate"
-                                value={progress}
-                                sx={{ height: 6, borderRadius: 1 }}
-                            />
-                        </Box>
-                    ) : (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <CheckCircleIcon color="success" fontSize="small" />
-                            <Typography variant="caption" color="success.main" fontWeight="medium">
-                                {t('projects.statusMessages.sentToClient')}
-                            </Typography>
-                        </Box>
-                    )}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                        <PhotoLibraryIcon sx={{ fontSize: 16 }} />
+                        <Typography variant="caption" fontWeight="500">
+                            {photoCount}
+                        </Typography>
+                    </Box>
                     {getActionButton()}
                 </Box>
             </CardContent>

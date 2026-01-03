@@ -130,7 +130,13 @@
     "create": "Tạo mới",
     "save": "Lưu",
     "edit": "Sửa",
-    "delete": "Xóa"
+    "delete": "Xóa",
+    "created": "Ngày tạo",
+    "daysLeft": "Ngày còn lại",
+    "share": "Chia sẻ",
+    "generate": "Tạo liên kết",
+    "copied": "Đã sao chép liên kết!",
+    "actions": "Hành động"
   },
   "projects": {
     "title": "Tất cả Dự án",
@@ -147,14 +153,20 @@
     "progress": "Tiến độ",
     "photos": "Ảnh",
     "client": "Khách hàng",
+    "clientNotes": "Ghi chú Khách hàng",
     "noProjectsFound": "Không tìm thấy dự án",
     "tryDifferentSearch": "Thử từ khóa tìm kiếm khác",
     "createFirstProject": "Tạo dự án đầu tiên để bắt đầu",
     "form": {
       "title": "Tiêu đề",
       "status": "Trạng thái",
-      "clientNotes": "Ghi chú Khách hàng"
+      "clientNotes": "Ghi chú Khách hàng",
+      "expiredDays": "Số ngày hết hạn",
+      "expiredDaysHelper": "Số ngày cho đến khi dự án hết hạn"
     },
+    "shareProject": "Chia sẻ dự án",
+    "tokenExpiresIn": "Liên kết hết hạn sau (ngày)",
+    "sharedLink": "Liên kết chia sẻ",
     "status": {
       "draft": "Bản Nháp",
       "client_selecting": "Khách Đang Chọn",

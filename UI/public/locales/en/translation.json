@@ -130,7 +130,13 @@
     "create": "Create",
     "save": "Save",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "created": "Created",
+    "daysLeft": "Days Left",
+    "share": "Share",
+    "generate": "Generate Link",
+    "copied": "Link copied to clipboard!",
+    "actions": "Actions"
   },
   "projects": {
     "title": "All Projects",
@@ -147,14 +153,20 @@
     "progress": "Progress",
     "photos": "Photos",
     "client": "Client",
+    "clientNotes": "Client Notes",
     "noProjectsFound": "No projects found",
     "tryDifferentSearch": "Try a different search term",
     "createFirstProject": "Create your first project to get started",
     "form": {
       "title": "Title",
       "status": "Status",
-      "clientNotes": "Client Notes"
+      "clientNotes": "Client Notes",
+      "expiredDays": "Expired Days",
+      "expiredDaysHelper": "Number of days until the project expires"
     },
+    "shareProject": "Share Project",
+    "tokenExpiresIn": "Link expires in (days)",
+    "sharedLink": "Shared Link",
     "status": {
       "draft": "Draft",
       "client_selecting": "Client Selecting",

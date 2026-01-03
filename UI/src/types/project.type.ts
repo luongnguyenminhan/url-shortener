@@ -22,8 +22,7 @@ export interface ProjectCreate {
 export interface ProjectUpdate {
     title?: string;
     status?: ProjectStatus;
-    client_notes?: string | null;
-    expired_date?: string | null;
+    expired_days?: number;
 }
 
 export interface ProjectStatusUpdate {
@@ -33,7 +32,8 @@ export interface ProjectStatusUpdate {
 export interface ProjectResponse extends ProjectBase {
     id: string;
     owner_id: string;
-    status: string;
+    status: ProjectStatus;
+    expired_days?: number;
     created_at: string;
     updated_at: string;
 }

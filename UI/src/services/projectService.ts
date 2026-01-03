@@ -38,4 +38,13 @@ export const projectService = {
     deleteProject: async (id: string): Promise<void> => {
         await axiosInstance.delete(`${BASE_URL}/${id}`);
     },
+
+    // Create project token
+    createProjectToken: async (projectId: string, expiresInDays: number): Promise<string> => {
+        const response = await axiosInstance.post<{ data: { token: string } }>(`${BASE_URL}/create-project-token`, {
+            project_id: projectId,
+            expires_in_days: expiresInDays
+        });
+        return response.data.data.token;
+    },
 };

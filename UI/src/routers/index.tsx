@@ -12,6 +12,8 @@ import LandingPage from "../modules/landing/pages/LandingPage"
 import AuthLayout from "../components/layouts/AuthLayout"
 import { ROUTES } from "../constants"
 import ProjectManagementPage from "@/modules/projects/pages/ProjectManagementPage"
+import { ProjectDetail } from "@/modules/projects/components"
+
 
 const DevelopmentPage = () => {
     const { t } = useTranslation('admin')
@@ -74,6 +76,14 @@ const router = createBrowserRouter([
                         element: (
                             <PrivateRoute roles={[]}>
                                 <ProjectManagementPage />
+                            </PrivateRoute>
+                        ),
+                    },
+                    {
+                        path: "projects/:id",
+                        element: (
+                            <PrivateRoute roles={[]}>
+                                <ProjectDetail />
                             </PrivateRoute>
                         ),
                     },

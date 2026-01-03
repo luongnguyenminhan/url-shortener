@@ -28,7 +28,7 @@ export function ProjectFormDialog({ open, onClose, onSubmit, project, mode }: Pr
     const [formData, setFormData] = useState({
         title: '',
         status: ProjectStatus.DRAFT,
-        client_notes: '',
+        expired_days: undefined as number | undefined,
     });
 
     useEffect(() => {
@@ -36,13 +36,13 @@ export function ProjectFormDialog({ open, onClose, onSubmit, project, mode }: Pr
             setFormData({
                 title: project.title,
                 status: project.status as any,
-                client_notes: project.client_notes || '',
+                expired_days: project.expired_days,
             });
         } else {
             setFormData({
                 title: '',
                 status: ProjectStatus.DRAFT,
-                client_notes: '',
+                expired_days: undefined,
             });
         }
     }, [project, mode, open]);
@@ -65,7 +65,7 @@ export function ProjectFormDialog({ open, onClose, onSubmit, project, mode }: Pr
             setFormData({
                 title: '',
                 status: ProjectStatus.DRAFT,
-                client_notes: '',
+                expired_days: undefined,
             });
             onClose();
         }
@@ -104,12 +104,16 @@ export function ProjectFormDialog({ open, onClose, onSubmit, project, mode }: Pr
                         </TextField>
 
                         <TextField
-                            label={t('projects.form.clientNotes')}
-                            value={formData.client_notes}
-                            onChange={(e) => setFormData({ ...formData, client_notes: e.target.value })}
-                            multiline
-                            rows={3}
+                            label={t('projects.form.expiredDays')}
+                            value={formData.expired_days || ''}
+                            onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                setFormData({ ...formData, expired_days: isNaN(val) ? undefined : val });
+                            }}
+                            type="number"
                             fullWidth
+                            InputProps={{ inputProps: { min: 0 } }}
+                            helperText={t('projects.form.expiredDaysHelper')}
                         />
                     </Box>
                 </DialogContent>
