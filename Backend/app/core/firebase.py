@@ -1,4 +1,5 @@
 """Firebase Admin SDK initialization"""
+import json
 import os
 
 import firebase_admin
@@ -13,13 +14,27 @@ logger = get_logger(__name__)
 def initialize_firebase():
     if not firebase_admin._apps:
         try:
-            key_path = settings.FIREBASE_SERVICE_ACCOUNT_KEY_PATH
-            if not os.path.exists(key_path):
-                logger.error(f"Firebase service account key file not found: {key_path}")
-                raise FileNotFoundError(f"Service account key file not found: {key_path}")
-
-            logger.info(f"Initializing Firebase with service account key: {key_path}")
-            cred = credentials.Certificate(key_path)
+            key_content = settings.FIREBASE_SERVICE_ACCOUNT_KEY_PATH
+            
+            # Parse JSON content from env variable
+            if isinstance(key_content, str):
+                try:
+                    # Try to parse as JSON string
+                    key_dict = json.loads(key_content)
+                except json.JSONDecodeError:
+                    # If it's a file path, read from file
+                    if os.path.exists(key_content):
+                        logger.info(f"Reading Firebase key from file: {key_content}")
+                        with open(key_content, 'r') as f:
+                            key_dict = json.load(f)
+                    else:
+                        logger.error(f"Firebase service account key not found: {key_content}")
+                        raise FileNotFoundError(f"Service account key not found: {key_content}")
+            else:
+                key_dict = key_content
+            
+            logger.info("Initializing Firebase with service account key")
+            cred = credentials.Certificate(key_dict)
             firebase_admin.initialize_app(cred)
             logger.info("Firebase Admin SDK initialized successfully")
             logger.info(f"Firebase apps: {list(firebase_admin._apps.keys())}")

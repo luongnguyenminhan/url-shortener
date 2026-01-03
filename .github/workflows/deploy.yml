@@ -1,5 +1,11 @@
 name: Deploy Application
 
+# =========================================
+# Required GitHub Secrets:
+# =========================================
+# DOCKERHUB_USERNAME: DockerHub username
+# DOCKERHUB_TOKEN: DockerHub access token
+# 
 on:
   push:
     branches: [ main ]
@@ -13,28 +19,9 @@ env:
   FRONTEND_APP_IMAGE: luongnguyenminhan/url-shortener:frontend
 
 jobs:
-  detect-changes:
-    runs-on: self-hosted
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            backend:
-              - 'Backend/**'
-            frontend:
-              - 'Frontend/**'
-
-  # ===================== DEV =====================
-
   build-backend-dev:
-    needs: detect-changes
     runs-on: self-hosted
-    if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.backend == 'true'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -53,9 +40,8 @@ jobs:
             RUNTIME_IMAGE=${{ env.BACKEND_RUNTIME_IMAGE }}-dev
 
   build-frontend-dev:
-    needs: detect-changes
     runs-on: self-hosted
-    if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.frontend == 'true'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -74,24 +60,33 @@ jobs:
             RUNTIME_IMAGE=${{ env.FRONTEND_RUNTIME_IMAGE }}-dev
 
   deploy-development:
+    needs: [build-backend-dev, build-frontend-dev]
     runs-on: self-hosted
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy DEV
+      - uses: actions/checkout@v4
+
+      - name: Prepare env + init Vault Agent
         run: |
-          cd /opt/github-runner/url-shortener/dev || exit 1
+          set -e
+          cd "$HOME/url-shortener/dev" || true
 
-          # Pull images (will get latest if not just built)
-          docker pull ${{ env.BACKEND_APP_IMAGE }}-dev
-          docker pull ${{ env.FRONTEND_APP_IMAGE }}-dev
+          # Pull repository
+          git pull origin main --rebase || true
 
-          docker tag ${{ env.BACKEND_APP_IMAGE }}-dev urls:backend
-          docker tag ${{ env.FRONTEND_APP_IMAGE }}-dev urls:frontend
+          # Initialize Vault Agent
+          vault agent -config=$HOME/url-shortener/vault-agent.hcl > /dev/null 2>&1 &
 
-          docker compose --profile dev down || true
-          docker compose --profile dev up -d
+      - name: Pull latest Docker images
+        run: |
+          docker compose -f docker-compose.dev.yml pull 
 
-          docker compose --profile dev ps
+      - name: Deploy with docker compose
+        run: |
+          cd "$HOME/url-shortener/dev"
+          docker compose -f docker-compose.dev.yml down || true
+          docker compose -f docker-compose.dev.yml up -d
+          docker compose -f docker-compose.dev.yml ps
 
   # ===================== PROD =====================
 
@@ -135,21 +130,31 @@ jobs:
           build-args: |
             RUNTIME_IMAGE=${{ env.FRONTEND_RUNTIME_IMAGE }}-prod
 
+
   deploy-production:
+    needs: [build-backend-prod, build-frontend-prod]
     runs-on: self-hosted
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Deploy PROD
+      - uses: actions/checkout@v4
+
+      - name: Prepare env + init Vault Agent
         run: |
-          cd /opt/github-runner/url-shortener/prod || exit 1
+          set -e
+          cd "$HOME/url-shortener/prod" || true
 
-          docker pull ${{ env.BACKEND_APP_IMAGE }}-prod
-          docker pull ${{ env.FRONTEND_APP_IMAGE }}-prod
+          git pull origin main --rebase || true
 
-          docker tag ${{ env.BACKEND_APP_IMAGE }}-prod urls:backend
-          docker tag ${{ env.FRONTEND_APP_IMAGE }}-prod urls:frontend
+          # Initialize Vault Agent
+          vault agent -config=$HOME/url-shortener/vault-agent.hcl > /dev/null 2>&1 &
 
-          docker compose --profile prod down
-          docker compose --profile prod up -d
+      - name: Pull latest Docker images
+        run: |
+          docker compose -f docker-compose.prod.yml pull
 
-          docker compose --profile prod ps
+      - name: Deploy with docker compose
+        run: |
+          cd "$HOME/url-shortener/prod"
+          docker compose -f docker-compose.prod.yml down || true
+          docker compose -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.prod.yml ps

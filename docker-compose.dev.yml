@@ -1,0 +1,84 @@
+version: '3.9'
+
+x-shared-service: &shared-service
+  environment:
+    PYTHON_ENVIRONMENT: development
+  restart: unless-stopped
+  networks:
+    - urls-network
+
+services:
+  db:
+    image: postgres:15-alpine
+    <<: *shared-service
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: urls123
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    image: luongnguyenminhan/url-shortener:backend-dev
+    container_name: urls-backend-dev
+    pull_policy: always
+    <<: *shared-service
+    volumes:
+      - ./Backend/config:/app/config
+      - /home/anlnm/url-shortener/.vault/secrets/configuration.development.json:/vault/secrets/configuration.development.json:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  frontend:
+    image: luongnguyenminhan/url-shortener:frontend-dev
+    container_name: urls-frontend-dev
+    pull_policy: always
+    <<: *shared-service
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - urls-network
+    environment:
+      REDIS_PASSWORD: urls123
+    command: redis-server --requirepass urls123
+
+  adminer:
+    image: adminer:latest
+    container_name: urls-adminer-dev
+    pull_policy: always
+    <<: *shared-service
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:alpine
+    container_name: urls-nginx-dev
+    pull_policy: always
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    networks:
+      - urls-network
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:
+
+networks:
+  urls-network:
+    driver: bridge
