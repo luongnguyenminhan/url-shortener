@@ -11,6 +11,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    allowedHosts: ['photo.wc504.io.vn'],
+  },
   preview: {
     allowedHosts: ['photo.wc504.io.vn'],
   },
