@@ -1,0 +1,15 @@
+{
+    "layout": {
+        "title": "Dashboard",
+        "greeting": "Hello, MeoBeo Studio"
+    },
+    "menu": {
+        "dashboard": "Dashboard",
+        "projects": "Project Management",
+        "logout": "Logout"
+    },
+    "development": {
+        "title": "Feature Under Development",
+        "description": "This feature is currently under development and will be launched soon."
+    }
+}

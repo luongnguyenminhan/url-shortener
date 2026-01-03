@@ -1,0 +1,179 @@
+{
+  "hero": {
+    "title": "Tối Ưu Quy Trình Chọn Ảnh Của Bạn",
+    "subtitle": "Tải ảnh lên, cộng tác với khách hàng, quản lý đánh giá và giao ảnh cuối cùng với nền tảng chọn ảnh trực quan của chúng tôi",
+    "getStarted": "Bắt đầu Miễn phí",
+    "learnMore": "Tìm hiểu Thêm"
+  },
+  "header": {
+    "brand": "LinkShort",
+    "nav": {
+      "features": "Tính năng",
+      "pricing": "Giá cả",
+      "about": "Giới thiệu",
+      "dashboard": "Bảng điều khiển",
+      "project": "Dự án của tôi"
+    },
+    "login": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "menu": "Menu",
+    "logout": "Đăng xuất"
+  },
+  "form": {
+    "placeholder": "Nhập URL dài của bạn ở đây...",
+    "shortenUrl": "Rút gọn URL",
+    "shortening": "Đang rút gọn...",
+    "errors": {
+      "emptyUrl": "Vui lòng nhập URL",
+      "invalidUrl": "Vui lòng nhập URL hợp lệ (bắt đầu bằng http:// hoặc https://)",
+      "shortenFailed": "Không thể rút gọn URL"
+    },
+    "result": {
+      "label": "URL rút gọn của bạn:",
+      "copy": "Sao chép"
+    }
+  },
+  "features": {
+    "title": "Tính năng Mạnh mẽ",
+    "subtitle": "Mọi thứ bạn cần để tối ưu quy trình chọn ảnh từ tải lên đến giao hàng",
+    "workflow": {
+      "title": "Quy Trình Tối Ưu",
+      "description": "Tải ảnh lên, để khách hàng chọn ảnh yêu thích và quản lý toàn bộ quá trình chỉnh sửa và đánh giá trên một nền tảng liền mạch."
+    },
+    "review": {
+      "title": "Cộng Tác Khách Hàng",
+      "description": "Khách hàng có thể chọn ảnh, thêm nhận xét và xem lại các phiên bản đã chỉnh sửa. Cộng tác hiệu quả với quy trình phản hồi và phê duyệt rõ ràng."
+    },
+    "versionControl": {
+      "title": "Quản Lý Phiên Bản",
+      "description": "Theo dõi các phiên bản gốc và đã chỉnh sửa của mỗi bức ảnh. Khách hàng có thể so sánh các phiên bản và phê duyệt ảnh cuối cùng với sự tự tin."
+    }
+  },
+  "pricing": {
+    "title": "Giá cả Đơn giản",
+    "subtitle": "Chọn gói phù hợp nhất với bạn. Nâng cấp hoặc hạ cấp bất cứ lúc nào.",
+    "mostPopular": "Phổ biến Nhất",
+    "free": {
+      "name": "Miễn phí",
+      "price": "$0",
+      "period": "Mãi mãi",
+      "description": "Hoàn hảo để bắt đầu",
+      "features": {
+        "urls": "Dự án không giới hạn",
+        "analytics": "Tính năng cơ bản",
+        "support": "Hỗ trợ tiêu chuẩn",
+        "branding": "Thương hiệu tiêu chuẩn"
+      },
+      "cta": "Bắt đầu"
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "$9.99",
+      "period": "Mỗi tháng",
+      "description": "Dành cho chuyên gia và doanh nghiệp",
+      "features": {
+        "unlimited": "Dự án không giới hạn",
+        "analytics": "Tính năng nâng cao",
+        "support": "Hỗ trợ ưu tiên",
+        "branding": "Thương hiệu tùy chỉnh",
+        "api": "Truy cập API",
+        "team": "Hợp tác nhóm"
+      },
+      "cta": "Bắt đầu Dùng thử Miễn phí"
+    }
+  },
+  "cta": {
+    "title": "Sẵn sàng Bắt đầu?",
+    "description": "Tham gia cùng các nhiếp ảnh gia và studio đang tối ưu quy trình chọn ảnh của họ. Đăng ký ngay hôm nay và bắt đầu quản lý dự án của bạn một cách dễ dàng.",
+    "createAccount": "Tạo Tài khoản Miễn phí",
+    "learnMore": "Tìm hiểu Thêm"
+  },
+  "footer": {
+    "sections": {
+      "product": {
+        "title": "Sản phẩm",
+        "features": "Tính năng",
+        "pricing": "Giá cả",
+        "security": "Bảo mật"
+      },
+      "company": {
+        "title": "Công ty",
+        "about": "Giới thiệu",
+        "blog": "Blog",
+        "careers": "Tuyển dụng"
+      },
+      "support": {
+        "title": "Hỗ trợ",
+        "helpCenter": "Trung tâm trợ giúp",
+        "contact": "Liên hệ",
+        "status": "Trạng thái"
+      },
+      "newsletter": {
+        "title": "Bản tin",
+        "description": "Đăng ký để nhận cập nhật về tính năng mới"
+      }
+    },
+    "copyright": "© {{year}} {{brand}}. Tất cả quyền được bảo lưu.",
+    "legal": {
+      "privacy": "Quyền riêng tư",
+      "terms": "Điều khoản",
+      "cookies": "Cookie"
+    }
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "create": "Tạo mới",
+    "save": "Lưu",
+    "edit": "Sửa",
+    "delete": "Xóa"
+  },
+  "projects": {
+    "title": "Tất cả Dự án",
+    "newProject": "Dự án Mới",
+    "createProject": "Tạo Dự án",
+    "editProject": "Sửa Dự án",
+    "deleteProject": "Xóa Dự án",
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa \"{{title}}\"? Hành động này không thể hoàn tác.",
+    "searchPlaceholder": "Tìm kiếm dự án, khách hàng...",
+    "filter": "Lọc",
+    "sortBy": "Sắp xếp theo: Ngày",
+    "gridView": "Dạng Lưới",
+    "listView": "Dạng Danh sách",
+    "progress": "Tiến độ",
+    "photos": "Ảnh",
+    "client": "Khách hàng",
+    "noProjectsFound": "Không tìm thấy dự án",
+    "tryDifferentSearch": "Thử từ khóa tìm kiếm khác",
+    "createFirstProject": "Tạo dự án đầu tiên để bắt đầu",
+    "form": {
+      "title": "Tiêu đề",
+      "status": "Trạng thái",
+      "clientNotes": "Ghi chú Khách hàng"
+    },
+    "status": {
+      "draft": "Bản Nháp",
+      "client_selecting": "Khách Đang Chọn",
+      "pending_edit": "Chờ Chỉnh sửa",
+      "client_review": "Khách Xem lại",
+      "completed": "Hoàn thành",
+      "new": "Mới",
+      "inReview": "Đang Xem xét",
+      "delivered": "Đã Giao"
+    },
+    "actions": {
+      "open": "Mở",
+      "start": "Bắt đầu",
+      "details": "Chi tiết",
+      "archive": "Lưu trữ"
+    },
+    "statusMessages": {
+      "sentToClient": "Đã gửi cho Khách hàng",
+      "delivered": "Đã Giao"
+    }
+  }
+}

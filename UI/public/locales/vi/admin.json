@@ -1,0 +1,15 @@
+{
+    "layout": {
+        "title": "Dashboard",
+        "greeting": "Xin chào, MeoBeo Studio"
+    },
+    "menu": {
+        "dashboard": "Trang chủ",
+        "projects": "Quản lý dự án",
+        "logout": "Đăng xuất"
+    },
+    "development": {
+        "title": "Tính năng đang phát triển",
+        "description": "Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt."
+    }
+}
