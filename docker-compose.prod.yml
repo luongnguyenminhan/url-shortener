@@ -1,0 +1,80 @@
+version: '3.9'
+
+x-shared-service: &shared-service
+  environment:
+    PYTHON_ENVIRONMENT: production
+  restart: unless-stopped
+  networks:
+    - urls-network
+
+services:
+  db:
+    image: postgres:15-alpine
+    <<: *shared-service
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: urls123
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+
+  backend:
+    image: luongnguyenminhan/url-shortener:backend-prod
+    container_name: urls-backend-prod
+    pull_policy: always
+    <<: *shared-service
+    volumes:
+      - ./Backend/config:/app/config
+      - /home/anlnm/url-shortener/.vault/secrets/configuration.production.json:/vault/secrets/configuration.production.json:ro
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  frontend:
+    image: luongnguyenminhan/url-shortener:frontend-prod
+    container_name: urls-frontend-prod
+    pull_policy: always
+    <<: *shared-service
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - urls-network
+    environment:
+      REDIS_PASSWORD: urls123
+    command: redis-server --requirepass urls123
+
+  adminer:
+    image: adminer:latest
+    container_name: urls-adminer-prod
+    pull_policy: always
+    <<: *shared-service
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:alpine
+    container_name: urls-nginx-prod
+    pull_policy: always
+    ports:
+      - "8083:80"
+    restart: unless-stopped
+    networks:
+      - urls-network
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  urls-network:
+    driver: bridge
