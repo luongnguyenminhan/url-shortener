@@ -292,3 +292,6 @@ class FastAPILoggingMiddleware:
 # Initialize colorama if available
 if HAS_COLORAMA:
     colorama.init(autoreset=True)
+
+# Create a global logger instance for convenience
+logger = get_logger(__name__)

@@ -1,5 +1,11 @@
 name: Deploy Application
 
+# =========================================
+# Required GitHub Secrets:
+# =========================================
+# DOCKERHUB_USERNAME: DockerHub username
+# DOCKERHUB_TOKEN: DockerHub access token
+# 
 on:
   push:
     branches: [ main ]
@@ -7,7 +13,6 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: luongnguyenminhan
   BACKEND_RUNTIME_IMAGE: luongnguyenminhan/url-shortener:backend-runtime
   BACKEND_APP_IMAGE: luongnguyenminhan/url-shortener:backend
   FRONTEND_RUNTIME_IMAGE: luongnguyenminhan/url-shortener:frontend-runtime
@@ -29,6 +34,8 @@ jobs:
               - 'Backend/**'
             frontend:
               - 'Frontend/**'
+
+  # ===================== DEV =====================
 
   build-backend-dev:
     needs: detect-changes
@@ -72,6 +79,42 @@ jobs:
           build-args: |
             RUNTIME_IMAGE=${{ env.FRONTEND_RUNTIME_IMAGE }}-dev
 
+  deploy-development:
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare env + init Vault Agent
+        run: |
+          set -e
+          cd "$HOME/url-shortener/dev" || true
+
+          # Pull repository
+          git pull origin main || true
+
+          # Initialize Vault Agent
+          vault agent -config=$HOME/url-shortener/vault-agent.hcl > /dev/null 2>&1 &
+
+      - name: Pull latest Docker images
+        run: |
+          docker pull ${{ env.BACKEND_APP_IMAGE }}-dev
+          docker pull ${{ env.FRONTEND_APP_IMAGE }}-dev
+
+      - name: Inject Firebase service account key
+        run: |
+          mkdir -p "$HOME/url-shortener/dev/Backend/config"
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > "$HOME/url-shortener/dev/Backend/config/scribe-c7f13-firebase-adminsdk-fbsvc-fa698da673.json"
+
+      - name: Deploy with docker compose
+        run: |
+          cd "$HOME/url-shortener/dev"
+          docker compose -f docker-compose.dev.yml down || true
+          docker compose -f docker-compose.dev.yml up -d
+          docker compose -f docker-compose.dev.yml ps
+
+  # ===================== PROD =====================
+
   build-backend-prod:
     runs-on: self-hosted
     if: startsWith(github.ref, 'refs/tags/')
@@ -112,28 +155,36 @@ jobs:
           build-args: |
             RUNTIME_IMAGE=${{ env.FRONTEND_RUNTIME_IMAGE }}-prod
 
-  deploy:
-    needs: [build-backend-prod, build-frontend-prod]
+
+  deploy-production:
     runs-on: self-hosted
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USER }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          port: ${{ secrets.PRODUCTION_PORT || 22 }}
-          script: |
-            cd /opt/url-shortener
+      - uses: actions/checkout@v4
 
-            docker pull ${{ env.BACKEND_APP_IMAGE }}-prod
-            docker pull ${{ env.FRONTEND_APP_IMAGE }}-prod
+      - name: Prepare env + init Vault Agent
+        run: |
+          set -e
+          cd "$HOME/url-shortener/prod" || true
 
-            docker tag ${{ env.BACKEND_APP_IMAGE }}-prod urls:backend
-            docker tag ${{ env.FRONTEND_APP_IMAGE }}-prod urls:frontend
+          git pull origin main || true
 
-            docker-compose down || true
-            docker-compose up -d
+          # Initialize Vault Agent
+          vault agent -config=$HOME/url-shortener/vault-agent.hcl > /dev/null 2>&1 &
 
-            sleep 20
-            docker-compose ps
+      - name: Pull latest Docker images
+        run: |
+          docker pull ${{ env.BACKEND_APP_IMAGE }}-prod
+          docker pull ${{ env.FRONTEND_APP_IMAGE }}-prod
+
+      - name: Inject Firebase service account key
+        run: |
+          mkdir -p "$HOME/url-shortener/prod/Backend/config"
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > "$HOME/url-shortener/prod/Backend/config/scribe-c7f13-firebase-adminsdk-fbsvc-fa698da673.json"
+
+      - name: Deploy with docker compose
+        run: |
+          cd "$HOME/url-shortener/prod"
+          docker compose -f docker-compose.prod.yml down || true
+          docker compose -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.prod.yml ps

@@ -2,12 +2,16 @@ from fastapi import FastAPI, HTTPException
 from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 
+from app.core.vault_loader import load_config
 from app.api import register_routers
 from app.core.config import settings
 from app.core.firebase import initialize_firebase
 from app.db import create_tables
 from app.exception_handlers.http_exception import custom_exception_handler, custom_http_exception_handler
 from app.utils.logging import setup_logging, FastAPILoggingMiddleware, get_logger
+
+# Load configuration from .env or Vault
+load_config()
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     """

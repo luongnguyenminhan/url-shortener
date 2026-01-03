@@ -3,16 +3,17 @@
 # Variables
 REGISTRY :=
 DOCKERHUB_REGISTRY := luongnguyenminhan
-IMAGE_NAME := urls
+IMAGE_NAME := url-shortener
 DOCKER_BUILD_FLAGS := 
+PROFILE := 
 
 # Local images
-BACKEND_RUNTIME_IMAGE := $(IMAGE_NAME):backend-runtime
-BACKEND_APP_IMAGE := $(IMAGE_NAME):backend
+BACKEND_RUNTIME_IMAGE := $(DOCKERHUB_REGISTRY)/$(IMAGE_NAME):backend-runtime
+BACKEND_APP_IMAGE := $(DOCKERHUB_REGISTRY)/$(IMAGE_NAME):backend
 
 # Frontend images
-FRONTEND_RUNTIME_IMAGE := $(IMAGE_NAME):frontend-runtime
-FRONTEND_APP_IMAGE := $(IMAGE_NAME):frontend
+FRONTEND_RUNTIME_IMAGE := $(DOCKERHUB_REGISTRY)/$(IMAGE_NAME):frontend-runtime
+FRONTEND_APP_IMAGE := $(DOCKERHUB_REGISTRY)/$(IMAGE_NAME):frontend
 
 # Docker Hub images
 DOCKERHUB_BACKEND_RUNTIME := $(DOCKERHUB_REGISTRY)/url-shortener:backend-runtime
@@ -34,14 +35,39 @@ help:
 	@echo "  make update-runtime-be  - Build and push backend runtime to Docker Hub (dev & prod) - Required before CI deployment"
 	@echo "  make update-runtime-fe  - Build and push frontend runtime to Docker Hub (dev & prod) - Required before CI deployment"
 	@echo "  make up                 - Start all services"
-	@echo "  make restart            - Restart all services"
+	@echo "  make up PROFILE=dev     - Start services with dev profile (nginx-dev)"
+	@echo "  make up PROFILE=prod    - Start services with prod profile (nginx)"
 	@echo "  make rebuild            - Rebuild app images and restart services"
+	@echo "  make rebuild PROFILE=dev - Rebuild and restart with dev profile"
 
-## build: Build app images (backend & frontend) - requires runtime images to exist
+## build: Build app images with platform tag (pulls runtime images from registry automatically)
 build:
-	@echo "🔨 Building app images..."
-	@docker image inspect $(BACKEND_RUNTIME_IMAGE) >/dev/null 2>&1 || (echo "❌ Backend runtime image $(BACKEND_RUNTIME_IMAGE) does not exist. Run 'make update-runtime-be' first." && exit 1)
-	@docker image inspect $(FRONTEND_RUNTIME_IMAGE) >/dev/null 2>&1 || (echo "❌ Frontend runtime image $(FRONTEND_RUNTIME_IMAGE) does not exist. Run 'make update-runtime-fe' first." && exit 1)
+	@echo "🔨 Pulling runtime images from registry..."
+	docker pull $(BACKEND_RUNTIME_IMAGE) || true
+	docker pull $(FRONTEND_RUNTIME_IMAGE) || true
+	@echo "🔨 Building app images with platform tag..."
+	docker buildx build $(DOCKER_BUILD_FLAGS) \
+		--platform linux/amd64 \
+		-f Backend/build/Dockerfile.app \
+		--build-arg RUNTIME_IMAGE=$(BACKEND_RUNTIME_IMAGE) \
+		-t $(BACKEND_APP_IMAGE) \
+		--load \
+		Backend/
+	docker buildx build $(DOCKER_BUILD_FLAGS) \
+		--platform linux/amd64 \
+		-f Frontend/Dockerfile.app \
+		--build-arg RUNTIME_IMAGE=$(FRONTEND_RUNTIME_IMAGE) \
+		-t $(FRONTEND_APP_IMAGE) \
+		--load \
+		Frontend/
+	@echo "✅ App images built successfully!"
+
+## build-linux: Build app images without platform tag (pulls runtime images from registry automatically)
+build-linux:
+	@echo "🔨 Pulling runtime images from registry..."
+	docker pull $(BACKEND_RUNTIME_IMAGE) || true
+	docker pull $(FRONTEND_RUNTIME_IMAGE) || true
+	@echo "🔨 Building app images (Linux)..."
 	docker build $(DOCKER_BUILD_FLAGS) \
 		-f Backend/build/Dockerfile.app \
 		--build-arg RUNTIME_IMAGE=$(BACKEND_RUNTIME_IMAGE) \
@@ -101,13 +127,30 @@ env-check:
 ## up: Start all services with docker-compose
 up: env-check
 	@echo "🚀 Starting all services..."
-	docker-compose up -d
+	@if [ -n "$(PROFILE)" ]; then \
+		echo "Using profile: $(PROFILE)"; \
+		docker-compose --profile $(PROFILE) up -d; \
+	else \
+		docker-compose up -d; \
+	fi
 	@echo "✅ Services started!"
 	@echo ""
-	@echo "Backend:  http://localhost/be"
-	@echo "Frontend: http://localhost:3030"
-	@echo "Nginx:    http://localhost"
-	@echo "Redis:    localhost:6379"
+	@if [ "$(PROFILE)" = "dev" ]; then \
+		echo "Backend:  http://localhost/be"; \
+		echo "Frontend: http://localhost:3030"; \
+		echo "Nginx:    http://localhost:8081"; \
+		echo "Redis:    localhost:6379"; \
+	elif [ "$(PROFILE)" = "prod" ]; then \
+		echo "Backend:  http://localhost/be"; \
+		echo "Frontend: http://localhost:3030"; \
+		echo "Nginx:    http://localhost:8082"; \
+		echo "Redis:    localhost:6379"; \
+	else \
+		echo "Backend:  http://localhost/be"; \
+		echo "Frontend: http://localhost:3030"; \
+		echo "Nginx:    http://localhost"; \
+		echo "Redis:    localhost:6379"; \
+	fi
 
 ## down: Stop all services
 down:

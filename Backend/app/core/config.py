@@ -9,6 +9,10 @@ from pydantic import (
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Load configuration from Vault before initializing settings
+from app.core.vault_loader import load_config
+load_config()
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -49,7 +53,7 @@ class Settings(BaseSettings):
 
     # Firebase Configuration
     FIREBASE_SERVICE_ACCOUNT_KEY_PATH: str = (
-        "/app/config/keys/scribe-c7f13-firebase-adminsdk-fbsvc-1ab2f55755.json"
+        '{"type": "service_account", "project_id": ""}'
     )
 
     # Redis Configuration
