@@ -76,3 +76,19 @@ class ProjectListResponse(BaseModel):
 
     total: int
     items: List[ProjectResponse]
+    
+class ProjectCreateToken(BaseModel):
+    """Schema for creating a project token"""
+    project_id: UUID = Field(..., description="ID of the project")
+    expires_in_days: Optional[int] = Field(
+        default=7,
+        description="Number of days until the token expires",
+    )
+    
+class VerifyProjectToken(BaseModel):
+    """Schema for verifying a project token"""
+    token: str = Field(..., description="Project token to verify")
+    password: Optional[str] = Field(
+        default="",
+        description="Password for the token if it is password-protected",
+    )

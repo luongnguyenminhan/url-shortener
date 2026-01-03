@@ -76,9 +76,9 @@ class ColorFormatter(logging.Formatter):
         # Format timestamp
         timestamp = self.formatTime(record, "%Y-%m-%d %H:%M:%S")
 
-        # Create the formatted message
+        # Create the formatted message with colors only on label, not on content
         formatted_message = (
-            f"{color}[{timestamp}] {record.levelname:<8} {record.name:<20} | {record.getMessage()}{self.RESET}"
+            f"{color}[{timestamp}] {record.levelname:<8} {record.name:<20} |{self.RESET} {record.getMessage()}"
         )
 
         # Add exception info if present

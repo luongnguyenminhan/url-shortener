@@ -1,4 +1,5 @@
 """Project API endpoints"""
+
 from typing import List
 from uuid import UUID
 
@@ -9,12 +10,18 @@ from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.db import get_db
 from app.models.user import User
-from app.schemas.common import ApiResponse, PaginationSortSearchSchema, pagination_params_dep
+from app.schemas.common import (
+    ApiResponse,
+    PaginationSortSearchSchema,
+    pagination_params_dep,
+)
 from app.schemas.project import (
     ProjectCreate,
+    ProjectCreateToken,
     ProjectResponse,
     ProjectStatusUpdate,
     ProjectUpdate,
+    VerifyProjectToken,
 )
 from app.services import project_service
 from app.utils.auth import get_current_user
@@ -165,4 +172,71 @@ def delete_project(
         success=True,
         message=MessageConstants.PROJECT_DELETED,
         data={"id": str(project_id)},
+    )
+
+
+@router.post(
+    "/create-project-token",
+    response_model=ApiResponse[dict],
+    status_code=status.HTTP_201_CREATED,
+    summary="Create project token",
+    description="Create a new token for a project",
+)
+def create_project_token(
+    project_data: ProjectCreateToken,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[dict]:
+    """Create a new project token for authenticated user"""
+    project_token = project_service.create_project_token(db, current_user, project_data)
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_TOKEN_CREATED,
+        data=project_token,
+    )
+
+
+@router.post(
+    "/verify-project-token",
+    response_model=ApiResponse[dict],
+    status_code=status.HTTP_200_OK,
+    summary="Verify project token",
+    description="Verify access using a project token",
+)
+def verify_project_token(
+    project_token: VerifyProjectToken,
+    db: Session = Depends(get_db),
+) -> ApiResponse[dict]:
+    """Verify project token access"""
+    session_details = project_service.verify_project_token_access(db, project_token)
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_TOKEN_VERIFIED,
+        data=session_details,
+    )
+
+
+@router.get(
+    "/active-project-token/{project_id}",
+    response_model=ApiResponse[dict],
+    status_code=status.HTTP_200_OK,
+    summary="Get active project token",
+    description="Get the active token for a specific project",
+)
+def get_active_project_token(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[dict]:
+    """Get the active token for a specific project"""
+    project_token = project_service.get_project_token(db, project_id, current_user)
+    if not project_token:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Active project token not found.",
+        )
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PROJECT_TOKEN_RETRIEVED,
+        data=project_token,
     )

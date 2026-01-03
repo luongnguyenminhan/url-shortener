@@ -22,7 +22,6 @@ def create(db: Session, project: ProjectCreate, owner_id: UUID) -> Project:
         owner_id=owner_id,
         title=project.title,
         status=project.status or ProjectStatus.DRAFT.value,
-        client_notes=project.client_notes,
         expired_date=expired_date,
     )
     db.add(db_project)
