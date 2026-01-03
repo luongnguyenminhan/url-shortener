@@ -10,11 +10,14 @@
     "nav": {
       "features": "Tính năng",
       "pricing": "Giá cả",
-      "about": "Giới thiệu"
+      "about": "Giới thiệu",
+      "dashboard": "Bảng điều khiển",
+      "project": "Dự án của tôi"
     },
     "login": "Đăng nhập",
     "signUp": "Đăng ký",
-    "menu": "Menu"
+    "menu": "Menu",
+    "logout": "Đăng xuất"
   },
   "form": {
     "placeholder": "Nhập URL dài của bạn ở đây...",

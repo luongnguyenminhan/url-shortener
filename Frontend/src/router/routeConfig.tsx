@@ -4,9 +4,8 @@ import { ProtectedRoute } from './ProtectedRoute';
 
 // Page components
 import App from '../App';
-
-// Placeholder pages for routes
-const PlaceholderPage = () => <div>Page Coming Soon</div>;
+import { PlaceholderPage } from '../pages/PlaceholderPage';
+import { Projects } from '../pages/projects/Projects';
 
 /**
  * Main route configuration
@@ -40,6 +39,10 @@ export const routeConfig: RouteObject[] = [
       {
         path: ROUTES.DASHBOARD,
         element: <ProtectedRoute element={<PlaceholderPage />} />,
+      },
+      {
+        path: ROUTES.PROJECTS,
+        element: <ProtectedRoute element={<Projects />} />,
       },
       {
         path: ROUTES.LINKS,

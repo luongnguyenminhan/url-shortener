@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 
@@ -78,6 +79,17 @@ app = FastAPI(
 
 # Set custom OpenAPI schema
 app.openapi = custom_openapi
+
+# Add CORS middleware
+APP_CORS_ORIGINS = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=APP_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Add colorful logging middleware
 app.add_middleware(FastAPILoggingMiddleware)

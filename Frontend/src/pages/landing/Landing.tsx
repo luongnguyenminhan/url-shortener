@@ -33,7 +33,6 @@ export function LandingPage() {
       <Box component="main" sx={{ flex: 1 }}>
         <Hero onSignup={handleSignup} />
         <Features />
-        <Pricing onSelectPlan={(plan) => console.log('Selected plan:', plan)} />
         <CTA onGetStarted={handleSignup} />
       </Box>
 

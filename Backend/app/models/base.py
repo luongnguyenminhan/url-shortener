@@ -2,8 +2,9 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, DateTime, func
 from sqlmodel import Field, SQLModel
+
+from app.utils import common_utils
 
 
 class BaseModel(SQLModel):
@@ -15,11 +16,11 @@ class BaseModel(SQLModel):
     )
     is_deleted: bool = Field(default=False, nullable=False, index=True)
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=common_utils.get_utc_now,
         nullable=False,
     )
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=common_utils.get_utc_now,
         nullable=False,
     )
 

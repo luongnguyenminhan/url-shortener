@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [navigate]);
 
     const redirectAuthWithoutToastCallback = useCallback(() => {
-        navigate('/auth');
+        navigate('/');
     }, [navigate]);
 
     const scheduleTokenRefresh = useCallback((expiresAtMs: number) => {
