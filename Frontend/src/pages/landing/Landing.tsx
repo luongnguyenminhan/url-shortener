@@ -1,7 +1,7 @@
-import { Box } from '@mui/material';
-import { Header, Footer } from '@/components/common/layout';
-import { Hero, Features, Pricing, CTA } from '@/components/landing';
+import { Footer, Header } from '@/components/common/layout';
+import { CTA, Features, Hero } from '@/components/landing';
 import { useNavigation } from '@/hooks/useNavigation';
+import { Box } from '@mui/material';
 
 /**
  * Landing page component
