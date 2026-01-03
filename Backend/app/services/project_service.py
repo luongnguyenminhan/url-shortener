@@ -1,7 +1,6 @@
 """Service layer for Project operations"""
 
 from typing import Optional, List, Dict, Any
-from datetime import datetime, timedelta
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -113,8 +112,15 @@ def get_user_projects(
     page = (pagination_params.skip // pagination_params.limit) + 1
     pagination_meta = create_pagination_meta(page, pagination_params.limit, total)
 
+    # Add images count for each project using relationship
+    projects_with_counts = []
+    for project in projects:
+        project_response = ProjectResponse.model_validate(project)
+        project_response.images_count = len(project.photos) if project.photos else 0
+        projects_with_counts.append(project_response)
+
     return {
-        "projects": [ProjectResponse.model_validate(project) for project in projects],
+        "projects": projects_with_counts,
         "meta": pagination_meta.model_dump(),
     }
 

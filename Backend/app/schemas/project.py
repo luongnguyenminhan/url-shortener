@@ -56,6 +56,7 @@ class ProjectResponse(ProjectBase):
     id: UUID
     owner_id: UUID
     status: str
+    images_count: int = 0
     created_at: datetime
     updated_at: datetime
 
