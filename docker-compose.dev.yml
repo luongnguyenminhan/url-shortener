@@ -49,6 +49,15 @@ services:
       REDIS_PASSWORD: urls123
     command: redis-server --requirepass urls123
 
+  adminer:
+    image: adminer:latest
+    container_name: urls-adminer-dev
+    <<: *shared-service
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      - db
+
   nginx:
     image: nginx:alpine
     container_name: urls-nginx-dev
