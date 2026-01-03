@@ -19,28 +19,9 @@ env:
   FRONTEND_APP_IMAGE: luongnguyenminhan/url-shortener:frontend
 
 jobs:
-  detect-changes:
-    runs-on: self-hosted
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            backend:
-              - 'Backend/**'
-            frontend:
-              - 'Frontend/**'
-
-  # ===================== DEV =====================
-
   build-backend-dev:
-    needs: detect-changes
     runs-on: self-hosted
-    if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.backend == 'true'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -59,9 +40,8 @@ jobs:
             RUNTIME_IMAGE=${{ env.BACKEND_RUNTIME_IMAGE }}-dev
 
   build-frontend-dev:
-    needs: detect-changes
     runs-on: self-hosted
-    if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.frontend == 'true'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -80,6 +60,7 @@ jobs:
             RUNTIME_IMAGE=${{ env.FRONTEND_RUNTIME_IMAGE }}-dev
 
   deploy-development:
+    needs: [build-backend-dev, build-frontend-dev]
     runs-on: self-hosted
     if: github.ref == 'refs/heads/main'
     steps:
@@ -151,6 +132,7 @@ jobs:
 
 
   deploy-production:
+    needs: [build-backend-prod, build-frontend-prod]
     runs-on: self-hosted
     if: startsWith(github.ref, 'refs/tags/')
     steps:

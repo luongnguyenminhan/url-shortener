@@ -23,6 +23,7 @@ services:
   backend:
     image: luongnguyenminhan/url-shortener:backend-dev
     container_name: urls-backend-dev
+    pull_policy: always
     <<: *shared-service
     volumes:
       - ./Backend/config:/app/config
@@ -38,6 +39,7 @@ services:
   frontend:
     image: luongnguyenminhan/url-shortener:frontend-dev
     container_name: urls-frontend-dev
+    pull_policy: always
     <<: *shared-service
 
   redis:
@@ -52,6 +54,7 @@ services:
   adminer:
     image: adminer:latest
     container_name: urls-adminer-dev
+    pull_policy: always
     <<: *shared-service
     environment:
       ADMINER_DEFAULT_SERVER: db
@@ -61,6 +64,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: urls-nginx-dev
+    pull_policy: always
     ports:
       - "8081:80"
     restart: unless-stopped
