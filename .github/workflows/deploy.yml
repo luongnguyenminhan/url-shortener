@@ -98,13 +98,7 @@ jobs:
 
       - name: Pull latest Docker images
         run: |
-          docker pull ${{ env.BACKEND_APP_IMAGE }}-dev
-          docker pull ${{ env.FRONTEND_APP_IMAGE }}-dev
-
-      - name: Inject Firebase service account key
-        run: |
-          mkdir -p "$HOME/url-shortener/dev/Backend/config"
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > "$HOME/url-shortener/dev/Backend/config/scribe-c7f13-firebase-adminsdk-fbsvc-fa698da673.json"
+          docker compose -f docker-compose.dev.yml pull 
 
       - name: Deploy with docker compose
         run: |
@@ -174,13 +168,7 @@ jobs:
 
       - name: Pull latest Docker images
         run: |
-          docker pull ${{ env.BACKEND_APP_IMAGE }}-prod
-          docker pull ${{ env.FRONTEND_APP_IMAGE }}-prod
-
-      - name: Inject Firebase service account key
-        run: |
-          mkdir -p "$HOME/url-shortener/prod/Backend/config"
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > "$HOME/url-shortener/prod/Backend/config/scribe-c7f13-firebase-adminsdk-fbsvc-fa698da673.json"
+          docker compose -f docker-compose.prod.yml pull
 
       - name: Deploy with docker compose
         run: |
