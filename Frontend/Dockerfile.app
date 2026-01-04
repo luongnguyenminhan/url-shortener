@@ -1,17 +1,16 @@
-# Declare build argument at the top level
-ARG RUNTIME_IMAGE=runtime:latest
-
-# Build stage
+# Build stage - uses node:20-alpine to get all dependencies (dev + prod)
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install Yarn
+RUN corepack enable
+
 # Copy package files
 COPY package.json yarn.lock ./
 
-# Install all dependencies
-RUN --mount=type=cache,target=/root/.yarn \
-    yarn install --frozen-lockfile
+# Install all dependencies (dev + production)
+RUN yarn install --frozen-lockfile
 
 # Copy all source files
 COPY tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts ./
@@ -22,28 +21,31 @@ COPY index.html ./
 # Build app
 RUN yarn build
 
-# Application stage - uses runtime base image
-FROM ${RUNTIME_IMAGE} 
+# Production stage - use nginx to serve (lightweight, avoids host blocking)
+FROM nginx:stable-alpine
 
-WORKDIR /app
+# Install jq for robust JSON parsing in entrypoint
+RUN apk add --no-cache jq
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=3030
+# Copy built app from builder to nginx directory
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Switch to root to copy files
-USER root
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Copy built app from builder
-COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
-
-# Copy node_modules from builder (includes all deps needed)
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
-
-# Switch back to nextjs user
-USER nextjs
+# Create default nginx config for SPA
+RUN echo 'server { \
+    listen 3030; \
+    server_name _; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 3030
 
-# Start Vite preview server on port 3030
-CMD ["yarn", "preview", "--", "--host", "0.0.0.0", "--port", "3030"]
+# Use entrypoint script to load vault config and start nginx
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

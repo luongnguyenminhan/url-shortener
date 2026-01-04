@@ -126,6 +126,54 @@
     "success": "Thành công",
     "cancel": "Hủy",
     "confirm": "Xác nhận",
-    "close": "Đóng"
+    "close": "Đóng",
+    "create": "Tạo mới",
+    "save": "Lưu",
+    "edit": "Sửa",
+    "delete": "Xóa"
+  },
+  "projects": {
+    "title": "Tất cả Dự án",
+    "newProject": "Dự án Mới",
+    "createProject": "Tạo Dự án",
+    "editProject": "Sửa Dự án",
+    "deleteProject": "Xóa Dự án",
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa \"{{title}}\"? Hành động này không thể hoàn tác.",
+    "searchPlaceholder": "Tìm kiếm dự án, khách hàng...",
+    "filter": "Lọc",
+    "sortBy": "Sắp xếp theo: Ngày",
+    "gridView": "Dạng Lưới",
+    "listView": "Dạng Danh sách",
+    "progress": "Tiến độ",
+    "photos": "Ảnh",
+    "client": "Khách hàng",
+    "noProjectsFound": "Không tìm thấy dự án",
+    "tryDifferentSearch": "Thử từ khóa tìm kiếm khác",
+    "createFirstProject": "Tạo dự án đầu tiên để bắt đầu",
+    "form": {
+      "title": "Tiêu đề",
+      "status": "Trạng thái",
+      "clientNotes": "Ghi chú Khách hàng"
+    },
+    "status": {
+      "draft": "Bản Nháp",
+      "client_selecting": "Khách Đang Chọn",
+      "pending_edit": "Chờ Chỉnh sửa",
+      "client_review": "Khách Xem lại",
+      "completed": "Hoàn thành",
+      "new": "Mới",
+      "inReview": "Đang Xem xét",
+      "delivered": "Đã Giao"
+    },
+    "actions": {
+      "open": "Mở",
+      "start": "Bắt đầu",
+      "details": "Chi tiết",
+      "archive": "Lưu trữ"
+    },
+    "statusMessages": {
+      "sentToClient": "Đã gửi cho Khách hàng",
+      "delivered": "Đã Giao"
+    }
   }
 }

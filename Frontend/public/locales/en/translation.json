@@ -126,6 +126,54 @@
     "success": "Success",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "create": "Create",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "projects": {
+    "title": "All Projects",
+    "newProject": "New Project",
+    "createProject": "Create Project",
+    "editProject": "Edit Project",
+    "deleteProject": "Delete Project",
+    "deleteConfirmMessage": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
+    "searchPlaceholder": "Search projects, clients...",
+    "filter": "Filter",
+    "sortBy": "Sort by: Date",
+    "gridView": "Grid View",
+    "listView": "List View",
+    "progress": "Progress",
+    "photos": "Photos",
+    "client": "Client",
+    "noProjectsFound": "No projects found",
+    "tryDifferentSearch": "Try a different search term",
+    "createFirstProject": "Create your first project to get started",
+    "form": {
+      "title": "Title",
+      "status": "Status",
+      "clientNotes": "Client Notes"
+    },
+    "status": {
+      "draft": "Draft",
+      "client_selecting": "Client Selecting",
+      "pending_edit": "Pending Edit",
+      "client_review": "Client Review",
+      "completed": "Completed",
+      "new": "New",
+      "inReview": "In Review",
+      "delivered": "Delivered"
+    },
+    "actions": {
+      "open": "Open",
+      "start": "Start",
+      "details": "Details",
+      "archive": "Archive"
+    },
+    "statusMessages": {
+      "sentToClient": "Sent to Client",
+      "delivered": "Delivered"
+    }
   }
 }

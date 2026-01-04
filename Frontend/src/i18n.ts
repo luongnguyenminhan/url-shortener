@@ -1,7 +1,7 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import Backend from 'i18next-http-backend';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import i18n from 'i18next'
+import Backend from 'i18next-http-backend'
+import LanguageDetector from 'i18next-browser-languagedetector'
+import { initReactI18next } from 'react-i18next'
 
 i18n
     .use(Backend)
@@ -9,27 +9,20 @@ i18n
     .use(initReactI18next)
     .init({
         fallbackLng: 'en',
-        debug: import.meta.env.DEV,
+        supportedLngs: ['en', 'vi'],
+        debug: false,
+        ns: ['translation', 'auth', 'admin'],
         defaultNS: 'translation',
-        ns: ['translation', 'common', 'auth'],
-        interpolation: {
-            escapeValue: false
-        },
         backend: {
-            loadPath: '/locales/{{lng}}/{{ns}}.json'
+            loadPath: '/locales/{{lng}}/{{ns}}.json',
+        },
+        interpolation: {
+            escapeValue: false,
         },
         detection: {
-            order: ['querystring', 'cookie', 'localStorage', 'navigator'],
-            caches: ['localStorage', 'cookie']
+            order: ['localStorage', 'navigator', 'htmlTag', 'path', 'subdomain'],
+            caches: ['localStorage'],
         },
-        react: {
-            useSuspense: true,
-            bindI18n: 'languageChanged loaded',
-            bindI18nStore: 'added removed',
-            transEmptyNodeValue: '',
-            transSupportBasicHtmlNodes: true,
-            transKeepBasicHtmlNodesFor: ['br', 'strong', 'i']
-        }
-    });
+    })
 
-export default i18n;
+export default i18n

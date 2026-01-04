@@ -9,7 +9,19 @@ export interface BrandConfig {
     logo: string;
 }
 
+declare global {
+    interface Window {
+        __ENV__?: EnvConfig;
+    }
+}
+
 export function loadEnvConfig(): EnvConfig {
+    // First, try to load from runtime-injected config (set by entrypoint.sh)
+    if (window.__ENV__) {
+        return window.__ENV__;
+    }
+
+    // Fallback to build-time environment variables (VITE_*)
     return {
         API_ENDPOINT: import.meta.env.VITE_API_ENDPOINT || 'https://securescribe.wc504.io.vn/be/api',
         BRAND_NAME: import.meta.env.VITE_BRAND_NAME || 'FPT Telecom',

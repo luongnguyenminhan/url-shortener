@@ -1,34 +1,34 @@
-import { StrictMode, useEffect } from 'react'
-import { createRoot } from 'react-dom/client'
-import { CssBaseline } from '@mui/material'
-import { I18nextProvider, useTranslation } from 'react-i18next'
-import './index.css'
-import App from './App.tsx'
-import i18n from './i18n.ts'
-import { getBrandConfig } from './lib/utils/runtimeConfig'
+import React from "react"
+import "./i18n.ts"
+import ReactDOM from "react-dom/client"
+import App from "./App.tsx"
+import { AuthProvider } from "./contexts/AuthContext.tsx"
+import { getBrandConfig } from "./config/envConfig.ts"
 
-function AppWithLang() {
-  const { i18n } = useTranslation();
-  const brandConfig = getBrandConfig();
+const updateMetadata = () => {
+  try {
+    const brandConfig = getBrandConfig();
 
-  useEffect(() => {
-    // Update document language when i18n language changes
-    document.documentElement.lang = i18n.language;
-
-    // Update document title with brand name
     document.title = brandConfig.name;
-  }, [i18n.language, brandConfig.name]);
+    const titleElement = document.getElementById('page-title');
+    if (titleElement) {
+      titleElement.textContent = brandConfig.name;
+    }
+    const faviconElement = document.getElementById('favicon') as HTMLLinkElement;
+    if (faviconElement && brandConfig.logo) {
+      faviconElement.href = brandConfig.logo;
+    }
+  } catch (error) {
+    console.error('Failed to update brand metadata:', error);
+  }
+};
 
-  return <App />;
-}
+updateMetadata();
 
-export { AppWithLang };
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <I18nextProvider i18n={i18n}>
-      <CssBaseline />
-      <AppWithLang />
-    </I18nextProvider>
-  </StrictMode>,
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>,
 )

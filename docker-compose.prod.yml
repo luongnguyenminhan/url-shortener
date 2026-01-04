@@ -37,6 +37,8 @@ services:
     container_name: urls-frontend-prod
     pull_policy: always
     <<: *shared-service
+    volumes:
+      - /home/anlnm/url-shortener/.vault/secrets/configuration.production.json:/vault/secrets/configuration.production.json:ro
 
   redis:
     image: redis:7-alpine
