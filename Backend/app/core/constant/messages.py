@@ -44,6 +44,19 @@ class MessageConstants:
     PROJECT_ALREADY_EXISTS = "project_already_exists"
     INVALID_PROJECT_TOKEN = "invalid_project_token"
 
+    # Photo Success Messages
+    PHOTO_UPLOADED = "photo_uploaded"
+    PHOTO_RETRIEVED = "photo_retrieved"
+    PHOTO_LIST_RETRIEVED = "photo_list_retrieved"
+
+    # Photo Error Messages
+    PHOTO_NOT_FOUND = "photo_not_found"
+    INVALID_FILE_TYPE = "invalid_file_type"
+    FILE_TOO_LARGE = "file_too_large"
+    DUPLICATE_FILENAME = "duplicate_filename"
+    MINIO_UPLOAD_ERROR = "minio_upload_error"
+    PROJECT_PERMISSION_DENIED = "project_permission_denied"
+
     # Log Messages
     LOG_FIREBASE_LOGIN_REQUEST = "firebase_login_request"
     LOG_FIREBASE_LOGIN_FAILED = "firebase_login_failed"
