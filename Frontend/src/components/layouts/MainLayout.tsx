@@ -26,6 +26,7 @@ import {
     Logout as LogoutIcon,
 } from "@mui/icons-material"
 import { getBrandConfig } from "../../config/envConfig"
+import { ThemeToggle } from "../common/ui/ThemeToggle"
 import LanguageSelector from "../common/LanguageSelector"
 import { ROUTES } from "../../constants"
 import { useAuth } from "../../contexts/AuthContext"
@@ -192,6 +193,7 @@ const MainLayout: React.FC = () => {
                     <Typography variant="body2" color="white" sx={{ mr: 2 }}>
                         {t('layout.greeting')} {user?.email}
                     </Typography>
+                    <ThemeToggle />
                     <Box sx={{ mr: 2 }}>
                         <LanguageSelector />
                     </Box>
