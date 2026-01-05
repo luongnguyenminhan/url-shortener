@@ -9,7 +9,7 @@ from app.core.constant.messages import MessageConstants
 from app.db import get_db
 from app.models.user import User
 from app.schemas.common import ApiResponse, PaginationSortSearchSchema, pagination_params_dep, create_pagination_meta
-from app.schemas.photo import PhotoDetailResponse, PhotoListResponse, PhotoUploadRequest
+from app.schemas.photo import PhotoDetailResponse, PhotoListResponse, PhotoUploadRequest, PhotoSelectRequest, PhotoMetaResponse
 from app.services import photo_service
 from app.utils.auth import get_current_user
 
@@ -100,21 +100,22 @@ async def get_photo(
     response_model=ApiResponse,
     status_code=status.HTTP_200_OK,
     summary="List project photos",
-    description="Get all photos in a project with pagination",
+    description="Get all photos in a project with pagination and optional filtering",
 )
 def list_project_photos(
     project_id: UUID,
     pagination_params: PaginationSortSearchSchema = Depends(pagination_params_dep),
+    is_selected: bool = Query(None, description="Filter by selection status (true/false)"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> ApiResponse:
-    """Get all photos in a project"""
+    """Get all photos in a project with optional is_selected filter"""
     photos, total = photo_service.get_project_photos(
         db=db,
         user=current_user,
         project_id=project_id,
-        skip=pagination_params.skip,
-        limit=pagination_params.limit,
+        pagination_params=pagination_params,
+        is_selected=is_selected,
     )
     
     page = (pagination_params.skip // pagination_params.limit) + 1
@@ -125,4 +126,30 @@ def list_project_photos(
         message=MessageConstants.PHOTO_LIST_RETRIEVED,
         data=[PhotoListResponse.model_validate(photo) for photo in photos],
         meta=pagination_meta.model_dump(),
+    )
+
+
+@router.get(
+    "/{photo_id}/meta",
+    response_model=ApiResponse[PhotoMetaResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get photo meta (authenticated)",
+    description="Get photo details with all comments - requires authentication",
+)
+def get_photo_meta(
+    photo_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[PhotoMetaResponse]:
+    """Get photo with all comments metadata (authenticated user only)"""
+    photo_meta = photo_service.get_photo_meta_by_id_user(
+        db=db,
+        user=current_user,
+        photo_id=photo_id,
+    )
+    
+    return ApiResponse(
+        success=True,
+        message="Photo meta retrieved successfully",
+        data=photo_meta,
     )

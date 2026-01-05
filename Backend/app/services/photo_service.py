@@ -9,11 +9,13 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
-from app.crud import photo_crud
+from app.crud import photo_crud, photo_comment_crud, project_crud, client_session_crud
 from app.models.photo import Photo
 from app.models.photo_version import PhotoVersion, VersionType
 from app.models.user import User
-from app.schemas.photo import PhotoCreate, PhotoDetailResponse
+from app.schemas.common import PaginationSortSearchSchema
+from app.schemas.photo import PhotoCreate, PhotoDetailResponse, PhotoResponse, PhotoCommentResponse, PhotoMetaResponse
+from app.utils.image_utils import resize_image
 from app.utils.logging import logger
 
 # Constants
@@ -219,18 +221,18 @@ def get_project_photos(
     db: Session,
     user: User,
     project_id: UUID,
-    skip: int = 0,
-    limit: int = 100,
+    pagination_params: PaginationSortSearchSchema,
+    is_selected: Optional[bool] = None,
 ) -> tuple[list[Photo], int]:
     """
-    Get all photos in a project with authorization check.
+    Get all photos in a project with authorization check and optional filtering.
 
     Args:
         db: Database session
         user: Authenticated user
         project_id: Project ID
-        skip: Number of records to skip
-        limit: Maximum number of records to return
+        pagination_params: Pagination parameters
+        is_selected: Optional filter by selection status (True/False/None)
 
     Returns:
         Tuple of (photos list, total count)
@@ -254,9 +256,9 @@ def get_project_photos(
             detail=MessageConstants.PROJECT_PERMISSION_DENIED,
         )
 
-    # Get photos
-    photos = photo_crud.get_by_project(db, project_id, skip=skip, limit=limit)
-    total = photo_crud.count_by_project(db, project_id)
+    # Get photos with optional filtering
+    photos = photo_crud.get_by_project(db, project_id, pagination_params, is_selected=is_selected)
+    total = photo_crud.count_by_project(db, project_id, is_selected=is_selected)
 
     return photos, total
 
@@ -316,91 +318,7 @@ async def get_photo_image(
             return None
 
         # Resize if parameters provided
-        if width or height:
-            try:
-                from PIL import Image
-
-                img = Image.open(BytesIO(file_bytes))
-                
-                # Fix EXIF orientation
-                try:
-                    from PIL.ExifTags import TAGS
-                    exif_data = img._getexif()
-                    if exif_data:
-                        for tag_id, value in exif_data.items():
-                            tag = TAGS.get(tag_id, tag_id)
-                            # Tag 274 is Orientation
-                            if tag == "Orientation":
-                                if value == 3:
-                                    img = img.rotate(180, expand=True)
-                                elif value == 6:
-                                    img = img.rotate(270, expand=True)
-                                elif value == 8:
-                                    img = img.rotate(90, expand=True)
-                                break
-                except Exception as e:
-                    logger.debug(f"Could not read EXIF orientation: {e}")
-                
-                original_width, original_height = img.size
-                aspect_ratio = original_width / original_height
-                
-                # Determine target dimensions
-                if width and height:
-                    # Both width and height specified: resize to fit, then crop
-                    if aspect_ratio > 1:  # Wide image
-                        # Height is limiting factor
-                        resize_width = int(height * aspect_ratio)
-                        resize_height = height
-                    else:  # Tall or square image
-                        # Width is limiting factor
-                        resize_width = width
-                        resize_height = int(width / aspect_ratio)
-                    
-                    # Resize
-                    if (resize_width, resize_height) != (original_width, original_height):
-                        img = img.resize(
-                            (int(resize_width), int(resize_height)),
-                            Image.Resampling.LANCZOS
-                        )
-                    
-                    # Crop from center to get exact dimensions
-                    crop_left = (resize_width - width) // 2
-                    crop_top = (resize_height - height) // 2
-                    crop_right = crop_left + width
-                    crop_bottom = crop_top + height
-                    
-                    img = img.crop((crop_left, crop_top, crop_right, crop_bottom))
-                    logger.info(
-                        f"Resized+Cropped photo {photo_id}: {original_width}x{original_height} "
-                        f"-> resize({resize_width}x{resize_height}) -> crop({width}x{height})"
-                    )
-                
-                elif width:
-                    # Width only: maintain aspect ratio
-                    new_width = width
-                    new_height = int(width / aspect_ratio)
-                    if (new_width, new_height) != (original_width, original_height):
-                        img = img.resize((int(new_width), int(new_height)), Image.Resampling.LANCZOS)
-                        logger.info(f"Resized photo {photo_id}: {original_width}x{original_height} -> {new_width}x{new_height}")
-                
-                elif height:
-                    # Height only: maintain aspect ratio
-                    new_height = height
-                    new_width = int(height * aspect_ratio)
-                    if (new_width, new_height) != (original_width, original_height):
-                        img = img.resize((int(new_width), int(new_height)), Image.Resampling.LANCZOS)
-                        logger.info(f"Resized photo {photo_id}: {original_width}x{original_height} -> {new_width}x{new_height}")
-
-                # Convert back to bytes
-                output = BytesIO()
-                img.save(output, format="JPEG", quality=85, optimize=True)
-                file_bytes = output.getvalue()
-
-            except ImportError:
-                logger.warning("Pillow not installed, returning original image")
-            except Exception as e:
-                logger.exception(f"Error resizing photo {photo_id}: {e}")
-                # Return original if resize fails
+        file_bytes = resize_image(file_bytes, width, height, photo_id)
 
         # Create stream
         stream = BytesIO(file_bytes)
@@ -414,3 +332,55 @@ async def get_photo_image(
     except Exception as e:
         logger.exception(f"Error retrieving photo image {photo_id}: {e}")
         return None
+
+
+def get_photo_meta_by_id_user(
+    db: Session,
+    user: User,
+    photo_id: UUID,
+) -> PhotoMetaResponse:
+    """
+    Get photo details with all comments (authenticated user).
+
+    Args:
+        db: Database session
+        user: Authenticated user
+        photo_id: Photo ID
+
+    Returns:
+        PhotoMetaResponse with photo and all comments
+
+    Raises:
+        HTTPException: If photo not found or user is not project owner
+    """
+
+    # 1. Get photo
+    photo = photo_crud.get_by_id(db, photo_id)
+    if not photo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MessageConstants.PHOTO_NOT_FOUND,
+        )
+
+    # 2. Get project and verify user is owner
+    project = project_crud.get_by_id(db, photo.project_id)
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MessageConstants.PROJECT_NOT_FOUND,
+        )
+
+    if project.owner_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=MessageConstants.PROJECT_PERMISSION_DENIED,
+        )
+
+    # 3. Get comments
+    comments = photo_comment_crud.get_by_photo(db, photo_id, skip=0, limit=10000)
+
+    # 4. Convert to response model
+    photo_meta = PhotoMetaResponse.model_validate(photo)
+    photo_meta.comments = [PhotoCommentResponse.model_validate(comment) for comment in comments]
+
+    return photo_meta

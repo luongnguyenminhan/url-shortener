@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.models.photo import Photo
+from app.schemas.common import PaginationSortSearchSchema
 from app.schemas.photo import PhotoCreate
 
 
@@ -51,19 +52,23 @@ def exists_by_filename(
 def get_by_project(
     db: Session,
     project_id: UUID,
-    skip: int = 0,
-    limit: int = 100,
+    pagination_params: PaginationSortSearchSchema,
+    is_selected: Optional[bool] = None,
 ) -> List[Photo]:
-    """Get all photos in a project with pagination"""
-    return (
-        db.query(Photo)
-        .filter(Photo.project_id == project_id)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    """Get all photos in a project with pagination and optional filtering"""
+    query = db.query(Photo).filter(Photo.project_id == project_id)
+    
+    if is_selected is not None:
+        query = query.filter(Photo.is_selected == is_selected)
+    
+    return query.offset(pagination_params.skip).limit(pagination_params.limit).all()
 
 
-def count_by_project(db: Session, project_id: UUID) -> int:
-    """Count photos in a project"""
-    return db.query(Photo).filter(Photo.project_id == project_id).count()
+def count_by_project(db: Session, project_id: UUID, is_selected: Optional[bool] = None) -> int:
+    """Count photos in a project with optional filtering"""
+    query = db.query(Photo).filter(Photo.project_id == project_id)
+    
+    if is_selected is not None:
+        query = query.filter(Photo.is_selected == is_selected)
+    
+    return query.count()
