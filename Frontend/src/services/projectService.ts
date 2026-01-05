@@ -5,7 +5,7 @@ import type {
     ProjectUpdate,
     ProjectDetailResponse
 } from '@/types/project.type';
-import type { PaginatedResponse, PaginationParams } from '@/types/common.type';
+import type { PaginatedResponse, PaginationParams, ApiResponse } from '@/types/common.type';
 
 const BASE_URL = '/v1/projects';
 
@@ -18,19 +18,19 @@ export const projectService = {
 
     // Get single project by ID
     getProjectById: async (id: string): Promise<ProjectDetailResponse> => {
-        const response = await axiosInstance.get<{ data: ProjectDetailResponse }>(`${BASE_URL}/${id}`);
+        const response = await axiosInstance.get<ApiResponse<ProjectDetailResponse>>(`${BASE_URL}/${id}`);
         return response.data.data!;
     },
 
     // Create new project
     createProject: async (data: ProjectCreate): Promise<ProjectResponse> => {
-        const response = await axiosInstance.post<{ data: ProjectResponse }>(BASE_URL, data);
+        const response = await axiosInstance.post<ApiResponse<ProjectResponse>>(BASE_URL, data);
         return response.data.data!;
     },
 
     // Update project
     updateProject: async (id: string, data: ProjectUpdate): Promise<ProjectResponse> => {
-        const response = await axiosInstance.patch<{ data: ProjectResponse }>(`${BASE_URL}/${id}`, data);
+        const response = await axiosInstance.put<ApiResponse<ProjectResponse>>(`${BASE_URL}/${id}`, data);
         return response.data.data!;
     },
 

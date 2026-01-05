@@ -130,7 +130,11 @@
     "create": "Create",
     "save": "Save",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "days ago",
+    "noProjects": "No projects yet"
   },
   "projects": {
     "title": "All Projects",
@@ -146,14 +150,22 @@
     "listView": "List View",
     "progress": "Progress",
     "photos": "Photos",
+    "images": "images",
     "client": "Client",
     "noProjectsFound": "No projects found",
     "tryDifferentSearch": "Try a different search term",
     "createFirstProject": "Create your first project to get started",
+    "createSuccess": "Project created successfully",
+    "updateSuccess": "Project updated successfully",
+    "deleteSuccess": "Project deleted successfully",
     "form": {
       "title": "Title",
       "status": "Status",
-      "clientNotes": "Client Notes"
+      "clientNotes": "Client Notes",
+      "expiredDays": "Expiration (days)",
+      "expiredDaysHelp": "Set expiration days for client access (default: 10 days)",
+      "expiredDate": "Expiration Date",
+      "expiredDateHelp": "Set the expiration date for client access"
     },
     "status": {
       "draft": "Draft",

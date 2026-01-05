@@ -130,7 +130,11 @@
     "create": "Tạo mới",
     "save": "Lưu",
     "edit": "Sửa",
-    "delete": "Xóa"
+    "delete": "Xóa",
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua",
+    "daysAgo": "ngày trước",
+    "noProjects": "Chưa có dự án nào"
   },
   "projects": {
     "title": "Tất cả Dự án",
@@ -146,14 +150,22 @@
     "listView": "Dạng Danh sách",
     "progress": "Tiến độ",
     "photos": "Ảnh",
+    "images": "ảnh",
     "client": "Khách hàng",
     "noProjectsFound": "Không tìm thấy dự án",
     "tryDifferentSearch": "Thử từ khóa tìm kiếm khác",
     "createFirstProject": "Tạo dự án đầu tiên để bắt đầu",
+    "createSuccess": "Tạo dự án thành công",
+    "updateSuccess": "Cập nhật dự án thành công",
+    "deleteSuccess": "Xóa dự án thành công",
     "form": {
       "title": "Tiêu đề",
       "status": "Trạng thái",
-      "clientNotes": "Ghi chú Khách hàng"
+      "clientNotes": "Ghi chú Khách hàng",
+      "expiredDays": "Thời hạn (ngày)",
+      "expiredDaysHelp": "Đặt số ngày hết hạn cho khách hàng truy cập (mặc định: 10 ngày)",
+      "expiredDate": "Ngày hết hạn",
+      "expiredDateHelp": "Đặt ngày hết hạn cho khách hàng truy cập"
     },
     "status": {
       "draft": "Bản Nháp",

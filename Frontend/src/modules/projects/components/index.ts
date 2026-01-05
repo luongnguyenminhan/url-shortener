@@ -1,4 +1,5 @@
 export { ProjectCard } from './ProjectCard';
-export { ProjectToolbar } from './ProjectToolbar';
 export { ProjectFormDialog } from './ProjectFormDialog';
 export { DeleteConfirmDialog } from './DeleteConfirmDialog';
+export { ProjectDetailInfo } from './ProjectDetailInfo';
+export { PhotoGallery } from './PhotoGallery';
