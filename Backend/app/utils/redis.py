@@ -1,6 +1,5 @@
 # app/clients/redis_client.py
 import asyncio
-import logging
 
 import redis
 from redis import ConnectionPool
@@ -12,8 +11,9 @@ from tenacity import (
 )
 
 from app.core.config import settings
+from app.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Create connection pool for better performance (sync client)
 redis_pool = ConnectionPool(

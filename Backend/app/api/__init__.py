@@ -1,7 +1,7 @@
 """API module initialization"""
 from fastapi import FastAPI
 
-from app.api.endpoints import auth, project
+from app.api.endpoints import auth, photo, project
 
 
 def register_routers(app: FastAPI) -> None:
@@ -13,3 +13,5 @@ def register_routers(app: FastAPI) -> None:
     """
     app.include_router(auth.router)
     app.include_router(project.router)
+    app.include_router(photo.router)
+

@@ -38,6 +38,8 @@ services:
         condition: service_started
       redis:
         condition: service_started
+      minio:
+        condition: service_started
 
   frontend:
     image: luongnguyenminhan/url-shortener:frontend-dev
@@ -61,6 +63,27 @@ services:
       - "logging=promtail"
       - "job=urls-redis-dev"
     command: redis-server --requirepass urls123
+
+  minio:
+    image: minio/minio:latest
+    container_name: urls-minio-dev
+    restart: unless-stopped
+    networks:
+      - urls-network
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    volumes:
+      - minio_data_dev:/data
 
   adminer:
     image: adminer:latest
@@ -89,6 +112,7 @@ services:
 
 volumes:
   postgres_data:
+  minio_data_dev:
 
 networks:
   urls-network:

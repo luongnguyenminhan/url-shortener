@@ -11,6 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Load configuration from Vault before initializing settings
 from app.core.vault_loader import load_config
+
 load_config()
 
 
@@ -27,7 +28,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30  # 30 days
 
-    # Server Configuration 
+    # Server Configuration
     SERVER_NAME: str = "UrlsBE"
     SERVER_HOST: str = "http://localhost"
     SERVER_PORT: int = 8081
@@ -61,6 +62,15 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = "urls123"
     REDIS_DB: int = 0
+
+    # MinIO Configuration
+    MINIO_ENDPOINT: str = "minio:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_BUCKET_NAME: str = "photos"
+    MINIO_PUBLIC_BUCKET_NAME: str = "photos"
+    MINIO_SECURE: bool = False
+    MINIO_PUBLIC_URL: str = "http://localhost:9000"
 
     @computed_field  # type: ignore[prop-decorator]
     @property

@@ -1,5 +1,4 @@
 import io
-import logging
 from typing import Optional
 
 from minio import Minio
@@ -12,8 +11,9 @@ from tenacity import (
 )
 
 from app.core.config import settings
+from app.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 minio_client = None
 
