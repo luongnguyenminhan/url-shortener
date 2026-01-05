@@ -1,4 +1,4 @@
-# Runtime base image - installs production dependencies
+# Runtime base image - installs ALL dependencies for building
 FROM node:20-alpine
 
 WORKDIR /app
@@ -12,9 +12,9 @@ RUN corepack enable && \
 # Copy package files
 COPY package.json yarn.lock ./
 
-# Install production dependencies (with layer caching)
-RUN yarn install --frozen-lockfile --production && \
+# Install ALL dependencies (dev + production) for building
+RUN yarn install --frozen-lockfile && \
     yarn cache clean
 
-# Switch to non-root user
-USER nextjs
+# Keep as the final image for use by Dockerfile.app
+# This image will be tagged as frontend-runtime:latest
