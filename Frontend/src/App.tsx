@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router-dom"
 import router from "./routers"
 import './styles/globals.css'
 import "react-toastify/dist/ReactToastify.css"
+import { ToastContainer } from "./hooks/useShowToast"
 
 const theme = createTheme({
   palette: {
@@ -24,6 +25,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <ToastContainer />
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <RouterProvider router={router} />
       </Box>

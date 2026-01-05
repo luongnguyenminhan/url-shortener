@@ -23,7 +23,7 @@ export function loadEnvConfig(): EnvConfig {
 
     // Fallback to build-time environment variables (VITE_*)
     return {
-        API_ENDPOINT: import.meta.env.VITE_API_ENDPOINT || 'https://securescribe.wc504.io.vn/be/api',
+        API_ENDPOINT: import.meta.env.VITE_API_ENDPOINT || '/be/api',
         BRAND_NAME: import.meta.env.VITE_BRAND_NAME || 'FPT Telecom',
         BRAND_LOGO: import.meta.env.VITE_BRAND_LOGO || '/images/logos/logo.png',
     };

@@ -34,6 +34,9 @@ export interface ProjectResponse extends ProjectBase {
     id: string;
     owner_id: string;
     status: string;
+    client_notes?: string;
+    expired_date?: string | null;
+    images_count: number;
     created_at: string;
     updated_at: string;
 }
@@ -43,6 +46,18 @@ export interface ProjectDetailResponse extends ProjectResponse { }
 export interface ProjectListResponse {
     total: number;
     items: ProjectResponse[];
+}
+
+export interface CreateProjectTokenRequest {
+    project_id: string;
+    expires_in_days: number;
+}
+
+export interface ProjectTokenResponse {
+    token: string;
+    project_id: string;
+    expires_at: string;
+    created_at: string;
 }
 
 export interface ProjectCreateToken {

@@ -130,7 +130,17 @@
     "create": "Create",
     "save": "Save",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "days ago",
+    "noProjects": "No projects yet",
+    "copiedToClipboard": "Copied to clipboard",
+    "copyFailed": "Failed to copy",
+    "day": "day",
+    "days": "days",
+    "copyLink": "Copy Link",
+    "copied": "Copied"
   },
   "projects": {
     "title": "All Projects",
@@ -146,14 +156,22 @@
     "listView": "List View",
     "progress": "Progress",
     "photos": "Photos",
+    "images": "images",
     "client": "Client",
     "noProjectsFound": "No projects found",
     "tryDifferentSearch": "Try a different search term",
     "createFirstProject": "Create your first project to get started",
+    "createSuccess": "Project created successfully",
+    "updateSuccess": "Project updated successfully",
+    "deleteSuccess": "Project deleted successfully",
     "form": {
       "title": "Title",
       "status": "Status",
-      "clientNotes": "Client Notes"
+      "clientNotes": "Client Notes",
+      "expiredDays": "Expiration (days)",
+      "expiredDaysHelp": "Set expiration days for client access (default: 10 days)",
+      "expiredDate": "Expiration Date",
+      "expiredDateHelp": "Set the expiration date for client access"
     },
     "status": {
       "draft": "Draft",
@@ -174,6 +192,15 @@
     "statusMessages": {
       "sentToClient": "Sent to Client",
       "delivered": "Delivered"
-    }
+    },
+    "share": "Share",
+    "shareProject": "Share Project",
+    "shareProjectDescription": "Generate a share link for",
+    "shareLinkGenerated": "Share link generated successfully",
+    "shareLinkError": "Failed to generate share link",
+    "expiresIn": "Expires In",
+    "linkExpiresAt": "This link will expire at",
+    "generateLink": "Generate Link",
+    "tokenAlreadyExists": "A share link already exists for this project. Please wait for it to expire or contact support to revoke it."
   }
 }
