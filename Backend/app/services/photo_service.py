@@ -3,7 +3,7 @@
 from typing import Optional
 from uuid import UUID
 
-from Backend.app.utils.minio import download_file_from_minio, upload_bytes_to_minio
+from app.utils.minio import download_file_from_minio, upload_bytes_to_minio
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
