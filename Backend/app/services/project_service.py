@@ -17,6 +17,7 @@ from app.schemas.project import (
     ProjectUpdate,
     ProjectResponse,
     VerifyProjectToken,
+    OwnerInfo,
 )
 from app.core.constant.messages import MessageConstants
 from app.services import client_session_service
@@ -87,6 +88,7 @@ def get_project_by_id(
 
     project_response = ProjectResponse.model_validate(project)
     project_response.images_count = len(project.photos) if project.photos else 0
+    project_response.owner_info = OwnerInfo.model_validate(project.owner)
     return project_response
 
 
@@ -119,6 +121,7 @@ def get_user_projects(
     for project in projects:
         project_response = ProjectResponse.model_validate(project)
         project_response.images_count = len(project.photos) if project.photos else 0
+        project_response.owner_info = OwnerInfo.model_validate(project.owner)
         projects_with_counts.append(project_response)
 
     return {
@@ -152,7 +155,12 @@ def get_all_projects(
     pagination_meta = create_pagination_meta(page, pagination_params.limit, total)
 
     return {
-        "projects": [ProjectResponse.model_validate(project) for project in projects],
+        "projects": [
+            ProjectResponse.model_validate(project).model_copy(update={
+                "images_count": len(project.photos) if project.photos else 0,
+                "owner_info": OwnerInfo.model_validate(project.owner)
+            }) for project in projects
+        ],
         "meta": pagination_meta.model_dump(),
     }
 
@@ -193,7 +201,9 @@ def update_project(
     try:
         updated_project = project_crud.update(db, project_id, update_data)
         db_manager.commit(db)
-        return ProjectResponse.model_validate(updated_project)
+        project_response = ProjectResponse.model_validate(updated_project)
+        project_response.owner_info = OwnerInfo.model_validate(updated_project.owner)
+        return project_response
     except Exception as e:
         db_manager.rollback(db)
         raise e
@@ -232,7 +242,9 @@ def update_project_status(
     try:
         updated_project = project_crud.update_status(db, project_id, new_status)
         db_manager.commit(db)
-        return ProjectResponse.model_validate(updated_project)
+        project_response = ProjectResponse.model_validate(updated_project)
+        project_response.owner_info = OwnerInfo.model_validate(updated_project.owner)
+        return project_response
     except ValueError:
         db_manager.rollback(db)
         raise HTTPException(
@@ -311,7 +323,9 @@ def soft_delete_project(
     try:
         deleted_project = project_crud.soft_delete(db, project_id)
         db_manager.commit(db)
-        return ProjectResponse.model_validate(deleted_project)
+        project_response = ProjectResponse.model_validate(deleted_project)
+        project_response.owner_info = OwnerInfo.model_validate(deleted_project.owner)
+        return project_response
     except Exception as e:
         db_manager.rollback(db)
         raise e
@@ -348,7 +362,11 @@ def get_expired_projects_for_cleanup(
     """
     # TODO: Add admin permission check if needed
     projects = project_crud.get_expired_projects(db)
-    return [ProjectResponse.model_validate(project) for project in projects]
+    return [
+        ProjectResponse.model_validate(project).model_copy(update={
+            "owner_info": OwnerInfo.model_validate(project.owner)
+        }) for project in projects
+    ]
 
 
 def cleanup_expired_projects(db: Session, user: User) -> int:
@@ -420,12 +438,18 @@ def create_project_token(
             expires_in_days=project_data.expires_in_days,
         )
 
+        # Create full project response
+        project_response = ProjectResponse.model_validate(project)
+        project_response.images_count = len(project.photos) if project.photos else 0
+        project_response.owner_info = OwnerInfo.model_validate(project.owner)
+
         return {
             "token": client_session.token,
             "project_id": str(client_session.project_id),
             "expires_at": client_session.expires_at,
             "is_active": client_session.is_active,
             "has_password": client_session.has_password(),
+            "project": project_response,
         }
     except Exception as e:
         db_manager.rollback(db)
@@ -457,6 +481,16 @@ def verify_project_token_access(
             detail=MessageConstants.INVALID_PROJECT_TOKEN,
         )
 
+    # Get project to include owner info
+    project = project_crud.get_by_id(db, client_session.project_id)
+    
+    # Create full project response
+    project_response = None
+    if project:
+        project_response = ProjectResponse.model_validate(project)
+        project_response.images_count = len(project.photos) if project.photos else 0
+        project_response.owner_info = OwnerInfo.model_validate(project.owner)
+
     return {
         "token": client_session.token,
         "project_id": str(client_session.project_id),
@@ -464,6 +498,7 @@ def verify_project_token_access(
         "is_active": client_session.is_active,
         "has_password": client_session.has_password(),
         "count_accesses": client_session.count_accesses,
+        "project": project_response,
     }
     
 def get_project_token(
@@ -500,6 +535,11 @@ def get_project_token(
     if not client_session:
         return None
 
+    # Create full project response
+    project_response = ProjectResponse.model_validate(project)
+    project_response.images_count = len(project.photos) if project.photos else 0
+    project_response.owner_info = OwnerInfo.model_validate(project.owner)
+
     return {
         "token": client_session.token,
         "project_id": str(client_session.project_id),
@@ -507,4 +547,6 @@ def get_project_token(
         "is_active": client_session.is_active,
         "has_password": client_session.has_password(),
         "count_accesses": client_session.count_accesses,
+        "owner_info": OwnerInfo.model_validate(project.owner),
+        "project": project_response,
     }
