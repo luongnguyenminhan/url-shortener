@@ -3,7 +3,7 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.project import Project, ProjectStatus
 from app.schemas.common import PaginationSortSearchSchema
@@ -30,7 +30,7 @@ def create(db: Session, project: ProjectCreate, owner_id: UUID) -> Project:
 
 def get_by_id(db: Session, project_id: UUID) -> Optional[Project]:
     """Get project by ID"""
-    return db.get(Project, project_id)
+    return db.query(Project).filter(Project.id == project_id).options(joinedload(Project.photos)).first()
 
 def get_by_title_and_owner(
     db: Session,
@@ -50,7 +50,7 @@ def get_by_owner(
     status: Optional[str] = None,
 ) -> List[Project]:
     """Get all projects by owner with optional filtering"""
-    query = db.query(Project).filter(Project.owner_id == owner_id)
+    query = db.query(Project).filter(Project.owner_id == owner_id).options(joinedload(Project.photos))
 
     if status:
         query = query.filter(Project.status == status)
@@ -64,7 +64,7 @@ def get_all(
     status: Optional[str] = None,
 ) -> List[Project]:
     """Get all projects with optional filtering by status"""
-    query = db.query(Project)
+    query = db.query(Project).options(joinedload(Project.photos))
 
     if status:
         query = query.filter(Project.status == status)
