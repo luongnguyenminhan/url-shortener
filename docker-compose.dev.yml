@@ -102,6 +102,9 @@ services:
     ports:
       - "8081:80"
     restart: unless-stopped
+    labels:
+      - "logging=promtail"
+      - "job=urls-nginx-dev"
     networks:
       - urls-network
     volumes:
