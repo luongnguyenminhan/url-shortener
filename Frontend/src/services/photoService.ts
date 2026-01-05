@@ -1,6 +1,6 @@
 import axiosInstance from '@/config/axiosInstance';
-import type { PhotoWithVersions } from '@/types/photo.type';
-import type { ApiResponse, PaginatedResponse, PaginationParams } from '@/types/common.type';
+import type { Photo, PhotoUploadResponse, PhotoListMeta } from '@/types/photo.type';
+import type { ApiResponse } from '@/types/common.type';
 
 const BASE_URL = '/v1/photos';
 
@@ -8,34 +8,38 @@ export const photoService = {
     // Get all photos for a project
     getPhotosByProject: async (
         projectId: string,
-        params?: PaginationParams
-    ): Promise<PaginatedResponse<PhotoWithVersions>> => {
-        const response = await axiosInstance.get<PaginatedResponse<PhotoWithVersions>>(
-            `${BASE_URL}`,
-            { params: { ...params, project_id: projectId } }
-        );
-        return response.data;
+        params?: { page?: number; page_size?: number }
+    ): Promise<{ data: Photo[]; meta: PhotoListMeta }> => {
+        const response = await axiosInstance.get<
+            ApiResponse<Photo[]> & { meta: PhotoListMeta }
+        >(`${BASE_URL}/projects/${projectId}`, { params });
+        return {
+            data: response.data.data || [],
+            meta: response.data.meta!,
+        };
     },
 
-    // Get single photo with versions
-    getPhotoById: async (id: string): Promise<PhotoWithVersions> => {
-        const response = await axiosInstance.get<ApiResponse<PhotoWithVersions>>(`${BASE_URL}/${id}`);
-        return response.data.data!;
+    // Get single photo image (returns blob/stream)
+    getPhotoImage: (photoId: string, params?: { w?: number; h?: number }): string => {
+        const query = new URLSearchParams();
+        if (params?.w) query.append('w', params.w.toString());
+        if (params?.h) query.append('h', params.h.toString());
+        const queryString = query.toString();
+        return `${BASE_URL}/${photoId}${queryString ? `?${queryString}` : ''}`;
     },
 
-    // Upload photos to project
-    uploadPhotos: async (
+    // Upload single photo to project
+    uploadPhoto: async (
         projectId: string,
-        files: File[],
+        file: File,
         onProgress?: (progress: number) => void
-    ): Promise<PhotoWithVersions[]> => {
+    ): Promise<PhotoUploadResponse> => {
         const formData = new FormData();
-        files.forEach((file) => {
-            formData.append('files', file);
-        });
+        formData.append('file', file);
+        formData.append('project_id', projectId);
 
-        const response = await axiosInstance.post<ApiResponse<PhotoWithVersions[]>>(
-            `/v1/projects/${projectId}/photos/upload`,
+        const response = await axiosInstance.post<ApiResponse<PhotoUploadResponse>>(
+            BASE_URL,
             formData,
             {
                 headers: {
@@ -60,8 +64,8 @@ export const photoService = {
     },
 
     // Toggle photo selection
-    toggleSelection: async (id: string, isSelected: boolean): Promise<PhotoWithVersions> => {
-        const response = await axiosInstance.patch<ApiResponse<PhotoWithVersions>>(
+    toggleSelection: async (id: string, isSelected: boolean): Promise<Photo> => {
+        const response = await axiosInstance.patch<ApiResponse<Photo>>(
             `${BASE_URL}/${id}/select`,
             { is_selected: isSelected }
         );

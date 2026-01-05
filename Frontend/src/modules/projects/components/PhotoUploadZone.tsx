@@ -116,10 +116,10 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
                 )
             );
 
-            // Upload the file with real progress tracking
-            await photoService.uploadPhotos(
+            // Upload single file with real progress tracking
+            await photoService.uploadPhoto(
                 projectId,
-                [fileWithPreview.file],
+                fileWithPreview.file,
                 (progress) => {
                     setFiles((prev) =>
                         prev.map((f) =>

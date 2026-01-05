@@ -19,12 +19,13 @@ import {
     Cancel,
     Delete,
 } from '@mui/icons-material';
-import type { PhotoWithVersions } from '@/types/photo.type';
+import type { Photo } from '@/types/photo.type';
+import { photoService } from '@/services/photoService';
 
 interface PhotoGalleryProps {
-    photos: PhotoWithVersions[];
+    photos: Photo[];
     loading?: boolean;
-    onPhotoClick?: (photo: PhotoWithVersions) => void;
+    onPhotoClick?: (photo: Photo) => void;
     onPhotoSelect?: (photoId: string, selected: boolean) => void;
     onPhotoDelete?: (photoId: string) => void;
     viewMode?: 'grid' | 'list';
@@ -40,9 +41,9 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 }) => {
     const [hoveredPhoto, setHoveredPhoto] = useState<string | null>(null);
 
-    const getImageUrl = (photo: PhotoWithVersions): string => {
-        const originalVersion = photo.photo_versions?.find((v) => v.version_type === 'original');
-        return originalVersion?.image_url || '/placeholder-image.png';
+    const getImageUrl = (photo: Photo): string => {
+        // Use the new API endpoint to get photo image
+        return photoService.getPhotoImage(photo.id, { w: 400 });
     };
 
     if (loading) {

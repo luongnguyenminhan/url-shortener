@@ -38,3 +38,15 @@ export interface PhotoWithVersions extends Photo {
     photo_versions?: PhotoVersion[];
     photo_comments?: PhotoComment[];
 }
+
+export interface PhotoUploadResponse {
+    photo: Photo;
+    version: PhotoVersion;
+}
+
+export interface PhotoListMeta {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+}

@@ -7,10 +7,8 @@ declare module "axios" {
     }
 }
 
-import API_URL from './apiConfig';
 
 const options = {
-    baseURL: API_URL,
     headers: {
         "Content-Type": "application/json",
     },

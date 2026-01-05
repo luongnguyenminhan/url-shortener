@@ -32,7 +32,7 @@ import { PhotoUploadZone } from '../components/PhotoUploadZone';
 import { projectService } from '@/services/projectService';
 import { photoService } from '@/services/photoService';
 import type { ProjectDetailResponse } from '@/types/project.type';
-import type { PhotoWithVersions } from '@/types/photo.type';
+import type { Photo } from '@/types/photo.type';
 import { showSuccessToast, showErrorToast } from '@/hooks/useShowToast';
 
 export const ProjectDetailPage = () => {
@@ -40,7 +40,7 @@ export const ProjectDetailPage = () => {
     const navigate = useNavigate();
 
     const [project, setProject] = useState<ProjectDetailResponse | null>(null);
-    const [photos, setPhotos] = useState<PhotoWithVersions[]>([]);
+    const [photos, setPhotos] = useState<Photo[]>([]);
     const [loading, setLoading] = useState(true);
     const [photosLoading, setPhotosLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -71,8 +71,8 @@ export const ProjectDetailPage = () => {
     const loadPhotos = async () => {
         try {
             setPhotosLoading(true);
-            const data = await photoService.getPhotosByProject(id!, { skip: 0, limit: 100 });
-            setPhotos(data.data || []);
+            const result = await photoService.getPhotosByProject(id!, { page: 1, page_size: 100 });
+            setPhotos(result.data || []);
         } catch (err: any) {
             console.error('Error loading photos:', err);
             showErrorToast('Không thể tải danh sách ảnh');
@@ -81,7 +81,7 @@ export const ProjectDetailPage = () => {
         }
     };
 
-    const handlePhotoClick = (photo: PhotoWithVersions) => {
+    const handlePhotoClick = (photo: Photo) => {
         console.log('Photo clicked:', photo);
         // TODO: Open photo detail modal or navigate to photo detail page
     };
