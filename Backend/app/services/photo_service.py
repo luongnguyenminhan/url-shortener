@@ -13,10 +13,7 @@ from app.models.photo import Photo
 from app.models.photo_version import PhotoVersion, VersionType
 from app.models.user import User
 from app.schemas.photo import PhotoCreate, PhotoDetailResponse
-from app.utils.logging import get_logger
-from app.utils.minio import download_file_from_minio, upload_bytes_to_minio
-
-logger = get_logger(__name__)
+from app.utils.logging import logger
 
 # Constants
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB

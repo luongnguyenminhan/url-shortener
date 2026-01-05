@@ -6,9 +6,7 @@ import firebase_admin
 from firebase_admin import credentials
 
 from app.core.config import settings
-from app.utils.logging import get_logger
-
-logger = get_logger(__name__)
+from app.utils.logging import logger
 
 
 def initialize_firebase():

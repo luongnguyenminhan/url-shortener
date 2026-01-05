@@ -10,9 +10,7 @@ from app.utils.auth import (
     create_refresh_token,
     get_firebase_user_info,
 )
-from app.utils.logging import get_logger
-
-logger = get_logger(__name__)
+from app.utils.logging import logger
 
 
 def firebase_login(db: Session, id_token: str) -> dict:

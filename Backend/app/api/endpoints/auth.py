@@ -10,9 +10,7 @@ from app.schemas.common import ApiResponse
 from app.models.user import User
 from app.services.auth import firebase_login
 from app.utils.auth import get_current_user
-from app.utils.logging import get_logger
-
-logger = get_logger(__name__)
+from app.utils.logging import logger
 
 router = APIRouter(prefix=settings.API_V1_STR, tags=["Auth"])
 
