@@ -1,4 +1,5 @@
 """CRUD operations for Photo model"""
+
 from typing import List, Optional
 from uuid import UUID
 
@@ -30,9 +31,7 @@ def get_by_project_and_filename(
     filename: str,
 ) -> Optional[Photo]:
     """Get photo by project ID and filename"""
-    return db.query(Photo).filter(
-        (Photo.project_id == project_id) & (Photo.filename == filename)
-    ).first()
+    return db.query(Photo).filter((Photo.project_id == project_id) & (Photo.filename == filename)).first()
 
 
 def exists_by_filename(
@@ -41,12 +40,7 @@ def exists_by_filename(
     filename: str,
 ) -> bool:
     """Check if photo with filename exists in project"""
-    return (
-        db.query(Photo)
-        .filter((Photo.project_id == project_id) & (Photo.filename == filename))
-        .first()
-        is not None
-    )
+    return db.query(Photo).filter((Photo.project_id == project_id) & (Photo.filename == filename)).first() is not None
 
 
 def get_by_project(
@@ -57,10 +51,10 @@ def get_by_project(
 ) -> List[Photo]:
     """Get all photos in a project with pagination and optional filtering"""
     query = db.query(Photo).filter(Photo.project_id == project_id)
-    
+
     if is_selected is not None:
         query = query.filter(Photo.is_selected == is_selected)
-    
+
     return query.offset(pagination_params.skip).limit(pagination_params.limit).all()
 
 
@@ -79,11 +73,7 @@ def get_selected_by_project(
     project_id: UUID,
 ) -> List[Photo]:
     """Get all selected photos in a project"""
-    return (
-        db.query(Photo)
-        .filter((Photo.project_id == project_id) & (Photo.is_selected == True))
-        .all()
-    )
+    return db.query(Photo).filter((Photo.project_id == project_id) & (Photo.is_selected == True)).all()
 
 
 def get_all_by_project(
@@ -92,4 +82,3 @@ def get_all_by_project(
 ) -> List[Photo]:
     """Get all photos in a project (selected and not selected)"""
     return db.query(Photo).filter(Photo.project_id == project_id).all()
-

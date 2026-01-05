@@ -1,24 +1,24 @@
 """Schemas for Project operations"""
-from typing import Optional, List
+
 from datetime import datetime
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-
-from enum import Enum
 
 from app.models.project import ProjectStatus
 
 
 class OwnerInfo(BaseModel):
     """Schema for owner information in project responses"""
-    
+
     id: UUID
     email: str
     name: Optional[str] = None
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
 
@@ -35,6 +35,7 @@ class ProjectBase(BaseModel):
 
 class ProjectCreate(BaseModel):
     """Schema for creating a project"""
+
     title: str = Field(..., max_length=255, description="Project title")
 
     status: Optional[ProjectStatus] = Field(
@@ -75,6 +76,7 @@ class ProjectResponse(ProjectBase):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
 
@@ -90,17 +92,21 @@ class ProjectListResponse(BaseModel):
 
     total: int
     items: List[ProjectResponse]
-    
+
+
 class ProjectCreateToken(BaseModel):
     """Schema for creating a project token"""
+
     project_id: UUID = Field(..., description="ID of the project")
     expires_in_days: Optional[int] = Field(
         default=7,
         description="Number of days until the token expires",
     )
-    
+
+
 class VerifyProjectToken(BaseModel):
     """Schema for verifying a project token"""
+
     token: str = Field(..., description="Project token to verify")
     password: Optional[str] = Field(
         default="",

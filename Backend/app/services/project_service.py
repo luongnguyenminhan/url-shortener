@@ -1,26 +1,27 @@
 """Service layer for Project operations"""
 
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.constant.messages import MessageConstants
 from app.crud import project_crud
 from app.db.manager import DatabaseManager as db_manager
-from app.models.project import Project, ProjectStatus
+from app.models.project import ProjectStatus
 from app.models.user import User
 from app.schemas.common import PaginationSortSearchSchema, create_pagination_meta
 from app.schemas.project import (
+    OwnerInfo,
     ProjectCreate,
     ProjectCreateToken,
-    ProjectUpdate,
     ProjectResponse,
+    ProjectUpdate,
     VerifyProjectToken,
-    OwnerInfo,
 )
-from app.core.constant.messages import MessageConstants
 from app.services import client_session_service
+
 
 def create_project(
     db: Session,
@@ -39,9 +40,7 @@ def create_project(
         ProjectResponse: Created project data
     """
     # Check project name exists
-    existing_project = project_crud.get_by_title_and_owner(
-        db, project_data.title, user.id
-    )
+    existing_project = project_crud.get_by_title_and_owner(db, project_data.title, user.id)
     if existing_project:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -129,10 +128,10 @@ def get_user_projects(
         "meta": pagination_meta.model_dump(),
     }
 
-
+# TODO: Add admin permission check if needed
 def get_all_projects(
     db: Session,
-    user: User,
+    user: User, # type: ignore  # noqa: ARG001
     pagination_params: PaginationSortSearchSchema,
     status: Optional[str] = None,
 ) -> Dict[str, Any]:
@@ -155,12 +154,7 @@ def get_all_projects(
     pagination_meta = create_pagination_meta(page, pagination_params.limit, total)
 
     return {
-        "projects": [
-            ProjectResponse.model_validate(project).model_copy(update={
-                "images_count": len(project.photos) if project.photos else 0,
-                "owner_info": OwnerInfo.model_validate(project.owner)
-            }) for project in projects
-        ],
+        "projects": [ProjectResponse.model_validate(project).model_copy(update={"images_count": len(project.photos) if project.photos else 0, "owner_info": OwnerInfo.model_validate(project.owner)}) for project in projects],
         "meta": pagination_meta.model_dump(),
     }
 
@@ -348,7 +342,7 @@ def count_user_projects(db: Session, user: User, status: Optional[str] = None) -
 
 def get_expired_projects_for_cleanup(
     db: Session,
-    user: User,
+    user: User, # type: ignore  # noqa: ARG001
 ) -> List[ProjectResponse]:
     """
     Get expired projects for cleanup (admin only)
@@ -362,14 +356,10 @@ def get_expired_projects_for_cleanup(
     """
     # TODO: Add admin permission check if needed
     projects = project_crud.get_expired_projects(db)
-    return [
-        ProjectResponse.model_validate(project).model_copy(update={
-            "owner_info": OwnerInfo.model_validate(project.owner)
-        }) for project in projects
-    ]
+    return [ProjectResponse.model_validate(project).model_copy(update={"owner_info": OwnerInfo.model_validate(project.owner)}) for project in projects]
 
 
-def cleanup_expired_projects(db: Session, user: User) -> int:
+def cleanup_expired_projects(db: Session, user: User) -> int:  # noqa: ARG001
     """
     Delete all expired projects (admin only)
 
@@ -471,9 +461,7 @@ def verify_project_token_access(
     Returns:
         Dict with session details if access granted, else None
     """
-    client_session = client_session_service.verify_session_access(
-        db, project_token.token, project_token.password
-    )
+    client_session = client_session_service.verify_session_access(db, project_token.token, project_token.password)
 
     if not client_session:
         raise HTTPException(
@@ -483,7 +471,7 @@ def verify_project_token_access(
 
     # Get project to include owner info
     project = project_crud.get_by_id(db, client_session.project_id)
-    
+
     # Create full project response
     project_response = None
     if project:
@@ -500,7 +488,8 @@ def verify_project_token_access(
         "count_accesses": client_session.count_accesses,
         "project": project_response,
     }
-    
+
+
 def get_project_token(
     db: Session,
     project_id: UUID,
@@ -522,14 +511,14 @@ def get_project_token(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=MessageConstants.PROJECT_NOT_FOUND,
         )
-    
+
     # Authorization check
     if project.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=MessageConstants.PROJECT_ACCESS_DENIED,
         )
-    
+
     client_session = client_session_service.get_active_project_client_sessions(db, project_id)
 
     if not client_session:

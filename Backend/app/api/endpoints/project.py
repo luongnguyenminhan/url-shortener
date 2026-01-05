@@ -1,6 +1,5 @@
 """Project API endpoints"""
 
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -134,9 +133,7 @@ def update_project_status(
     db: Session = Depends(get_db),
 ) -> ApiResponse[ProjectResponse]:
     """Update the status of a project"""
-    project = project_service.update_project_status(
-        db, current_user, project_id, status_update.status
-    )
+    project = project_service.update_project_status(db, current_user, project_id, status_update.status)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

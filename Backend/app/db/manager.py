@@ -1,7 +1,8 @@
 """Database session management and transaction utilities"""
+
 from contextlib import contextmanager
-from typing import Generator, Any, Optional
 from threading import local
+from typing import Any, Generator, Optional
 
 from sqlmodel import Session
 
@@ -23,10 +24,10 @@ class DatabaseManager:
     def get_or_create_session() -> tuple[Session, bool]:
         """
         Get existing active session or create a new one
-        
+
         Returns:
             tuple: (session, is_new) - session object and boolean indicating if it's newly created
-            
+
         Usage:
             db, is_new = DatabaseManager.get_or_create_session()
             try:
@@ -40,7 +41,7 @@ class DatabaseManager:
         active_session = getattr(_thread_local, "session", None)
         if active_session and active_session.is_active:
             return active_session, False
-        
+
         new_session = DatabaseManager.get_session()
         _thread_local.session = new_session
         return new_session, True
@@ -64,7 +65,7 @@ class DatabaseManager:
     @staticmethod
     def clear_session() -> None:
         """Clear current thread session"""
-        setattr(_thread_local, "session", None)
+        _thread_local.session = None
 
     @staticmethod
     def commit(db: Session) -> None:
@@ -86,7 +87,7 @@ class DatabaseManager:
     def transaction(db: Session) -> Generator[Session, None, None]:
         """
         Context manager for database transaction
-        
+
         Usage:
             with DatabaseManager.transaction(db) as transaction_db:
                 # do something
@@ -107,7 +108,7 @@ class DatabaseManager:
         """
         Context manager for getting and managing a session
         Reuses existing session if available, otherwise creates new one
-        
+
         Usage:
             with DatabaseManager.session() as db:
                 # do something
@@ -156,7 +157,7 @@ class DatabaseManager:
     def begin_nested(db: Session) -> Any:
         """
         Begin a nested transaction (savepoint)
-        
+
         Usage:
             savepoint = DatabaseManager.begin_nested(db)
             try:

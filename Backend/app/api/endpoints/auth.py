@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.db import get_db
+from app.models.user import User
 from app.schemas.auth import AuthResponse, CurrentUserResponse, GoogleAuthRequest
 from app.schemas.common import ApiResponse
-from app.models.user import User
 from app.services.auth import firebase_login
 from app.utils.auth import get_current_user
 from app.utils.logging import logger

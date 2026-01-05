@@ -1,6 +1,6 @@
 """CRUD operations for ClientSession model"""
-from typing import Optional, List
 from datetime import datetime
+from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -25,7 +25,7 @@ def create(
     )
     if password:
         db_session.set_password(password)
-    
+
     db.add(db_session)
     return db_session
 
@@ -229,7 +229,7 @@ def get_session_active_project(
 ) -> Optional[ClientSession]:
     """Get session if it is active and not expired"""
     session = db.query(ClientSession).filter(
-        (ClientSession.project_id == project_id)
+        ClientSession.project_id == project_id
     ).first()
     if not session:
         return None

@@ -8,14 +8,14 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
-from app.crud import photo_crud, photo_comment_crud, client_session_crud
+from app.crud import client_session_crud, photo_comment_crud, photo_crud
 from app.models.photo import Photo
-from app.schemas.common import PaginationSortSearchSchema
-from app.schemas.photo import PhotoCommentResponse, PhotoMetaResponse, PhotoListResponse
 from app.models.photo_version import PhotoVersion, VersionType
-from app.utils.minio import download_file_from_minio
+from app.schemas.common import PaginationSortSearchSchema
+from app.schemas.photo import PhotoCommentResponse, PhotoListResponse, PhotoMetaResponse
 from app.utils.image_utils import resize_image
 from app.utils.logging import logger
+from app.utils.minio import download_file_from_minio
 
 
 async def get_photo_image_guest(
@@ -61,14 +61,7 @@ async def get_photo_image_guest(
 
     # 3. Get photo image (reuse logic from photo_service)
 
-    photo_version = (
-        db.query(PhotoVersion)
-        .filter(
-            (PhotoVersion.photo_id == photo_id)
-            & (PhotoVersion.version_type == VersionType.ORIGINAL.value)
-        )
-        .first()
-    )
+    photo_version = db.query(PhotoVersion).filter((PhotoVersion.photo_id == photo_id) & (PhotoVersion.version_type == VersionType.ORIGINAL.value)).first()
 
     if not photo_version:
         return None

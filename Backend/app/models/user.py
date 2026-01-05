@@ -1,5 +1,5 @@
 """User model - Photographers (authenticated via Google OAuth)"""
-from typing import Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 from uuid import UUID
 
 from sqlmodel import Field, Relationship

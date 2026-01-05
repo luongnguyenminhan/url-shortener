@@ -3,20 +3,20 @@
 from typing import Optional
 from uuid import UUID
 
-from app.utils.minio import download_file_from_minio, upload_bytes_to_minio
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
-from app.crud import photo_crud, photo_comment_crud, project_crud, client_session_crud
+from app.crud import photo_comment_crud, photo_crud, project_crud
 from app.models.photo import Photo
 from app.models.photo_version import PhotoVersion, VersionType
 from app.models.user import User
 from app.schemas.common import PaginationSortSearchSchema
-from app.schemas.photo import PhotoCreate, PhotoDetailResponse, PhotoResponse, PhotoCommentResponse, PhotoMetaResponse
+from app.schemas.photo import PhotoCommentResponse, PhotoCreate, PhotoDetailResponse, PhotoMetaResponse
 from app.utils.image_utils import resize_image
 from app.utils.logging import logger
+from app.utils.minio import download_file_from_minio, upload_bytes_to_minio
 
 # Constants
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -287,21 +287,15 @@ async def get_photo_image(
         HTTPException: If user doesn't have access to photo
     """
     from io import BytesIO
-    
-    # Get photo
+    # Check photo exists and user has access
     photo = photo_crud.get_by_id(db, photo_id)
     if not photo:
         return None
-
+    project = project_crud.get_by_id(db, photo.project_id)
+    if not project or project.owner_id != user.id:
+        return None
     # Get original version
-    photo_version = (
-        db.query(PhotoVersion)
-        .filter(
-            (PhotoVersion.photo_id == photo_id)
-            & (PhotoVersion.version_type == VersionType.ORIGINAL.value)
-        )
-        .first()
-    )
+    photo_version = db.query(PhotoVersion).filter((PhotoVersion.photo_id == photo_id) & (PhotoVersion.version_type == VersionType.ORIGINAL.value)).first()
 
     if not photo_version:
         return None

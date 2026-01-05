@@ -36,6 +36,7 @@ def resize_image(
         # Fix EXIF orientation
         try:
             from PIL.ExifTags import TAGS
+
             exif_data = img._getexif()
             if exif_data:
                 for tag_id, value in exif_data.items():
@@ -69,10 +70,7 @@ def resize_image(
 
             # Resize
             if (resize_width, resize_height) != (original_width, original_height):
-                img = img.resize(
-                    (int(resize_width), int(resize_height)),
-                    Image.Resampling.LANCZOS
-                )
+                img = img.resize((int(resize_width), int(resize_height)), Image.Resampling.LANCZOS)
 
             # Crop from center to get exact dimensions
             crop_left = (resize_width - width) // 2
@@ -81,10 +79,7 @@ def resize_image(
             crop_bottom = crop_top + height
 
             img = img.crop((crop_left, crop_top, crop_right, crop_bottom))
-            logger.info(
-                f"Resized+Cropped photo {photo_id or 'unknown'}: {original_width}x{original_height} "
-                f"-> resize({resize_width}x{resize_height}) -> crop({width}x{height})"
-            )
+            logger.info(f"Resized+Cropped photo {photo_id or 'unknown'}: {original_width}x{original_height} -> resize({resize_width}x{resize_height}) -> crop({width}x{height})")
 
         elif width:
             # Width only: maintain aspect ratio

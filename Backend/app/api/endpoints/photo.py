@@ -13,18 +13,16 @@ from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.db import get_db
 from app.models.user import User
-<<<<<<< HEAD
-from app.schemas.common import ApiResponse, PaginationSortSearchSchema, pagination_params_dep, create_pagination_meta
-from app.schemas.photo import PhotoDetailResponse, PhotoListResponse, PhotoUploadRequest, PhotoSelectRequest, PhotoMetaResponse
-=======
 from app.schemas.common import (
     ApiResponse,
     PaginationSortSearchSchema,
     create_pagination_meta,
     pagination_params_dep,
 )
-from app.schemas.photo import PhotoDetailResponse, PhotoListResponse
->>>>>>> 81eae72 (Add photo download functionality with manifest and script generation)
+from app.schemas.photo import (
+    PhotoDetailResponse,
+    PhotoListResponse,
+)
 from app.services import photo_service
 from app.services.photo_download_service import (
     build_photo_download_scripts_response,
@@ -147,8 +145,6 @@ def list_project_photos(
         data=[PhotoListResponse.model_validate(photo) for photo in photos],
         meta=pagination_meta.model_dump(),
     )
-
-
 
 
 @router.get(

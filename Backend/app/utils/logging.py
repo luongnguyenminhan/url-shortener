@@ -27,6 +27,7 @@ Usage:
 import sys
 import time
 from pathlib import Path
+
 from loguru import logger as loguru_logger
 
 # Export logger for easy import
@@ -126,17 +127,11 @@ class FastAPILoggingMiddleware:
             duration = time.time() - start_time
 
             if response_status and response_status < 400:
-                logger.success(
-                    f"← {method} {path} | {response_status} | {duration:.3f}s | {response_length} bytes"
-                )
+                logger.success(f"← {method} {path} | {response_status} | {duration:.3f}s | {response_length} bytes")
             else:
-                logger.warning(
-                    f"← {method} {path} | {response_status} | {duration:.3f}s | {response_length} bytes"
-                )
+                logger.warning(f"← {method} {path} | {response_status} | {duration:.3f}s | {response_length} bytes")
         except Exception as e:
+            logger.error(f"Error processing request {method} {path}: {e}")
             duration = time.time() - start_time
-            logger.error(
-                f"← {method} {path} | ERROR | {duration:.3f}s",
-                exc_info=True
-            )
+            logger.error(f"← {method} {path} | ERROR | {duration:.3f}s", exc_info=True)
             raise

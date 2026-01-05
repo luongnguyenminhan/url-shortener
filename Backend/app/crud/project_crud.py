@@ -1,6 +1,6 @@
 """CRUD operations for Project model"""
-from typing import Optional, List
 from datetime import datetime, timedelta
+from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy.orm import Session, joinedload
@@ -17,7 +17,7 @@ def create(db: Session, project: ProjectCreate, owner_id: UUID) -> Project:
     expired_date = None
     if project.expired_days:
         expired_date = common_utils.get_utc_now() + timedelta(days=project.expired_days)
-    
+
     db_project = Project(
         owner_id=owner_id,
         title=project.title,
@@ -117,20 +117,20 @@ def delete(db: Session, project_id: UUID) -> bool:
 def count_by_owner(db: Session, owner_id: UUID, status: Optional[str] = None) -> int:
     """Count projects by owner with optional status filter"""
     query = db.query(Project).filter(Project.owner_id == owner_id)
-    
+
     if status:
         query = query.filter(Project.status == status)
-    
+
     return query.count()
 
 
 def count_all(db: Session, status: Optional[str] = None) -> int:
     """Count all projects with optional status filter"""
     query = db.query(Project)
-    
+
     if status:
         query = query.filter(Project.status == status)
-    
+
     return query.count()
 
 
