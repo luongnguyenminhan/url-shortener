@@ -10,6 +10,18 @@ from enum import Enum
 from app.models.project import ProjectStatus
 
 
+class OwnerInfo(BaseModel):
+    """Schema for owner information in project responses"""
+    
+    id: UUID
+    email: str
+    name: Optional[str] = None
+
+    class Config:
+        """Pydantic config"""
+        from_attributes = True
+
+
 class ProjectBase(BaseModel):
     """Base schema for Project"""
 
@@ -59,6 +71,7 @@ class ProjectResponse(ProjectBase):
     images_count: int = 0
     created_at: datetime
     updated_at: datetime
+    owner_info: Optional[OwnerInfo] = Field(default=None, description="Owner information")
 
     class Config:
         """Pydantic config"""

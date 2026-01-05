@@ -30,7 +30,7 @@ def create(db: Session, project: ProjectCreate, owner_id: UUID) -> Project:
 
 def get_by_id(db: Session, project_id: UUID) -> Optional[Project]:
     """Get project by ID"""
-    return db.query(Project).filter(Project.id == project_id).options(joinedload(Project.photos)).first()
+    return db.query(Project).filter(Project.id == project_id).options(joinedload(Project.photos), joinedload(Project.owner)).first()
 
 def get_by_title_and_owner(
     db: Session,
@@ -50,7 +50,7 @@ def get_by_owner(
     status: Optional[str] = None,
 ) -> List[Project]:
     """Get all projects by owner with optional filtering"""
-    query = db.query(Project).filter(Project.owner_id == owner_id).options(joinedload(Project.photos))
+    query = db.query(Project).filter(Project.owner_id == owner_id).options(joinedload(Project.photos), joinedload(Project.owner))
 
     if status:
         query = query.filter(Project.status == status)
@@ -64,7 +64,7 @@ def get_all(
     status: Optional[str] = None,
 ) -> List[Project]:
     """Get all projects with optional filtering by status"""
-    query = db.query(Project).options(joinedload(Project.photos))
+    query = db.query(Project).options(joinedload(Project.photos), joinedload(Project.owner))
 
     if status:
         query = query.filter(Project.status == status)
@@ -78,7 +78,7 @@ def update(
     project_update: ProjectUpdate,
 ) -> Optional[Project]:
     """Update project"""
-    db_project = db.get(Project, project_id)
+    db_project = db.query(Project).filter(Project.id == project_id).options(joinedload(Project.owner)).first()
     if not db_project:
         return None
 
@@ -96,7 +96,7 @@ def update_status(
     status: ProjectStatus,
 ) -> Optional[Project]:
     """Update project status"""
-    db_project = db.get(Project, project_id)
+    db_project = db.query(Project).filter(Project.id == project_id).options(joinedload(Project.owner)).first()
     if not db_project:
         return None
     db_project.status = status
@@ -139,12 +139,12 @@ def get_expired_projects(db: Session) -> List[Project]:
     now = datetime.utcnow()
     return db.query(Project).filter(
         (Project.expired_date.isnot(None)) & (Project.expired_date < now)
-    ).all()
+    ).options(joinedload(Project.owner)).all()
 
 
 def soft_delete(db: Session, project_id: UUID) -> Optional[Project]:
     """Soft delete by setting status to completed"""
-    db_project = db.get(Project, project_id)
+    db_project = db.query(Project).filter(Project.id == project_id).options(joinedload(Project.owner)).first()
     if not db_project:
         return None
 
