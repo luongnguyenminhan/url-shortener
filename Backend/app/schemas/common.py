@@ -44,14 +44,15 @@ def create_pagination_meta(page: int, limit: int, total: int) -> PaginationMeta:
         has_next=page < total_pages,
         has_prev=page > 1,
     )
-    
+
+
 class PaginationSortSearchSchema(BaseModel):
     skip: int = Field(default=0, ge=0)
     limit: int = Field(default=10, ge=1, le=100)
     sort_key: Optional[str] = Field(default=None)
     sort_dir: Optional[str] = Field(default=None)
     search: Optional[str] = Field(default=None)
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -62,6 +63,4 @@ def pagination_params_dep(
     sort_dir: Optional[str] = Query(None, description="Sort direction: asc or desc"),
     search: Optional[str] = Query(None, description="Search term to filter results"),
 ) -> PaginationSortSearchSchema:
-    return PaginationSortSearchSchema(
-        skip=skip, limit=limit, sort_key=sort_key, sort_dir=sort_dir, search=search
-    )
+    return PaginationSortSearchSchema(skip=skip, limit=limit, sort_key=sort_key, sort_dir=sort_dir, search=search)

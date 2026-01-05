@@ -67,12 +67,6 @@ class PhotoDetailResponse(BaseModel):
         from_attributes = True
 
 
-class PhotoUploadRequest(BaseModel):
-    """Schema for photo upload request"""
-
-    project_id: UUID = Field(..., description="Project ID to upload photo to")
-
-
 class PhotoListResponse(BaseModel):
     """Schema for photo list response"""
 

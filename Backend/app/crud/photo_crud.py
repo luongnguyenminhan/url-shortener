@@ -67,8 +67,29 @@ def get_by_project(
 def count_by_project(db: Session, project_id: UUID, is_selected: Optional[bool] = None) -> int:
     """Count photos in a project with optional filtering"""
     query = db.query(Photo).filter(Photo.project_id == project_id)
-    
+
     if is_selected is not None:
         query = query.filter(Photo.is_selected == is_selected)
-    
+
     return query.count()
+
+
+def get_selected_by_project(
+    db: Session,
+    project_id: UUID,
+) -> List[Photo]:
+    """Get all selected photos in a project"""
+    return (
+        db.query(Photo)
+        .filter((Photo.project_id == project_id) & (Photo.is_selected == True))
+        .all()
+    )
+
+
+def get_all_by_project(
+    db: Session,
+    project_id: UUID,
+) -> List[Photo]:
+    """Get all photos in a project (selected and not selected)"""
+    return db.query(Photo).filter(Photo.project_id == project_id).all()
+
