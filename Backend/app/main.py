@@ -72,7 +72,7 @@ def custom_openapi():
 
 
 app = FastAPI(
-    title="URLShortener",
+    title="Meobeo Studio",
     version="1.0.0",
     root_path="/be",
     generate_unique_id_function=custom_generate_unique_id,

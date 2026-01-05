@@ -5,9 +5,11 @@ import io
 from datetime import datetime
 from typing import List, Optional, Tuple
 from uuid import UUID
+from zipfile import ZipFile
 
 from sqlmodel import Session, select
 
+from app.crud.photo_crud import get_selected_by_project
 from app.models.photo import Photo
 from app.models.photo_comment import PhotoComment
 from app.models.project import Project
@@ -17,6 +19,7 @@ from app.schemas.photo_download import (
     PhotoManifestItem,
     ScriptTemplate,
 )
+from app.utils.minio import download_file_from_minio
 
 
 def get_selected_photos_with_comments(db: Session, project_id: UUID) -> List[Tuple[Photo, Optional[PhotoComment]]]:
@@ -206,3 +209,48 @@ def build_photo_download_scripts_response(manifest: PhotoManifest, csv_url: str)
         scripts=scripts,
         csv_download_url=csv_url,
     )
+
+
+def build_photo_manifest_zip(
+    db: Session, project_id: UUID, current_user_id: UUID
+) -> io.BytesIO:
+    """Build ZIP with selected photos organized by extension + CSV"""
+    # Get project and verify ownership
+    project = db.get(Project, project_id)
+    if not project or project.owner_id != current_user_id:
+        raise ValueError("Project not found or access denied")
+
+    # Get selected photos from CRUD
+    selected_photos = get_selected_by_project(db, project_id)
+
+    # Create ZIP buffer
+    zip_buffer = io.BytesIO()
+
+    with ZipFile(zip_buffer, "w") as zip_file:
+        # Add each selected photo to ZIP
+        for photo in selected_photos:
+            # Construct MinIO object path: project_id/original/filename
+            object_name = f"{project_id}/original/{photo.filename}"
+
+            # Download file from MinIO using the correct path
+            file_bytes = download_file_from_minio(
+                bucket_name="photos",
+                object_name=object_name,
+            )
+
+            if file_bytes:
+                # Extract extension from filename
+                file_ext = photo.filename.split(".")[-1].upper()
+                folder_path = f"Selected/{file_ext}"
+
+                # Add to ZIP
+                zip_path = f"{folder_path}/{photo.filename}"
+                zip_file.writestr(zip_path, file_bytes)
+
+        # Generate and add CSV
+        manifest = build_photo_manifest(db, project_id, current_user_id)
+        csv_content = generate_csv_content(manifest)
+        zip_file.writestr("photos.csv", csv_content)
+
+    zip_buffer.seek(0)
+    return zip_buffer

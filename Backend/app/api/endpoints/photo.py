@@ -1,9 +1,6 @@
 """Photo API endpoints"""
 
-import json
-from io import BytesIO
 from uuid import UUID
-from zipfile import ZipFile
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
@@ -27,6 +24,7 @@ from app.services import photo_service
 from app.services.photo_download_service import (
     build_photo_download_scripts_response,
     build_photo_manifest,
+    build_photo_manifest_zip,
     generate_csv_content,
 )
 from app.utils.auth import get_current_user
@@ -175,7 +173,7 @@ def get_photo_meta(
 @router.get(
     "/{project_id}/download-photos",
     summary="Download project photos manifest or scripts",
-    description="Get manifest JSON+CSV or script templates for organizing photos locally",
+    description="Get selected photos organized by extension or script templates",
     status_code=status.HTTP_200_OK,
 )
 async def download_photos(
@@ -183,39 +181,40 @@ async def download_photos(
     type: str = Query(
         "manifest",
         regex="^(manifest|scripts)$",
-        description="Download type: manifest (JSON+CSV in ZIP) or scripts (shell templates)",
+        description="Download type: manifest (ZIP with selected photos) or scripts (shell templates)",
     ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
-    Download project photos as manifest or script templates.
+    Download project photos as manifest ZIP or script templates.
 
-    - **type=manifest**: Returns ZIP containing manifest.json and photos.csv
+    - **type=manifest**: Returns ZIP with selected photos organized by extension (Selected/[EXT]/filename) + photos.csv
     - **type=scripts**: Returns JSON with PowerShell, Bash, and Zsh script templates
     """
-    try:
-        manifest = build_photo_manifest(db, project_id, current_user.id)
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-
     if type == "manifest":
-        csv_content = generate_csv_content(manifest)
-        zip_buffer = BytesIO()
+        try:
+            zip_buffer = build_photo_manifest_zip(db, project_id, current_user.id)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
-        with ZipFile(zip_buffer, "w") as zip_file:
-            manifest_json = json.dumps(manifest.model_dump(mode="json"), indent=2, default=str)
-            zip_file.writestr("manifest.json", manifest_json)
-            zip_file.writestr("photos.csv", csv_content)
+        # Get project name for filename
+        from app.crud import project_crud
+        project = project_crud.get_by_id(db, project_id)
+        project_name = project.title.replace(" ", "_") if project else "photos"
 
-        zip_buffer.seek(0)
         return StreamingResponse(
             iter([zip_buffer.getvalue()]),
             media_type="application/zip",
-            headers={"Content-Disposition": f"attachment; filename={manifest.project_title.replace(' ', '_')}_manifest.zip"},
+            headers={"Content-Disposition": f"attachment; filename={project_name}_selected_photos.zip"},
         )
 
     elif type == "scripts":
+        try:
+            manifest = build_photo_manifest(db, project_id, current_user.id)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
         csv_url = f"/api/v1/photos/{project_id}/download-photos/csv"
         scripts_response = build_photo_download_scripts_response(manifest, csv_url)
         return ApiResponse(
