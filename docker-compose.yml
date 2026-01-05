@@ -30,6 +30,9 @@ services:
     image: luongnguyenminhan/url-shortener:backend
     container_name: urls-backend
     <<: *shared-service
+    labels:
+      - "logging=promtail"
+      - "job=urls-backend"
     volumes:
       - ./Backend/config:/app/config
 
@@ -37,11 +40,17 @@ services:
     image: luongnguyenminhan/url-shortener:frontend
     container_name: urls-frontend
     <<: *shared-service
+    labels:
+      - "logging=promtail"
+      - "job=urls-frontend"
   redis:
     image: redis:7-alpine
     <<: *shared-service-no-env
     environment:
       REDIS_PASSWORD: urls123
+    labels:
+      - "logging=promtail"
+      - "job=urls-redis"
     command: redis-server --requirepass urls123
 
   adminer:

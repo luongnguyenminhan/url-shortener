@@ -23,6 +23,9 @@ services:
     container_name: urls-backend-prod
     pull_policy: always
     <<: *shared-service
+    labels:
+      - "logging=promtail"
+      - "job=urls-backend-prod"
     volumes:
       - ./Backend/config:/app/config
       - /home/anlnm/url-shortener/.vault/secrets/configuration.production.json:/vault/secrets/configuration.production.json:ro
@@ -37,6 +40,9 @@ services:
     container_name: urls-frontend-prod
     pull_policy: always
     <<: *shared-service
+    labels:
+      - "logging=promtail"
+      - "job=urls-frontend-prod"
     volumes:
       - /home/anlnm/url-shortener/.vault/secrets/configuration.production.json:/vault/secrets/configuration.production.json:ro
 
@@ -47,6 +53,9 @@ services:
       - urls-network
     environment:
       REDIS_PASSWORD: urls123
+    labels:
+      - "logging=promtail"
+      - "job=urls-redis-prod"
     command: redis-server --requirepass urls123
 
   adminer:
