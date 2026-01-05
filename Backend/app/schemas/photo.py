@@ -88,3 +88,49 @@ class PhotoListResponse(BaseModel):
     class Config:
         """Pydantic config"""
         from_attributes = True
+
+
+class PhotoCommentCreate(BaseModel):
+    """Schema for creating a photo comment"""
+
+    content: str = Field(..., max_length=500, description="Comment content")
+
+
+class PhotoCommentResponse(BaseModel):
+    """Schema for photo comment response"""
+
+    id: UUID
+    photo_id: UUID
+    author_type: str
+    content: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        """Pydantic config"""
+        from_attributes = True
+
+
+class PhotoSelectRequest(BaseModel):
+    """Schema for photo select request"""
+
+    project_token: str = Field(..., description="Project access token")
+    comment: str = Field(None, max_length=500, description="Optional comment when selecting photo")
+
+
+class PhotoMetaResponse(BaseModel):
+    """Schema for photo with comments metadata response"""
+
+    id: UUID
+    filename: str
+    project_id: UUID
+    is_selected: bool = False
+    is_approved: bool = False
+    is_rejected: bool = False
+    created_at: datetime
+    updated_at: datetime
+    comments: list["PhotoCommentResponse"] = Field(default_factory=list, description="List of comments for the photo")
+
+    class Config:
+        """Pydantic config"""
+        from_attributes = True
