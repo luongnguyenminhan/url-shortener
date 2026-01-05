@@ -9,7 +9,7 @@ import type {
 } from '@/types/project.type';
 import type { PaginatedResponse, PaginationParams, ApiResponse } from '@/types/common.type';
 
-const BASE_URL = '/v1/projects';
+const BASE_URL = '/be/api/v1/projects';
 
 export const projectService = {
     // Get all projects with pagination

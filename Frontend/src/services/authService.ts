@@ -33,14 +33,14 @@ interface CurrentUserResponse {
 
 export const authService = {
     loginWithFirebase: async (idToken: string) => {
-        const response = await axiosInstance.post<LoginResponse>("/v1/auth/firebase/login", {
+        const response = await axiosInstance.post<LoginResponse>("/be/api/v1/auth/firebase/login", {
             id_token: idToken,
         });
         return response.data;
     },
 
     getCurrentUser: async () => {
-        const response = await axiosInstance.get<CurrentUserResponse>("/v1/me");
+        const response = await axiosInstance.get<CurrentUserResponse>("/be/api/v1/me");
         return response.data;
     },
 };
