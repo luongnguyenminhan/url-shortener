@@ -82,7 +82,7 @@ export default function ProjectManagementPage() {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
-    const handleAction = (projectId: string, action: 'open' | 'edit' | 'delete') => {
+    const handleAction = (projectId: string, action: 'open' | 'edit' | 'delete' | 'share') => {
         const project = projects.find(p => p.id === projectId);
 
         if (action === 'edit' && project) {
@@ -94,6 +94,9 @@ export default function ProjectManagementPage() {
             setDeleteDialogOpen(true);
         } else if (action === 'open') {
             navigate(`/admin/projects/${projectId}`);
+        } else if (action === 'share') {
+            // TODO: Implement share functionality
+            console.log('Share project:', projectId);
         }
     };
 

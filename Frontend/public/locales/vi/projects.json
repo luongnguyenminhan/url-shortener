@@ -1,0 +1,43 @@
+{
+    "detail": {
+        "title": "Chi tiết dự án",
+        "loadError": "Không thể tải thông tin dự án",
+        "loadPhotosError": "Không thể tải danh sách ảnh",
+        "notFound": "Không tìm thấy dự án",
+        "goBack": "Quay lại",
+        "uploadPhotos": "Tải lên ảnh",
+        "photoList": "Danh sách ảnh",
+        "photoSelected": "Đã chọn ảnh",
+        "photoDeselected": "Đã bỏ chọn ảnh",
+        "updatePhotoError": "Không thể cập nhật trạng thái ảnh",
+        "deleteConfirm": "Bạn có chắc chắn muốn xóa ảnh này?",
+        "deleteSuccess": "Đã xóa ảnh thành công",
+        "deleteError": "Không thể xóa ảnh",
+        "breadcrumb": {
+            "projects": "Dự án"
+        },
+        "uploadDialog": {
+            "title": "Upload ảnh"
+        }
+    },
+    "createSuccess": "Tạo dự án thành công",
+    "updateSuccess": "Cập nhật dự án thành công",
+    "deleteSuccess": "Xóa dự án thành công",
+    "upload": {
+        "onlyImages": "Vui lòng chỉ chọn file hình ảnh",
+        "uploadFailed": "Upload thất bại",
+        "noFiles": "Không có file nào để upload",
+        "successCount": "Đã upload thành công {{count}} ảnh",
+        "failCount": "Upload thất bại {{count}} ảnh",
+        "dropZoneTitle": "Kéo thả ảnh vào đây hoặc click để chọn",
+        "dropZoneSubtitle": "Hỗ trợ nhiều file cùng lúc",
+        "statusPending": "{{count}} chờ upload",
+        "statusUploading": "{{count}} đang upload",
+        "statusSuccess": "{{count}} thành công",
+        "statusError": "{{count}} thất bại",
+        "retry": "Thử lại",
+        "clearAll": "Xóa tất cả",
+        "uploading": "Đang upload...",
+        "uploadButton": "Upload {{count}} ảnh"
+    }
+}

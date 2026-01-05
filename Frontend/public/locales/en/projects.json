@@ -1,0 +1,46 @@
+{
+    "detail": {
+        "title": "Project Details",
+        "loadError": "Cannot load project information",
+        "loadPhotosError": "Cannot load photo list",
+        "notFound": "Project not found",
+        "goBack": "Go back",
+        "uploadPhotos": "Upload Photos",
+        "photoList": "Photo List",
+        "photoSelected": "Photo selected",
+        "photoDeselected": "Photo deselected",
+        "updatePhotoError": "Cannot update photo status",
+        "deleteConfirm": "Are you sure you want to delete this photo?",
+        "deleteSuccess": "Photo deleted successfully",
+        "deleteError": "Cannot delete photo",
+        "breadcrumb": {
+            "projects": "Projects"
+        },
+        "uploadDialog": {
+            "title": "Upload Photos"
+        }
+    },
+    "createSuccess": "Project created successfully",
+    "updateSuccess": "Project updated successfully",
+    "deleteSuccess": "Project deleted successfully",
+    "upload": {
+        "onlyImages": "Please select only image files",
+        "uploadFailed": "Upload failed",
+        "noFiles": "No files to upload",
+        "successCount": "Successfully uploaded {{count}} photo",
+        "successCount_plural": "Successfully uploaded {{count}} photos",
+        "failCount": "Failed to upload {{count}} photo",
+        "failCount_plural": "Failed to upload {{count}} photos",
+        "dropZoneTitle": "Drag and drop images here or click to select",
+        "dropZoneSubtitle": "Supports multiple files at once",
+        "statusPending": "{{count}} waiting",
+        "statusUploading": "{{count}} uploading",
+        "statusSuccess": "{{count}} success",
+        "statusError": "{{count}} failed",
+        "retry": "Retry",
+        "clearAll": "Clear all",
+        "uploading": "Uploading...",
+        "uploadButton": "Upload {{count}} photo",
+        "uploadButton_plural": "Upload {{count}} photos"
+    }
+}

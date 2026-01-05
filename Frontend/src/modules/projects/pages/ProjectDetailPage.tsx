@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     Box,
     Container,
@@ -38,6 +39,7 @@ import { showSuccessToast, showErrorToast } from '@/hooks/useShowToast';
 export const ProjectDetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { t } = useTranslation('projects');
 
     const [project, setProject] = useState<ProjectDetailResponse | null>(null);
     const [photos, setPhotos] = useState<Photo[]>([]);
@@ -61,8 +63,8 @@ export const ProjectDetailPage = () => {
             const data = await projectService.getProjectById(id!);
             setProject(data);
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Không thể tải thông tin dự án');
-            showErrorToast('Không thể tải thông tin dự án');
+            setError(err.response?.data?.message || t('detail.loadError', 'Không thể tải thông tin dự án'));
+            showErrorToast(t('detail.loadError', 'Không thể tải thông tin dự án'));
         } finally {
             setLoading(false);
         }
@@ -75,7 +77,7 @@ export const ProjectDetailPage = () => {
             setPhotos(result.data || []);
         } catch (err: any) {
             console.error('Error loading photos:', err);
-            showErrorToast('Không thể tải danh sách ảnh');
+            showErrorToast(t('detail.loadPhotosError', 'Không thể tải danh sách ảnh'));
         } finally {
             setPhotosLoading(false);
         }
@@ -92,24 +94,24 @@ export const ProjectDetailPage = () => {
             setPhotos((prev) =>
                 prev.map((p) => (p.id === photoId ? { ...p, is_selected: selected } : p))
             );
-            showSuccessToast(selected ? 'Đã chọn ảnh' : 'Đã bỏ chọn ảnh');
+            showSuccessToast(selected ? t('detail.photoSelected', 'Đã chọn ảnh') : t('detail.photoDeselected', 'Đã bỏ chọn ảnh'));
         } catch (err: any) {
-            showErrorToast('Không thể cập nhật trạng thái ảnh');
+            showErrorToast(t('detail.updatePhotoError', 'Không thể cập nhật trạng thái ảnh'));
         }
     };
 
     const handlePhotoDelete = async (photoId: string) => {
-        if (!window.confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+        if (!window.confirm(t('detail.deleteConfirm', 'Bạn có chắc chắn muốn xóa ảnh này?'))) {
             return;
         }
 
         try {
             await photoService.deletePhoto(photoId);
             setPhotos((prev) => prev.filter((p) => p.id !== photoId));
-            showSuccessToast('Đã xóa ảnh thành công');
+            showSuccessToast(t('detail.deleteSuccess', 'Đã xóa ảnh thành công'));
             loadProjectData(); // Reload to update images_count
         } catch (err: any) {
-            showErrorToast('Không thể xóa ảnh');
+            showErrorToast(t('detail.deleteError', 'Không thể xóa ảnh'));
         }
     };
 
@@ -133,9 +135,9 @@ export const ProjectDetailPage = () => {
     if (error || !project) {
         return (
             <Container maxWidth="lg" sx={{ mt: 4 }}>
-                <Alert severity="error">{error || 'Không tìm thấy dự án'}</Alert>
+                <Alert severity="error">{error || t('detail.notFound', 'Không tìm thấy dự án')}</Alert>
                 <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mt: 2 }}>
-                    Quay lại
+                    {t('detail.goBack', 'Quay lại')}
                 </Button>
             </Container>
         );
@@ -152,7 +154,7 @@ export const ProjectDetailPage = () => {
                         onClick={() => navigate('/projects')}
                         sx={{ textDecoration: 'none', cursor: 'pointer' }}
                     >
-                        Dự án
+                        {t('detail.breadcrumb.projects', 'Dự án')}
                     </Link>
                     <Typography color="text.primary">{project.title}</Typography>
                 </Breadcrumbs>
@@ -163,7 +165,7 @@ export const ProjectDetailPage = () => {
                             <ArrowBack />
                         </IconButton>
                         <Typography variant="h4" fontWeight="bold">
-                            Chi tiết dự án
+                            {t('detail.title', 'Chi tiết dự án')}
                         </Typography>
                     </Stack>
 
@@ -172,7 +174,7 @@ export const ProjectDetailPage = () => {
                         startIcon={<Upload />}
                         onClick={handleUploadPhotos}
                     >
-                        Tải lên ảnh
+                        {t('detail.uploadPhotos', 'Tải lên ảnh')}
                     </Button>
                 </Stack>
             </Box>
@@ -189,7 +191,7 @@ export const ProjectDetailPage = () => {
                             mb={3}
                         >
                             <Typography variant="h6" fontWeight="bold">
-                                Danh sách ảnh ({photos.length})
+                                {t('detail.photoList', 'Danh sách ảnh')} ({photos.length})
                             </Typography>
 
                             <ToggleButtonGroup
@@ -248,7 +250,7 @@ export const ProjectDetailPage = () => {
             >
                 <DialogTitle>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="h6">Upload ảnh</Typography>
+                        <Typography variant="h6">{t('detail.uploadDialog.title', 'Upload ảnh')}</Typography>
                         <IconButton onClick={() => setUploadModalOpen(false)}>
                             <ArrowBack />
                         </IconButton>

@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Box,
     Paper,
@@ -41,6 +42,7 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
     projectId,
     onUploadComplete,
 }) => {
+    const { t } = useTranslation('projects');
     const [files, setFiles] = useState<FileWithPreview[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -80,7 +82,7 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
         );
 
         if (imageFiles.length === 0) {
-            showErrorToast('Vui lòng chỉ chọn file hình ảnh');
+            showErrorToast(t('upload.onlyImages', 'Vui lòng chỉ chọn file hình ảnh'));
             return;
         }
 
@@ -150,7 +152,7 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
                             ...f,
                             status: 'error',
                             progress: 0,
-                            error: error.response?.data?.message || 'Upload failed',
+                            error: error.response?.data?.message || t('upload.uploadFailed', 'Upload failed'),
                         }
                         : f
                 )
@@ -163,7 +165,7 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
         const pendingFiles = files.filter((f) => f.status === 'pending' || f.status === 'error');
 
         if (pendingFiles.length === 0) {
-            showErrorToast('Không có file nào để upload');
+            showErrorToast(t('upload.noFiles', 'Không có file nào để upload'));
             return;
         }
 
@@ -186,12 +188,12 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
 
         // Show results
         if (successCount > 0) {
-            showSuccessToast(`Đã upload thành công ${successCount} ảnh`);
+            showSuccessToast(t('upload.successCount', 'Đã upload thành công {{count}} ảnh', { count: successCount }));
             onUploadComplete?.();
         }
 
         if (failCount > 0) {
-            showErrorToast(`Upload thất bại ${failCount} ảnh`);
+            showErrorToast(t('upload.failCount', 'Upload thất bại {{count}} ảnh', { count: failCount }));
         }
     };
 
@@ -233,10 +235,10 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
             >
                 <CloudUpload sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
                 <Typography variant="h6" gutterBottom>
-                    Kéo thả ảnh vào đây hoặc click để chọn
+                    {t('upload.dropZoneTitle', 'Kéo thả ảnh vào đây hoặc click để chọn')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Hỗ trợ nhiều file cùng lúc
+                    {t('upload.dropZoneSubtitle', 'Hỗ trợ nhiều file cùng lúc')}
                 </Typography>
                 <input
                     ref={fileInputRef}
@@ -252,16 +254,16 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
             {files.length > 0 && (
                 <Stack direction="row" spacing={2} mb={2}>
                     {pendingCount > 0 && (
-                        <Chip label={`${pendingCount} chờ upload`} color="default" />
+                        <Chip label={t('upload.statusPending', '{{count}} chờ upload', { count: pendingCount })} color="default" />
                     )}
                     {uploadingCount > 0 && (
-                        <Chip label={`${uploadingCount} đang upload`} color="primary" />
+                        <Chip label={t('upload.statusUploading', '{{count}} đang upload', { count: uploadingCount })} color="primary" />
                     )}
                     {successCount > 0 && (
-                        <Chip label={`${successCount} thành công`} color="success" />
+                        <Chip label={t('upload.statusSuccess', '{{count}} thành công', { count: successCount })} color="success" />
                     )}
                     {errorCount > 0 && (
-                        <Chip label={`${errorCount} thất bại`} color="error" />
+                        <Chip label={t('upload.statusError', '{{count}} thất bại', { count: errorCount })} color="error" />
                     )}
                 </Stack>
             )}
@@ -317,7 +319,7 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
                                                     size="small"
                                                     onClick={() => handleRetry(fileWithPreview.id)}
                                                     color="primary"
-                                                    title="Thử lại"
+                                                    title={t('upload.retry', 'Thử lại')}
                                                 >
                                                     <Refresh />
                                                 </IconButton>
@@ -348,7 +350,7 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
                         onClick={handleClearAll}
                         disabled={isUploading}
                     >
-                        Xóa tất cả
+                        {t('upload.clearAll', 'Xóa tất cả')}
                     </Button>
                     <Button
                         variant="contained"
@@ -357,8 +359,8 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
                         startIcon={isUploading ? undefined : <CloudUpload />}
                     >
                         {isUploading
-                            ? 'Đang upload...'
-                            : `Upload ${pendingCount} ảnh`}
+                            ? t('upload.uploading', 'Đang upload...')
+                            : t('upload.uploadButton', 'Upload {{count}} ảnh', { count: pendingCount })}
                     </Button>
                 </Stack>
             )}

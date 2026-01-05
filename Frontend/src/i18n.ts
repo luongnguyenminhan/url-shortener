@@ -11,7 +11,7 @@ i18n
         fallbackLng: 'en',
         supportedLngs: ['en', 'vi'],
         debug: false,
-        ns: ['translation', 'auth', 'admin'],
+        ns: ['translation', 'auth', 'admin', 'projects'],
         defaultNS: 'translation',
         backend: {
             loadPath: '/locales/{{lng}}/{{ns}}.json',
