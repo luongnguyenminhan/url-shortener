@@ -85,7 +85,9 @@ def get_project_by_id(
             detail=MessageConstants.PROJECT_ACCESS_DENIED,
         )
 
-    return ProjectResponse.model_validate(project)
+    project_response = ProjectResponse.model_validate(project)
+    project_response.images_count = len(project.photos) if project.photos else 0
+    return project_response
 
 
 def get_user_projects(
