@@ -21,18 +21,21 @@ import {
     Delete as DeleteIcon,
     FolderOpen as FolderOpenIcon,
     Schedule as ScheduleIcon,
+    Share as ShareIcon,
 } from '@mui/icons-material';
+import { ShareProjectDialog } from './ShareProjectDialog';
 
 interface ProjectCardProps {
     project: ProjectResponse;
     viewMode: 'grid' | 'list';
-    onAction?: (projectId: string, action: 'open' | 'edit' | 'delete') => void;
+    onAction?: (projectId: string, action: 'open' | 'edit' | 'delete' | 'share') => void;
 }
 
 export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
     const { t } = useTranslation();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [isHovered, setIsHovered] = useState(false);
+    const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
     const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
         event.stopPropagation();
@@ -52,6 +55,12 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
         onAction?.(project.id, 'delete');
+        handleMenuClose();
+    };
+
+    const handleShare = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShareDialogOpen(true);
         handleMenuClose();
     };
 
@@ -193,6 +202,12 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         </ListItemIcon>
                         <ListItemText>{t('common.edit', 'Edit')}</ListItemText>
                     </MenuItem>
+                    <MenuItem onClick={handleShare}>
+                        <ListItemIcon>
+                            <ShareIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>{t('projects.share', 'Share')}</ListItemText>
+                    </MenuItem>
                     <MenuItem onClick={handleDelete}>
                         <ListItemIcon>
                             <DeleteIcon fontSize="small" />
@@ -200,6 +215,14 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         <ListItemText>{t('common.delete', 'Delete')}</ListItemText>
                     </MenuItem>
                 </Menu>
+
+                {/* Share Dialog */}
+                <ShareProjectDialog
+                    open={shareDialogOpen}
+                    onClose={() => setShareDialogOpen(false)}
+                    projectId={project.id}
+                    projectTitle={project.title}
+                />
             </Card>
         );
     }
@@ -306,6 +329,12 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         </ListItemIcon>
                         <ListItemText>{t('common.edit', 'Edit')}</ListItemText>
                     </MenuItem>
+                    <MenuItem onClick={handleShare}>
+                        <ListItemIcon>
+                            <ShareIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>{t('projects.share', 'Share')}</ListItemText>
+                    </MenuItem>
                     <MenuItem onClick={handleDelete}>
                         <ListItemIcon>
                             <DeleteIcon fontSize="small" />
@@ -313,6 +342,14 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         <ListItemText>{t('common.delete', 'Delete')}</ListItemText>
                     </MenuItem>
                 </Menu>
+
+                {/* Share Dialog */}
+                <ShareProjectDialog
+                    open={shareDialogOpen}
+                    onClose={() => setShareDialogOpen(false)}
+                    projectId={project.id}
+                    projectTitle={project.title}
+                />
             </Box>
         </ListItemButton>
     );

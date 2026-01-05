@@ -48,6 +48,18 @@ export interface ProjectListResponse {
     items: ProjectResponse[];
 }
 
+export interface CreateProjectTokenRequest {
+    project_id: string;
+    expires_in_days: number;
+}
+
+export interface ProjectTokenResponse {
+    token: string;
+    project_id: string;
+    expires_at: string;
+    created_at: string;
+}
+
 export interface ProjectCreateToken {
     project_id: string;
     expires_in_days?: number;

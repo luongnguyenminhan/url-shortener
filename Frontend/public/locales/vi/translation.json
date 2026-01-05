@@ -134,7 +134,13 @@
     "today": "Hôm nay",
     "yesterday": "Hôm qua",
     "daysAgo": "ngày trước",
-    "noProjects": "Chưa có dự án nào"
+    "noProjects": "Chưa có dự án nào",
+    "copiedToClipboard": "Đã sao chép vào clipboard",
+    "copyFailed": "Sao chép thất bại",
+    "day": "ngày",
+    "days": "ngày",
+    "copyLink": "Sao chép Link",
+    "copied": "Đã sao chép"
   },
   "projects": {
     "title": "Tất cả Dự án",
@@ -186,6 +192,15 @@
     "statusMessages": {
       "sentToClient": "Đã gửi cho Khách hàng",
       "delivered": "Đã Giao"
-    }
+    },
+    "share": "Chia sẻ",
+    "shareProject": "Chia sẻ Dự án",
+    "shareProjectDescription": "Tạo liên kết chia sẻ cho",
+    "shareLinkGenerated": "Tạo liên kết chia sẻ thành công",
+    "shareLinkError": "Tạo liên kết chia sẻ thất bại",
+    "expiresIn": "Hết hạn sau",
+    "linkExpiresAt": "Liên kết sẽ hết hạn vào",
+    "generateLink": "Tạo Liên kết",
+    "tokenAlreadyExists": "Dự án này đã có liên kết chia sẻ. Vui lòng đợi liên kết hết hạn hoặc liên hệ hỗ trợ để thu hồi."
   }
 }

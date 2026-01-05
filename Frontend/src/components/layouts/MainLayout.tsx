@@ -119,7 +119,11 @@ const MainLayout: React.FC = () => {
             <Divider />
             <List>
                 {menuItems.map((item) => {
-                    const isActive = location.pathname === item.path;
+                    // Check if current path matches the menu item
+                    // Exact match or starts with item.path/ (with trailing slash to avoid partial matches)
+                    const isActive = location.pathname === item.path ||
+                        (item.path !== ROUTES.ADMIN.DASHBOARD &&
+                            location.pathname.startsWith(`${item.path}/`));
 
                     return (
                         <ListItem key={item.path} disablePadding>

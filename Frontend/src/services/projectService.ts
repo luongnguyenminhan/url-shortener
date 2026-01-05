@@ -3,7 +3,9 @@ import type {
     ProjectResponse,
     ProjectCreate,
     ProjectUpdate,
-    ProjectDetailResponse
+    ProjectDetailResponse,
+    CreateProjectTokenRequest,
+    ProjectTokenResponse
 } from '@/types/project.type';
 import type { PaginatedResponse, PaginationParams, ApiResponse } from '@/types/common.type';
 
@@ -37,5 +39,11 @@ export const projectService = {
     // Delete project
     deleteProject: async (id: string): Promise<void> => {
         await axiosInstance.delete(`${BASE_URL}/${id}`);
+    },
+
+    // Create project token for sharing
+    createProjectToken: async (data: CreateProjectTokenRequest): Promise<ProjectTokenResponse> => {
+        const response = await axiosInstance.post<ApiResponse<ProjectTokenResponse>>(`${BASE_URL}/create-project-token`, data);
+        return response.data.data!;
     },
 };

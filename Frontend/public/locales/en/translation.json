@@ -134,7 +134,13 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "daysAgo": "days ago",
-    "noProjects": "No projects yet"
+    "noProjects": "No projects yet",
+    "copiedToClipboard": "Copied to clipboard",
+    "copyFailed": "Failed to copy",
+    "day": "day",
+    "days": "days",
+    "copyLink": "Copy Link",
+    "copied": "Copied"
   },
   "projects": {
     "title": "All Projects",
@@ -186,6 +192,15 @@
     "statusMessages": {
       "sentToClient": "Sent to Client",
       "delivered": "Delivered"
-    }
+    },
+    "share": "Share",
+    "shareProject": "Share Project",
+    "shareProjectDescription": "Generate a share link for",
+    "shareLinkGenerated": "Share link generated successfully",
+    "shareLinkError": "Failed to generate share link",
+    "expiresIn": "Expires In",
+    "linkExpiresAt": "This link will expire at",
+    "generateLink": "Generate Link",
+    "tokenAlreadyExists": "A share link already exists for this project. Please wait for it to expire or contact support to revoke it."
   }
 }

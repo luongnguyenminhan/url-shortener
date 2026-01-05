@@ -24,7 +24,11 @@ export const photoService = {
     },
 
     // Upload photos to project
-    uploadPhotos: async (projectId: string, files: File[]): Promise<PhotoWithVersions[]> => {
+    uploadPhotos: async (
+        projectId: string,
+        files: File[],
+        onProgress?: (progress: number) => void
+    ): Promise<PhotoWithVersions[]> => {
         const formData = new FormData();
         files.forEach((file) => {
             formData.append('files', file);
@@ -36,6 +40,14 @@ export const photoService = {
             {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    if (progressEvent.total && onProgress) {
+                        const percentCompleted = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
+                        onProgress(percentCompleted);
+                    }
                 },
             }
         );

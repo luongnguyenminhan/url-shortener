@@ -15,6 +15,9 @@ import {
     ToggleButtonGroup,
     ToggleButton,
     Fab,
+    Dialog,
+    DialogTitle,
+    DialogContent,
 } from '@mui/material';
 import {
     ArrowBack,
@@ -25,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import { ProjectDetailInfo } from '../components/ProjectDetailInfo';
 import { PhotoGallery } from '../components/PhotoGallery';
+import { PhotoUploadZone } from '../components/PhotoUploadZone';
 import { projectService } from '@/services/projectService';
 import { photoService } from '@/services/photoService';
 import type { ProjectDetailResponse } from '@/types/project.type';
@@ -41,6 +45,7 @@ export const ProjectDetailPage = () => {
     const [photosLoading, setPhotosLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -109,27 +114,12 @@ export const ProjectDetailPage = () => {
     };
 
     const handleUploadPhotos = () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.multiple = true;
-        input.onchange = async (e) => {
-            const files = Array.from((e.target as HTMLInputElement).files || []);
-            if (files.length === 0) return;
+        setUploadModalOpen(true);
+    };
 
-            try {
-                setPhotosLoading(true);
-                await photoService.uploadPhotos(id!, files);
-                showSuccessToast('Đã tải lên ảnh thành công');
-                loadPhotos();
-                loadProjectData(); // Reload to update images_count
-            } catch (err: any) {
-                showErrorToast('Không thể tải lên ảnh');
-            } finally {
-                setPhotosLoading(false);
-            }
-        };
-        input.click();
+    const handleUploadComplete = () => {
+        loadPhotos();
+        loadProjectData(); // Reload to update images_count
     };
 
     if (loading) {
@@ -248,6 +238,29 @@ export const ProjectDetailPage = () => {
             >
                 <Add />
             </Fab>
+
+            {/* Upload Modal */}
+            <Dialog
+                open={uploadModalOpen}
+                onClose={() => setUploadModalOpen(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6">Upload ảnh</Typography>
+                        <IconButton onClick={() => setUploadModalOpen(false)}>
+                            <ArrowBack />
+                        </IconButton>
+                    </Stack>
+                </DialogTitle>
+                <DialogContent>
+                    <PhotoUploadZone
+                        projectId={id!}
+                        onUploadComplete={handleUploadComplete}
+                    />
+                </DialogContent>
+            </Dialog>
         </Container>
     );
 };
