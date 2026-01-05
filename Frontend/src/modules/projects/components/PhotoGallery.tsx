@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Card,
@@ -40,13 +40,47 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     viewMode = 'grid',
 }) => {
     const [hoveredPhoto, setHoveredPhoto] = useState<string | null>(null);
+    const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+    const [loadingImages, setLoadingImages] = useState(true);
+
+    // Load images with authentication
+    useEffect(() => {
+        const loadImages = async () => {
+            setLoadingImages(true);
+            const urls: Record<string, string> = {};
+            for (const photo of photos) {
+                try {
+                    const url = await photoService.getPhotoImage(photo.id, { w: 400 });
+                    urls[photo.id] = url;
+                } catch (error) {
+                    console.error(`Failed to load image for photo ${photo.id}:`, error);
+                }
+            }
+            setImageUrls(urls);
+            setLoadingImages(false);
+        };
+
+        if (photos.length > 0) {
+            loadImages();
+        } else {
+            setLoadingImages(false);
+        }
+
+        // Cleanup blob URLs when component unmounts or photos change
+        return () => {
+            Object.values(imageUrls).forEach((url) => {
+                if (url.startsWith('blob:')) {
+                    URL.revokeObjectURL(url);
+                }
+            });
+        };
+    }, [photos]);
 
     const getImageUrl = (photo: Photo): string => {
-        // Use the new API endpoint to get photo image
-        return photoService.getPhotoImage(photo.id, { w: 400 });
+        return imageUrls[photo.id] || '';
     };
 
-    if (loading) {
+    if (loading || loadingImages) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
                 <CircularProgress />

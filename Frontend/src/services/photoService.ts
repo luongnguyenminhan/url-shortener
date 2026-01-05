@@ -19,13 +19,20 @@ export const photoService = {
         };
     },
 
-    // Get single photo image (returns blob/stream)
-    getPhotoImage: (photoId: string, params?: { w?: number; h?: number }): string => {
+    // Get single photo image (returns blob URL with authentication)
+    getPhotoImage: async (photoId: string, params?: { w?: number; h?: number }): Promise<string> => {
         const query = new URLSearchParams();
         if (params?.w) query.append('w', params.w.toString());
         if (params?.h) query.append('h', params.h.toString());
         const queryString = query.toString();
-        return `${BASE_URL}/${photoId}${queryString ? `?${queryString}` : ''}`;
+
+        const response = await axiosInstance.get(
+            `${BASE_URL}/${photoId}${queryString ? `?${queryString}` : ''}`,
+            { responseType: 'blob' }
+        );
+
+        // Create a blob URL from the response
+        return URL.createObjectURL(response.data);
     },
 
     // Upload single photo to project
