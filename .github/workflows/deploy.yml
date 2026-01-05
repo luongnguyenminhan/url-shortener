@@ -20,7 +20,7 @@ env:
 
 jobs:
   build-backend-dev:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
             RUNTIME_IMAGE=${{ env.BACKEND_RUNTIME_IMAGE }}-dev
 
   build-frontend-dev:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +91,7 @@ jobs:
   # ===================== PROD =====================
 
   build-backend-prod:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
@@ -111,7 +111,7 @@ jobs:
             RUNTIME_IMAGE=${{ env.BACKEND_RUNTIME_IMAGE }}-prod
 
   build-frontend-prod:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
