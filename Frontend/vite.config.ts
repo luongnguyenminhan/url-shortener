@@ -17,10 +17,11 @@ export default defineConfig(({ mode }) => {
     server: {
       allowedHosts: ['photo.wc504.io.vn'],
       proxy: {
-        '/v1': {
-          target: env.VITE_API_ENDPOINT ?? 'https://photo.wc504.io.vn/be/api',
+        '/be/api': {
+          target: 'https://photo.wc504.io.vn',
           changeOrigin: true,
           secure: false,
+          rewrite: (path) => path,
         },
       },
     },

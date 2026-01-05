@@ -2,7 +2,7 @@ import axiosInstance from '@/config/axiosInstance';
 import type { Photo, PhotoUploadResponse, PhotoListMeta } from '@/types/photo.type';
 import type { ApiResponse } from '@/types/common.type';
 
-const BASE_URL = '/v1/photos';
+const BASE_URL = '/be/api/v1/photos';
 
 export const photoService = {
     // Get all photos for a project
