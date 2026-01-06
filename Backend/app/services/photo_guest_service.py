@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from PIL import Image
 
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
@@ -24,6 +25,7 @@ async def get_photo_image_guest(
     project_token: str,
     width: Optional[int] = None,
     height: Optional[int] = None,
+    is_thumbnail: bool = False,
 ) -> Optional[dict]:
     """
     Get photo image as streaming bytes with optional resizing (guest access).
@@ -34,6 +36,7 @@ async def get_photo_image_guest(
         project_token: Project access token for authorization
         width: Optional width for resizing
         height: Optional height for resizing (maintains aspect ratio)
+        is_thumbnail: Flag to indicate if this is a thumbnail request (returns WebP format)
 
     Returns:
         Dict with stream, content_type, filename or None if not found
@@ -80,12 +83,21 @@ async def get_photo_image_guest(
         # Resize if parameters provided
         file_bytes = resize_image(file_bytes, width, height, photo_id)
 
+        # Convert to WebP if thumbnail
+        if is_thumbnail:
+            image = Image.open(BytesIO(file_bytes))
+            output = BytesIO()
+            image.save(output, format='WEBP', quality=85)
+            file_bytes = output.getvalue()
+
+        content_type = "image/webp" if is_thumbnail else "image/jpeg"
+
         # Create stream
         stream = BytesIO(file_bytes)
 
         return {
             "stream": stream,
-            "content_type": "image/jpeg",
+            "content_type": content_type,
             "filename": photo.filename,
         }
 

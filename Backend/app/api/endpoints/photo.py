@@ -83,6 +83,7 @@ async def get_photo(
     photo_id: UUID,
     w: int = Query(None, ge=1, le=2000, description="Width for resizing"),
     h: int = Query(None, ge=1, le=2000, description="Height for resizing"),
+    is_thumbnail: bool = Query(False, description="Get thumbnail version of the photo"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -95,6 +96,7 @@ async def get_photo(
         photo_id=photo_id,
         width=w,
         height=h,
+        is_thumbnail=is_thumbnail,
     )
 
     if not photo_response:

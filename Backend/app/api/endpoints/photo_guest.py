@@ -34,6 +34,7 @@ async def get_photo_image(
     project_token: str = Query(..., description="Project access token"),
     w: int = Query(None, ge=1, le=2000, description="Width for resizing"),
     h: int = Query(None, ge=1, le=2000, description="Height for resizing"),
+    is_thumbnail: bool = Query(False, description="Get thumbnail version of the photo"),
     db: Session = Depends(get_db),
 ):
     """Get photo image as streaming response with optional resizing using project token"""
@@ -43,6 +44,7 @@ async def get_photo_image(
         project_token=project_token,
         width=w,
         height=h,
+        is_thumbnail=is_thumbnail,
     )
 
     if not photo_response:
