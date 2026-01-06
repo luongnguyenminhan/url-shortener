@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material';
 
 export default function ProjectManagementPage() {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['projects', 'admin']);
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -153,7 +153,7 @@ export default function ProjectManagementPage() {
                 >
                     {/* Search Bar */}
                     <TextField
-                        placeholder={t('projects.searchPlaceholder', 'Search projects')}
+                        placeholder={t('admin:projects.searchPlaceholder', 'Search projects')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         size="small"
@@ -200,13 +200,13 @@ export default function ProjectManagementPage() {
                                 <ListItemIcon>
                                     <CreateNewFolderIcon fontSize="small" />
                                 </ListItemIcon>
-                                <ListItemText>{t('projects.newProject', 'New Project')}</ListItemText>
+                                <ListItemText>{t('admin:projects.newProject', 'New Project')}</ListItemText>
                             </MenuItem>
                             <MenuItem onClick={() => setAnchorEl(null)}>
                                 <ListItemIcon>
                                     <SortIcon fontSize="small" />
                                 </ListItemIcon>
-                                <ListItemText>{t('projects.sortBy', 'Sort by')}</ListItemText>
+                                <ListItemText>{t('admin:projects.sortBy', 'Sort by')}</ListItemText>
                             </MenuItem>
                         </Menu>
                     </Box>
@@ -236,13 +236,13 @@ export default function ProjectManagementPage() {
                                 <CreateNewFolderIcon sx={{ fontSize: 80, color: 'text.disabled', mb: 2 }} />
                                 <Typography variant="h6" color="text.secondary" gutterBottom>
                                     {searchQuery
-                                        ? t('projects.noProjectsFound', 'No projects found')
-                                        : t('projects.noProjects', 'No projects yet')}
+                                        ? t('admin:projects.noProjectsFound', 'No projects found')
+                                        : t('admin:projects.noProjects', 'No projects yet')}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {searchQuery
-                                        ? t('projects.tryDifferentSearch', 'Try a different search')
-                                        : t('projects.createFirstProject', 'Create your first project to get started')}
+                                        ? t('admin:projects.tryDifferentSearch', 'Try a different search')
+                                        : t('admin:projects.createFirstProject', 'Create your first project to get started')}
                                 </Typography>
                             </Box>
                         ) : (

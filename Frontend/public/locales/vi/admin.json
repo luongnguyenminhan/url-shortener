@@ -11,5 +11,14 @@
     "development": {
         "title": "Tính năng đang phát triển",
         "description": "Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt."
+    },
+    "projects": {
+        "searchPlaceholder": "Tìm kiếm dự án",
+        "newProject": "Dự án mới",
+        "sortBy": "Sắp xếp theo",
+        "noProjectsFound": "Không tìm thấy dự án",
+        "noProjects": "Chưa có dự án nào",
+        "tryDifferentSearch": "Thử tìm kiếm khác",
+        "createFirstProject": "Tạo dự án đầu tiên để bắt đầu"
     }
 }

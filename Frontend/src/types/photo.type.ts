@@ -7,8 +7,8 @@ export type VersionType = typeof VersionType[keyof typeof VersionType];
 
 export interface Photo {
     id: string;
-    project_id: string;
     filename: string;
+    project_id: string;
     is_selected: boolean;
     is_approved: boolean;
     is_rejected: boolean;

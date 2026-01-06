@@ -14,6 +14,10 @@ export const ROUTES = {
     CLIENT: {
         DASHBOARD: '/',
         PROJECTS: '/projects',
+    },
+
+    SHARED: {
+        PROJECT: '/shared/:id',
     }
 } as const
 
