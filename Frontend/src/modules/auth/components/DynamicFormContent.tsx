@@ -4,6 +4,7 @@ import LoginViaEmailForm from './LoginViaEmailForm';
 import SignUpViaEmail from './SignUpViaEmail';
 import ForgotPasswordForm from './ForgotPasswordForm';
 import GoogleSignInButton from './GoogleSignInButton';
+import AzureSignInButton from './AzureSignInButton';
 import { Box, Divider, Typography } from '@mui/material';
 
 type AuthMode = 'login' | 'signup' | 'forgot';
@@ -65,6 +66,9 @@ export function DynamicFormContent({ initialMode = 'login' }: DynamicFormContent
 
       {/* Google Sign-in Button */}
       <GoogleSignInButton />
+
+      {/* Azure Sign-in Button */}
+      <AzureSignInButton />
     </Box>
   );
 }

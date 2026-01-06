@@ -4,6 +4,7 @@ import { initializeApp, type FirebaseApp } from "firebase/app";
 import {
     getAuth,
     GoogleAuthProvider,
+    OAuthProvider,
     type Auth,
     onAuthStateChanged,
 } from "firebase/auth";
@@ -23,6 +24,7 @@ const app: FirebaseApp | undefined = isBrowser ? initializeApp({
 
 const auth: Auth | undefined = app ? getAuth(app) : undefined;
 const googleProvider: GoogleAuthProvider | undefined = isBrowser ? new GoogleAuthProvider() : undefined;
+const azureProvider: OAuthProvider | undefined = isBrowser ? new OAuthProvider('microsoft.com') : undefined;
 
 const messaging: Messaging | undefined = (() => {
     try {
@@ -33,7 +35,7 @@ const messaging: Messaging | undefined = (() => {
     }
 })();
 
-export { app, auth, googleProvider, messaging, onAuthStateChanged, getToken, onMessage };
+export { app, auth, googleProvider, azureProvider, messaging, onAuthStateChanged, getToken, onMessage };
 
 export function isFirebaseReady(): boolean {
     return isBrowser && !!app && !!auth;
