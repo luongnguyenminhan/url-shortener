@@ -14,7 +14,8 @@ from app.schemas.common import (
     create_pagination_meta,
     pagination_params_dep,
 )
-from app.schemas.photo import PhotoListResponse, PhotoMetaResponse, PhotoSelectRequest
+from app.models.photo_version import VersionType
+from app.schemas.photo import PhotoMetaResponse, PhotoSelectRequest
 from app.services import photo_guest_service
 
 router = APIRouter(
@@ -35,6 +36,7 @@ async def get_photo_image(
     w: int = Query(None, ge=1, le=2000, description="Width for resizing"),
     h: int = Query(None, ge=1, le=2000, description="Height for resizing"),
     is_thumbnail: bool = Query(False, description="Get thumbnail version of the photo"),
+    version: VersionType = Query(VersionType.ORIGINAL, description="Photo version to retrieve"),
     db: Session = Depends(get_db),
 ):
     """Get photo image as streaming response with optional resizing using project token"""
@@ -45,6 +47,7 @@ async def get_photo_image(
         width=w,
         height=h,
         is_thumbnail=is_thumbnail,
+        version=version,
     )
 
     if not photo_response:
@@ -88,7 +91,10 @@ def list_project_photos(
     return ApiResponse(
         success=True,
         message="Photo list retrieved successfully",
-        data=[PhotoListResponse.model_validate(photo) for photo in photos],
+        data=[
+            PhotoListResponse.model_validate(item["photo"]).model_copy(update={"edited_version": item["edited_version"]})
+            for item in photos
+        ],
         meta=pagination_meta.model_dump(),
     )
 

@@ -9,6 +9,7 @@ from sqlmodel import Session
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.db import get_db
+from app.models.photo_version import VersionType
 from app.models.user import User
 from app.schemas.common import (
     ApiResponse,
@@ -84,6 +85,7 @@ async def get_photo(
     w: int = Query(None, ge=1, le=2000, description="Width for resizing"),
     h: int = Query(None, ge=1, le=2000, description="Height for resizing"),
     is_thumbnail: bool = Query(False, description="Get thumbnail version of the photo"),
+    version: VersionType = Query(VersionType.ORIGINAL, description="Photo version to retrieve"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -97,6 +99,7 @@ async def get_photo(
         width=w,
         height=h,
         is_thumbnail=is_thumbnail,
+        version=version,
     )
 
     if not photo_response:
@@ -142,7 +145,10 @@ def list_project_photos(
     return ApiResponse(
         success=True,
         message=MessageConstants.PHOTO_LIST_RETRIEVED,
-        data=[PhotoListResponse.model_validate(photo) for photo in photos],
+        data=[
+            PhotoListResponse.model_validate(item["photo"]).model_copy(update={"edited_version": item["edited_version"]})
+            for item in photos
+        ],
         meta=pagination_meta.model_dump(),
     )
 

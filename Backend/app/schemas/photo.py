@@ -78,6 +78,7 @@ class PhotoListResponse(BaseModel):
     is_rejected: bool = False
     created_at: datetime
     updated_at: datetime
+    edited_version: bool = False
 
     class Config:
         """Pydantic config"""

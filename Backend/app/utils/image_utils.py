@@ -9,6 +9,27 @@ from PIL import Image
 from app.utils.logging import logger
 
 
+def convert_to_webp(file_bytes: bytes, quality: int = 85) -> bytes:
+    """
+    Convert image bytes to WebP format.
+
+    Args:
+        file_bytes: Image bytes to convert
+        quality: WebP quality (0-100)
+
+    Returns:
+        WebP image bytes
+    """
+    try:
+        img = Image.open(BytesIO(file_bytes))
+        output = BytesIO()
+        img.save(output, format='WEBP', quality=quality)
+        return output.getvalue()
+    except Exception as e:
+        logger.exception(f"Error converting to WebP: {e}")
+        return file_bytes
+
+
 def resize_image(
     file_bytes: bytes,
     width: Optional[int],

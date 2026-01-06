@@ -9,12 +9,12 @@ from PIL import Image
 
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
-from app.crud import client_session_crud, photo_comment_crud, photo_crud
+from app.crud import client_session_crud, photo_comment_crud, photo_crud, photo_version_crud
 from app.models.photo import Photo
 from app.models.photo_version import PhotoVersion, VersionType
 from app.schemas.common import PaginationSortSearchSchema
 from app.schemas.photo import PhotoCommentResponse, PhotoListResponse, PhotoMetaResponse
-from app.utils.image_utils import resize_image
+from app.utils.image_utils import convert_to_webp, resize_image
 from app.utils.logging import logger
 from app.utils.minio import download_file_from_minio
 
@@ -26,6 +26,7 @@ async def get_photo_image_guest(
     width: Optional[int] = None,
     height: Optional[int] = None,
     is_thumbnail: bool = False,
+    version: VersionType = VersionType.ORIGINAL,
 ) -> Optional[dict]:
     """
     Get photo image as streaming bytes with optional resizing (guest access).
@@ -37,6 +38,7 @@ async def get_photo_image_guest(
         width: Optional width for resizing
         height: Optional height for resizing (maintains aspect ratio)
         is_thumbnail: Flag to indicate if this is a thumbnail request (returns WebP format)
+        version: Photo version to retrieve (VersionType.ORIGINAL or VersionType.EDITED)
 
     Returns:
         Dict with stream, content_type, filename or None if not found
@@ -64,14 +66,14 @@ async def get_photo_image_guest(
 
     # 3. Get photo image (reuse logic from photo_service)
 
-    photo_version = db.query(PhotoVersion).filter((PhotoVersion.photo_id == photo_id) & (PhotoVersion.version_type == VersionType.ORIGINAL.value)).first()
+    photo_version = photo_version_crud.get_by_photo_and_version_type(db, photo_id, version)
 
     if not photo_version:
         return None
 
     try:
         # Download from MinIO
-        minio_path = f"{photo.project_id}/original/{photo.filename}"
+        minio_path = f"{photo.project_id}/{version.value}/{photo.filename}"
         file_bytes = download_file_from_minio(
             bucket_name=settings.MINIO_BUCKET_NAME,
             object_name=minio_path,
@@ -85,10 +87,7 @@ async def get_photo_image_guest(
 
         # Convert to WebP if thumbnail
         if is_thumbnail:
-            image = Image.open(BytesIO(file_bytes))
-            output = BytesIO()
-            image.save(output, format='WEBP', quality=85)
-            file_bytes = output.getvalue()
+            file_bytes = convert_to_webp(file_bytes, quality=85)
 
         content_type = "image/webp" if is_thumbnail else "image/jpeg"
 
@@ -289,7 +288,7 @@ def get_project_photos_guest(
     project_token: str,
     pagination_params: PaginationSortSearchSchema,
     is_selected: Optional[bool] = None,
-) -> tuple[list[Photo], int]:
+) -> tuple[list[dict], int]:
     """
     Get all photos in a project with authorization check via project token and optional filtering.
 
@@ -300,7 +299,7 @@ def get_project_photos_guest(
         is_selected: Optional filter by selection status (True/False/None)
 
     Returns:
-        Tuple of (photos list, total count)
+        Tuple of (photos list with edited_version flag, total count)
 
     Raises:
         HTTPException: If token is invalid
@@ -326,7 +325,19 @@ def get_project_photos_guest(
         is_selected=is_selected,
     )
 
-    return photos, total
+    # Add edited_version flag to each photo
+    photo_list = []
+    for photo in photos:
+        has_edited = db.query(PhotoVersion).filter(
+            PhotoVersion.photo_id == photo.id,
+            PhotoVersion.version_type != VersionType.ORIGINAL.value
+        ).first() is not None
+        photo_list.append({
+            "photo": photo,
+            "edited_version": has_edited
+        })
+
+    return photo_list, total
 
 
 def get_photo_meta_by_id_guest(
