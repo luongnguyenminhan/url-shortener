@@ -51,6 +51,7 @@ class MessageConstants:
 
     # Photo Error Messages
     PHOTO_NOT_FOUND = "photo_not_found"
+    PHOTO_NOT_SELECTED = "photo_not_selected"
     INVALID_FILE_TYPE = "invalid_file_type"
     FILE_TOO_LARGE = "file_too_large"
     DUPLICATE_FILENAME = "duplicate_filename"

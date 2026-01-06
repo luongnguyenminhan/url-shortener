@@ -73,6 +73,42 @@ async def upload_photo(
         data=photo_detail,
     )
 
+@router.post(
+    "/edited",
+    response_model=ApiResponse[PhotoDetailResponse],
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload photo",
+    description="Upload a JPEG photo to a project",
+)
+async def upload_edited_photo(
+    file: UploadFile = File(..., description="JPEG image file"),
+    project_id: str = Form(..., description="Project ID to upload photo to"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[PhotoDetailResponse]:
+    """Upload a JPEG photo to a project"""
+    from uuid import UUID
+
+    # Convert project_id string to UUID
+    try:
+        project_uuid = UUID(project_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid project_id format",
+        )
+
+    photo_detail = await photo_service.upload_edited_photo(
+        db=db,
+        user=current_user,
+        project_id=project_uuid,
+        file=file,
+    )
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PHOTO_UPLOADED,
+        data=photo_detail,
+    )
 
 @router.get(
     "/{photo_id}",
