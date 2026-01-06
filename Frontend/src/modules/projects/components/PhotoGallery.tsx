@@ -1,61 +1,66 @@
 import { useState, useEffect } from 'react';
 import {
     Box,
-    Card,
-    CardMedia,
-    CardContent,
-    Typography,
-    IconButton,
-    Checkbox,
-    Chip,
-    Stack,
-    CircularProgress,
     ImageList,
     ImageListItem,
-    ImageListItemBar,
+    CircularProgress,
+    Typography,
+    Checkbox,
+    Chip,
+    alpha,
 } from '@mui/material';
 import {
     CheckCircle,
-    Cancel,
-    Delete,
+    ThumbUp,
+    ThumbDown,
+    ImageOutlined,
 } from '@mui/icons-material';
 import type { Photo } from '@/types/photo.type';
 import { photoService } from '@/services/photoService';
+import { PhotoDetailModal } from './PhotoDetailModal';
 
 interface PhotoGalleryProps {
     photos: Photo[];
     loading?: boolean;
-    onPhotoClick?: (photo: Photo) => void;
-    onPhotoSelect?: (photoId: string, selected: boolean) => void;
     onPhotoDelete?: (photoId: string) => void;
-    viewMode?: 'grid' | 'list';
+    onPhotoUpdate?: () => void;
 }
 
 export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     photos,
     loading = false,
-    onPhotoClick,
-    onPhotoSelect,
     onPhotoDelete,
-    viewMode = 'grid',
+    onPhotoUpdate,
 }) => {
     const [hoveredPhoto, setHoveredPhoto] = useState<string | null>(null);
+    const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
     const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
     const [loadingImages, setLoadingImages] = useState(true);
+    const [detailPhoto, setDetailPhoto] = useState<Photo | null>(null);
+    const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-    // Load images with authentication
+    // Load thumbnail images
     useEffect(() => {
         const loadImages = async () => {
             setLoadingImages(true);
             const urls: Record<string, string> = {};
-            for (const photo of photos) {
-                try {
-                    const url = await photoService.getPhotoImage(photo.id, { w: 400 });
-                    urls[photo.id] = url;
-                } catch (error) {
-                    console.error(`Failed to load image for photo ${photo.id}:`, error);
-                }
+
+            // Load images in batches for better performance
+            const batchSize = 10;
+            for (let i = 0; i < photos.length; i += batchSize) {
+                const batch = photos.slice(i, i + batchSize);
+                await Promise.all(
+                    batch.map(async (photo) => {
+                        try {
+                            const url = await photoService.getPhotoImage(photo.id, { w: 400, h: 400 });
+                            urls[photo.id] = url;
+                        } catch (error) {
+                            console.error(`Failed to load image for photo ${photo.id}:`, error);
+                        }
+                    })
+                );
             }
+
             setImageUrls(urls);
             setLoadingImages(false);
         };
@@ -76,9 +81,79 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         };
     }, [photos]);
 
+    const handlePhotoClick = (photo: Photo) => {
+        setDetailPhoto(photo);
+        setDetailModalOpen(true);
+    };
+
+    const handleNavigate = (direction: 'prev' | 'next') => {
+        if (!detailPhoto) return;
+
+        const currentIndex = photos.findIndex((p) => p.id === detailPhoto.id);
+        if (direction === 'prev' && currentIndex > 0) {
+            setDetailPhoto(photos[currentIndex - 1]);
+        } else if (direction === 'next' && currentIndex < photos.length - 1) {
+            setDetailPhoto(photos[currentIndex + 1]);
+        }
+    };
+
+    const handleToggleSelect = async (photoId: string, selected: boolean) => {
+        try {
+            await photoService.toggleSelection(photoId, selected);
+            onPhotoUpdate?.();
+        } catch (error) {
+            console.error('Failed to toggle selection:', error);
+        }
+    };
+
+    const handleApprove = async (photoId: string) => {
+        try {
+            await photoService.approvePhoto(photoId);
+            onPhotoUpdate?.();
+        } catch (error) {
+            console.error('Failed to approve photo:', error);
+        }
+    };
+
+    const handleReject = async (photoId: string) => {
+        try {
+            await photoService.rejectPhoto(photoId);
+            onPhotoUpdate?.();
+        } catch (error) {
+            console.error('Failed to reject photo:', error);
+        }
+    };
+
+    const handleBulkSelect = (photoId: string, checked: boolean) => {
+        const newSelected = new Set(selectedPhotos);
+        if (checked) {
+            newSelected.add(photoId);
+        } else {
+            newSelected.delete(photoId);
+        }
+        setSelectedPhotos(newSelected);
+    };
+
     const getImageUrl = (photo: Photo): string => {
         return imageUrls[photo.id] || '';
     };
+
+    // Calculate responsive columns
+    const getColumns = () => {
+        const width = window.innerWidth;
+        if (width < 600) return 2;
+        if (width < 960) return 3;
+        if (width < 1280) return 4;
+        return 5;
+    };
+
+    const [columns, setColumns] = useState(getColumns());
+
+    useEffect(() => {
+        const handleResize = () => setColumns(getColumns());
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     if (loading || loadingImages) {
         return (
@@ -98,6 +173,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                 minHeight={400}
                 gap={2}
             >
+                <ImageOutlined sx={{ fontSize: 64, color: 'text.secondary', opacity: 0.5 }} />
                 <Typography variant="h6" color="text.secondary">
                     Chưa có ảnh nào
                 </Typography>
@@ -108,162 +184,190 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         );
     }
 
-    if (viewMode === 'grid') {
-        return (
-            <ImageList cols={3} gap={16} sx={{ m: 0 }}>
-                {photos.map((photo) => (
-                    <ImageListItem
-                        key={photo.id}
-                        onMouseEnter={() => setHoveredPhoto(photo.id)}
-                        onMouseLeave={() => setHoveredPhoto(null)}
-                        sx={{ cursor: 'pointer', position: 'relative' }}
-                    >
-                        <img
-                            src={getImageUrl(photo)}
-                            alt={photo.filename}
-                            loading="lazy"
-                            style={{
-                                height: 200,
-                                objectFit: 'cover',
-                                borderRadius: 8,
-                            }}
-                            onClick={() => onPhotoClick?.(photo)}
-                        />
-                        <ImageListItemBar
-                            title={photo.filename}
-                            subtitle={
-                                <Stack direction="row" spacing={0.5} sx={{ mt: 0.5 }}>
-                                    {photo.is_selected && (
-                                        <Chip
-                                            label="Đã chọn"
-                                            size="small"
-                                            color="primary"
-                                            icon={<CheckCircle />}
-                                            sx={{ height: 20 }}
-                                        />
-                                    )}
-                                    {photo.is_approved && (
-                                        <Chip
-                                            label="Đã duyệt"
-                                            size="small"
-                                            color="success"
-                                            icon={<CheckCircle />}
-                                            sx={{ height: 20 }}
-                                        />
-                                    )}
-                                    {photo.is_rejected && (
-                                        <Chip
-                                            label="Từ chối"
-                                            size="small"
-                                            color="error"
-                                            icon={<Cancel />}
-                                            sx={{ height: 20 }}
-                                        />
-                                    )}
-                                </Stack>
-                            }
-                            actionIcon={
-                                hoveredPhoto === photo.id && (
-                                    <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }}>
-                                        {onPhotoSelect && (
-                                            <Checkbox
-                                                checked={photo.is_selected}
-                                                onChange={(e) => {
-                                                    e.stopPropagation();
-                                                    onPhotoSelect(photo.id, e.target.checked);
-                                                }}
-                                                sx={{ color: 'white' }}
-                                            />
-                                        )}
-                                        {onPhotoDelete && (
-                                            <IconButton
-                                                size="small"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onPhotoDelete(photo.id);
-                                                }}
-                                                sx={{ color: 'white' }}
-                                            >
-                                                <Delete fontSize="small" />
-                                            </IconButton>
-                                        )}
-                                    </Box>
-                                )
-                            }
-                            sx={{
-                                background:
-                                    'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
-                                borderRadius: '0 0 8px 8px',
-                            }}
-                        />
-                    </ImageListItem>
-                ))}
-            </ImageList>
-        );
-    }
-
-    // List view
     return (
-        <Stack spacing={2}>
-            {photos.map((photo) => (
-                <Card
-                    key={photo.id}
-                    onMouseEnter={() => setHoveredPhoto(photo.id)}
-                    onMouseLeave={() => setHoveredPhoto(null)}
-                    sx={{ display: 'flex', cursor: 'pointer' }}
-                    onClick={() => onPhotoClick?.(photo)}
-                >
-                    <CardMedia
-                        component="img"
-                        sx={{ width: 160, height: 120, objectFit: 'cover' }}
-                        image={getImageUrl(photo)}
-                        alt={photo.filename}
-                    />
-                    <CardContent sx={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Box>
-                            <Typography variant="subtitle1" fontWeight="medium">
-                                {photo.filename}
-                            </Typography>
-                            <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+        <>
+            <ImageList
+                cols={columns}
+                gap={8}
+                sx={{
+                    m: 0,
+                    width: '100%',
+                    // Masonry-like effect for Google Photos style
+                    '&.MuiImageList-root': {
+                        overflow: 'visible',
+                    },
+                }}
+            >
+                {photos.map((photo) => {
+                    const isHovered = hoveredPhoto === photo.id;
+                    const isSelected = selectedPhotos.has(photo.id);
+
+                    return (
+                        <ImageListItem
+                            key={photo.id}
+                            onMouseEnter={() => setHoveredPhoto(photo.id)}
+                            onMouseLeave={() => setHoveredPhoto(null)}
+                            sx={{
+                                cursor: 'pointer',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                borderRadius: 1,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    transform: 'scale(1.02)',
+                                    zIndex: 1,
+                                    boxShadow: 3,
+                                },
+                            }}
+                        >
+                            {/* Image */}
+                            <Box
+                                component="img"
+                                src={getImageUrl(photo)}
+                                alt={photo.filename}
+                                loading="lazy"
+                                onClick={() => handlePhotoClick(photo)}
+                                sx={{
+                                    width: '100%',
+                                    height: 200,
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                    bgcolor: '#f5f5f5',
+                                }}
+                            />
+
+                            {/* Overlay on hover */}
+                            {isHovered && (
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.5) 100%)',
+                                        pointerEvents: 'none',
+                                    }}
+                                />
+                            )}
+
+                            {/* Top overlay - Checkbox */}
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: 8,
+                                    left: 8,
+                                    right: 8,
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    pointerEvents: 'none',
+                                }}
+                            >
+                                <Checkbox
+                                    checked={isSelected}
+                                    onChange={(e) => {
+                                        e.stopPropagation();
+                                        handleBulkSelect(photo.id, e.target.checked);
+                                    }}
+                                    sx={{
+                                        color: '#fff',
+                                        pointerEvents: 'auto',
+                                        opacity: isHovered || isSelected ? 1 : 0,
+                                        transition: 'opacity 0.2s',
+                                        '&.Mui-checked': {
+                                            color: '#fff',
+                                        },
+                                        bgcolor: isSelected || isHovered ? 'rgba(0,0,0,0.3)' : 'transparent',
+                                        borderRadius: '50%',
+                                        p: 0.5,
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </Box>
+
+                            {/* Bottom overlay - Status chips */}
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    p: 1,
+                                    display: 'flex',
+                                    gap: 0.5,
+                                    flexWrap: 'wrap',
+                                }}
+                            >
                                 {photo.is_selected && (
-                                    <Chip label="Đã chọn" size="small" color="primary" icon={<CheckCircle />} />
+                                    <Chip
+                                        label="Đã chọn"
+                                        size="small"
+                                        icon={<CheckCircle sx={{ fontSize: 14 }} />}
+                                        sx={{
+                                            height: 24,
+                                            fontSize: '0.7rem',
+                                            bgcolor: alpha('#1976d2', 0.9),
+                                            color: '#fff',
+                                            '& .MuiChip-icon': {
+                                                color: '#fff',
+                                            },
+                                        }}
+                                    />
                                 )}
                                 {photo.is_approved && (
-                                    <Chip label="Đã duyệt" size="small" color="success" icon={<CheckCircle />} />
+                                    <Chip
+                                        label="Đã duyệt"
+                                        size="small"
+                                        icon={<ThumbUp sx={{ fontSize: 14 }} />}
+                                        sx={{
+                                            height: 24,
+                                            fontSize: '0.7rem',
+                                            bgcolor: alpha('#2e7d32', 0.9),
+                                            color: '#fff',
+                                            '& .MuiChip-icon': {
+                                                color: '#fff',
+                                            },
+                                        }}
+                                    />
                                 )}
                                 {photo.is_rejected && (
-                                    <Chip label="Từ chối" size="small" color="error" icon={<Cancel />} />
-                                )}
-                            </Stack>
-                        </Box>
-                        {hoveredPhoto === photo.id && (
-                            <Stack direction="row" spacing={1}>
-                                {onPhotoSelect && (
-                                    <IconButton
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onPhotoSelect(photo.id, !photo.is_selected);
+                                    <Chip
+                                        label="Từ chối"
+                                        size="small"
+                                        icon={<ThumbDown sx={{ fontSize: 14 }} />}
+                                        sx={{
+                                            height: 24,
+                                            fontSize: '0.7rem',
+                                            bgcolor: alpha('#d32f2f', 0.9),
+                                            color: '#fff',
+                                            '& .MuiChip-icon': {
+                                                color: '#fff',
+                                            },
                                         }}
-                                    >
-                                        <CheckCircle color={photo.is_selected ? 'primary' : 'action'} />
-                                    </IconButton>
+                                    />
                                 )}
-                                {onPhotoDelete && (
-                                    <IconButton
-                                        color="error"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onPhotoDelete(photo.id);
-                                        }}
-                                    >
-                                        <Delete />
-                                    </IconButton>
-                                )}
-                            </Stack>
-                        )}
-                    </CardContent>
-                </Card>
-            ))}
-        </Stack>
+                            </Box>
+                        </ImageListItem>
+                    );
+                })}
+            </ImageList>
+
+            {/* Photo Detail Modal */}
+            <PhotoDetailModal
+                open={detailModalOpen}
+                photo={detailPhoto}
+                photos={photos}
+                onClose={() => {
+                    setDetailModalOpen(false);
+                    setDetailPhoto(null);
+                }}
+                onNavigate={handleNavigate}
+                onDelete={onPhotoDelete}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                onToggleSelect={handleToggleSelect}
+            />
+        </>
     );
 };

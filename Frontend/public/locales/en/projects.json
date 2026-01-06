@@ -13,12 +13,38 @@
         "deleteConfirm": "Are you sure you want to delete this photo?",
         "deleteSuccess": "Photo deleted successfully",
         "deleteError": "Cannot delete photo",
+        "editStatus": "Edit Status",
+        "status": "Status",
+        "statusUpdateSuccess": "Status updated successfully",
+        "statusUpdateError": "Cannot update status",
+        "cancel": "Cancel",
+        "save": "Save",
         "breadcrumb": {
             "projects": "Projects"
         },
         "uploadDialog": {
             "title": "Upload Photos"
         }
+    },
+    "status": {
+        "draft": "Draft",
+        "clientSelecting": "Client Selecting",
+        "pendingEdit": "Pending Edit",
+        "clientReview": "Client Review",
+        "completed": "Completed"
+    },
+    "info": {
+        "photoCount": "Photo Count",
+        "photos": "photos",
+        "createdDate": "Created Date",
+        "lastUpdated": "Last Updated",
+        "expiryDate": "Expiry Date",
+        "owner": "Owner",
+        "shareLink": "Share Link",
+        "expires": "Expires",
+        "copyLink": "Copy link",
+        "copiedLink": "Share link copied",
+        "clientNotes": "Client Notes"
     },
     "shared": {
         "invalidLink": "Invalid shared link. Please check the URL.",
