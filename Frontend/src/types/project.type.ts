@@ -69,3 +69,28 @@ export interface VerifyProjectToken {
     token: string;
     password?: string;
 }
+
+export interface VerifyProjectTokenRequest {
+    token: string;
+    password?: string;
+}
+
+export interface ProjectOwnerInfo {
+    id: string;
+    email: string;
+    name: string;
+}
+
+export interface VerifyProjectTokenResponseProject extends ProjectResponse {
+    owner_info: ProjectOwnerInfo;
+}
+
+export interface VerifyProjectTokenResponse {
+    token: string;
+    project_id: string;
+    expires_at: string;
+    is_active: boolean;
+    has_password: boolean;
+    count_accesses: number;
+    project: VerifyProjectTokenResponseProject;
+}

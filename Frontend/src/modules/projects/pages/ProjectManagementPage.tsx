@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material';
 
 export default function ProjectManagementPage() {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['projects', 'admin']);
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -140,7 +140,7 @@ export default function ProjectManagementPage() {
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: 'var(--bg-primary)' }}>
             <Container maxWidth="xl">
                 {/* Google Drive-style Toolbar */}
                 <Toolbar
@@ -148,12 +148,13 @@ export default function ProjectManagementPage() {
                         px: { xs: 1, sm: 2 },
                         py: 2,
                         gap: 2,
-                        flexWrap: 'wrap'
+                        flexWrap: 'wrap',
+                        bgcolor: 'transparent',
                     }}
                 >
                     {/* Search Bar */}
                     <TextField
-                        placeholder={t('projects.searchPlaceholder', 'Search projects')}
+                        placeholder={t('admin:projects.searchPlaceholder', 'Search projects')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         size="small"
@@ -161,9 +162,23 @@ export default function ProjectManagementPage() {
                             flexGrow: 1,
                             maxWidth: { xs: '100%', sm: 600 },
                             '& .MuiOutlinedInput-root': {
-                                bgcolor: 'background.paper',
+                                bgcolor: 'var(--bg-secondary)',
                                 borderRadius: 2,
-                            }
+                                color: 'var(--text-primary)',
+                                '& fieldset': {
+                                    borderColor: 'var(--border-primary)',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'var(--border-focus)',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'var(--border-focus)',
+                                },
+                            },
+                            '& .MuiInputBase-input::placeholder': {
+                                color: 'var(--text-tertiary)',
+                                opacity: 1,
+                            },
                         }}
                         InputProps={{
                             startAdornment: (
@@ -180,6 +195,12 @@ export default function ProjectManagementPage() {
                         <IconButton
                             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                             size="small"
+                            sx={{
+                                color: 'var(--text-primary)',
+                                '&:hover': {
+                                    bgcolor: 'var(--bg-tertiary)',
+                                },
+                            }}
                         >
                             {viewMode === 'grid' ? <ViewListIcon /> : <ViewModuleIcon />}
                         </IconButton>
@@ -188,6 +209,12 @@ export default function ProjectManagementPage() {
                         <IconButton
                             size="small"
                             onClick={(e) => setAnchorEl(e.currentTarget)}
+                            sx={{
+                                color: 'var(--text-primary)',
+                                '&:hover': {
+                                    bgcolor: 'var(--bg-tertiary)',
+                                },
+                            }}
                         >
                             <MoreVertIcon />
                         </IconButton>
@@ -195,18 +222,30 @@ export default function ProjectManagementPage() {
                             anchorEl={anchorEl}
                             open={Boolean(anchorEl)}
                             onClose={() => setAnchorEl(null)}
+                            sx={{
+                                '& .MuiPaper-root': {
+                                    bgcolor: 'var(--bg-secondary)',
+                                    color: 'var(--text-primary)',
+                                    boxShadow: 'var(--shadow-lg)',
+                                },
+                                '& .MuiMenuItem-root': {
+                                    '&:hover': {
+                                        bgcolor: 'var(--bg-tertiary)',
+                                    },
+                                },
+                            }}
                         >
                             <MenuItem onClick={() => { handleOpenCreateDialog(); setAnchorEl(null); }}>
                                 <ListItemIcon>
                                     <CreateNewFolderIcon fontSize="small" />
                                 </ListItemIcon>
-                                <ListItemText>{t('projects.newProject', 'New Project')}</ListItemText>
+                                <ListItemText>{t('admin:projects.newProject', 'New Project')}</ListItemText>
                             </MenuItem>
                             <MenuItem onClick={() => setAnchorEl(null)}>
                                 <ListItemIcon>
                                     <SortIcon fontSize="small" />
                                 </ListItemIcon>
-                                <ListItemText>{t('projects.sortBy', 'Sort by')}</ListItemText>
+                                <ListItemText>{t('admin:projects.sortBy', 'Sort by')}</ListItemText>
                             </MenuItem>
                         </Menu>
                     </Box>
@@ -236,13 +275,13 @@ export default function ProjectManagementPage() {
                                 <CreateNewFolderIcon sx={{ fontSize: 80, color: 'text.disabled', mb: 2 }} />
                                 <Typography variant="h6" color="text.secondary" gutterBottom>
                                     {searchQuery
-                                        ? t('projects.noProjectsFound', 'No projects found')
-                                        : t('projects.noProjects', 'No projects yet')}
+                                        ? t('admin:projects.noProjectsFound', 'No projects found')
+                                        : t('admin:projects.noProjects', 'No projects yet')}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {searchQuery
-                                        ? t('projects.tryDifferentSearch', 'Try a different search')
-                                        : t('projects.createFirstProject', 'Create your first project to get started')}
+                                        ? t('admin:projects.tryDifferentSearch', 'Try a different search')
+                                        : t('admin:projects.createFirstProject', 'Create your first project to get started')}
                                 </Typography>
                             </Box>
                         ) : (

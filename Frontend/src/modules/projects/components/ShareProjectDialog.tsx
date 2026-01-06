@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -38,6 +38,30 @@ export function ShareProjectDialog({ open, onClose, projectId, projectTitle }: S
     const [copied, setCopied] = useState(false);
     const [expiresAt, setExpiresAt] = useState<string>('');
 
+    useEffect(() => {
+        const fetchActiveToken = async () => {
+            if (open && projectId) {
+                try {
+                    setLoading(true);
+                    const activeToken = await projectService.getActiveProjectToken(projectId);
+
+                    if (activeToken) {
+                        const baseUrl = window.location.origin;
+                        const link = `${baseUrl}/shared/${projectId}?token=${activeToken.token}`;
+                        setShareLink(link);
+                        setExpiresAt(activeToken.expires_at);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch active token:', error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchActiveToken();
+    }, [open, projectId]);
+
     const handleGenerateLink = async () => {
         try {
             setLoading(true);
@@ -48,7 +72,7 @@ export function ShareProjectDialog({ open, onClose, projectId, projectTitle }: S
 
             // Tạo share link từ token
             const baseUrl = window.location.origin;
-            const link = `${baseUrl}/projects/${projectId}?token=${response.token}`;
+            const link = `${baseUrl}/shared/${projectId}?token=${response.token}`;
             setShareLink(link);
             setExpiresAt(response.expires_at);
             showSuccessToast(t('projects.shareLinkGenerated', 'Share link generated successfully'));

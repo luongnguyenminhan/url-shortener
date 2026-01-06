@@ -93,7 +93,7 @@ const MainLayout: React.FC = () => {
 
     const drawer = (
         <div>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', 'padding': "20px 20px" }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', 'padding': "16px 15px" }}>
                 <Box
                     component="img"
                     src={brandConfig.logo}
@@ -116,7 +116,7 @@ const MainLayout: React.FC = () => {
                     {brandConfig.name}
                 </Box>
             </Box>
-            <Divider />
+            <Divider sx={{ borderColor: 'var(--border-primary)' }} />
             <List>
                 {menuItems.map((item) => {
                     // Check if current path matches the menu item
@@ -136,18 +136,17 @@ const MainLayout: React.FC = () => {
                                     }
                                 }}
                                 sx={{
-                                    backgroundColor: isActive ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
+                                    backgroundColor: isActive ? 'var(--bg-tertiary)' : 'transparent',
+                                    color: isActive ? 'var(--color-primary)' : 'var(--text-primary)',
                                     '&:hover': {
-                                        backgroundColor: isActive
-                                            ? 'rgba(25, 118, 210, 0.12)'
-                                            : 'rgba(0, 0, 0, 0.04)',
+                                        backgroundColor: 'var(--bg-tertiary)',
                                     },
                                     '& .MuiListItemIcon-root': {
-                                        color: isActive ? 'primary.main' : 'inherit',
+                                        color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)',
                                     },
                                     '& .MuiListItemText-primary': {
                                         fontWeight: isActive ? 600 : 400,
-                                        color: isActive ? 'primary.main' : 'inherit',
+                                        color: isActive ? 'var(--color-primary)' : 'var(--text-primary)',
                                     },
                                 }}
                             >
@@ -158,10 +157,21 @@ const MainLayout: React.FC = () => {
                     );
                 })}
             </List>
-            <Divider />
+            <Divider sx={{ borderColor: 'var(--border-primary)' }} />
             <List>
                 <ListItem disablePadding>
-                    <ListItemButton onClick={handleLogout}>
+                    <ListItemButton
+                        onClick={handleLogout}
+                        sx={{
+                            color: 'var(--text-primary)',
+                            '&:hover': {
+                                backgroundColor: 'var(--bg-tertiary)',
+                            },
+                            '& .MuiListItemIcon-root': {
+                                color: 'var(--text-secondary)',
+                            },
+                        }}
+                    >
                         <ListItemIcon>
                             <LogoutIcon />
                         </ListItemIcon>
@@ -173,12 +183,16 @@ const MainLayout: React.FC = () => {
     )
 
     return (
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex", bgcolor: "var(--bg-primary)" }}>
             <AppBar
                 position="fixed"
                 sx={{
                     width: { md: sidebarOpen ? `calc(100% - ${drawerWidth}px)` : "100%" },
                     ml: { md: sidebarOpen ? `${drawerWidth}px` : 0 },
+                    bgcolor: "var(--bg-secondary)",
+                    color: "var(--text-primary)",
+                    boxShadow: "var(--shadow-sm)",
+                    borderBottom: "1px solid var(--border-primary)",
                 }}
             >
                 <Toolbar>
@@ -187,21 +201,32 @@ const MainLayout: React.FC = () => {
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
-                        sx={{ mr: 2 }}
+                        sx={{
+                            mr: 2,
+                            color: "var(--text-primary)",
+                        }}
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: "var(--text-primary)" }}>
                         {t('layout.title')}
                     </Typography>
-                    <Typography variant="body2" color="white" sx={{ mr: 2 }}>
+                    <Typography variant="body2" sx={{ mr: 2, color: "var(--text-secondary)" }}>
                         {t('layout.greeting')} {user?.email}
                     </Typography>
                     <ThemeToggle />
                     <Box sx={{ mr: 2 }}>
                         <LanguageSelector />
                     </Box>
-                    <Button color="inherit" onClick={handleLogout}>
+                    <Button
+                        sx={{
+                            color: "var(--text-primary)",
+                            "&:hover": {
+                                bgcolor: "var(--bg-tertiary)"
+                            }
+                        }}
+                        onClick={handleLogout}
+                    >
                         {t('menu.logout')}
                     </Button>
                 </Toolbar>
@@ -219,6 +244,9 @@ const MainLayout: React.FC = () => {
                         "& .MuiDrawer-paper": {
                             boxSizing: "border-box",
                             width: drawerWidth,
+                            bgcolor: "var(--bg-secondary)",
+                            color: "var(--text-primary)",
+                            borderRight: "1px solid var(--border-primary)",
                         },
                     }}
                 >
@@ -234,6 +262,9 @@ const MainLayout: React.FC = () => {
                         "& .MuiDrawer-paper": {
                             boxSizing: "border-box",
                             width: drawerWidth,
+                            bgcolor: "var(--bg-secondary)",
+                            color: "var(--text-primary)",
+                            borderRight: "1px solid var(--border-primary)",
                         },
                     }}
                 >
@@ -250,6 +281,8 @@ const MainLayout: React.FC = () => {
                         md: sidebarOpen ? `calc(100% - ${drawerWidth}px)` : "100%",
                     },
                     mt: 8,
+                    bgcolor: "var(--bg-primary)",
+                    minHeight: "100vh",
                 }}
             >
                 <Outlet />
