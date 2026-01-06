@@ -33,6 +33,19 @@
         "clientReview": "Khách hàng đánh giá",
         "completed": "Hoàn thành"
     },
+    "info": {
+        "photoCount": "Số lượng ảnh",
+        "photos": "ảnh",
+        "createdDate": "Ngày tạo",
+        "lastUpdated": "Cập nhật lần cuối",
+        "expiryDate": "Ngày hết hạn",
+        "owner": "Chủ sở hữu",
+        "shareLink": "Link chia sẻ",
+        "expires": "Hết hạn",
+        "copyLink": "Copy link",
+        "copiedLink": "Đã copy link chia sẻ",
+        "clientNotes": "Ghi chú của khách hàng"
+    },
     "shared": {
         "invalidLink": "Link chia sẻ không hợp lệ. Vui lòng kiểm tra lại URL.",
         "loadingProject": "Đang tải dự án...",

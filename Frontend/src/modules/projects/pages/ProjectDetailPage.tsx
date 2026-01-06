@@ -89,10 +89,10 @@ export const ProjectDetailPage = () => {
     const loadPhotos = async () => {
         try {
             setPhotosLoading(true);
-            const result = await photoService.getPhotosByProject(id!, { page, page_size: pageSize });
+            const result = await photoService.getPhotosByProject(id!, { page, limit: pageSize });
             setPhotos(result.data || []);
             setTotalPhotos(result.meta.total);
-            setTotalPages(Math.ceil(result.meta.total / pageSize));
+            setTotalPages(result.meta.total_pages);
         } catch (err: any) {
             console.error('Error loading photos:', err);
             showErrorToast(t('detail.loadPhotosError', 'Không thể tải danh sách ảnh'));

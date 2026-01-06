@@ -218,7 +218,7 @@ const MainLayout: React.FC = () => {
                     <Typography variant="body2" sx={{ mr: 2, color: "rgba(255, 255, 255, 0.9)" }}>
                         {t('layout.greeting')} {user?.email}
                     </Typography>
-                    <ThemeToggle />
+                    {/* <ThemeToggle /> */}
                     <Box sx={{ mr: 2 }}>
                         <LanguageSelector />
                     </Box>

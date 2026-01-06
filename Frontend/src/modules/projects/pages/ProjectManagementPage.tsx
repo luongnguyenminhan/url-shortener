@@ -20,6 +20,7 @@ import {
     ListItemIcon,
     ListItemText,
     useTheme,
+    Pagination,
 } from '@mui/material';
 import {
     Search as SearchIcon,
@@ -40,6 +41,10 @@ export default function ProjectManagementPage() {
     const [projects, setProjects] = useState<ProjectResponse[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(12);
+    const [totalPages, setTotalPages] = useState(0);
+    const [total, setTotal] = useState(0);
 
     // Dialog states
     const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -53,19 +58,20 @@ export default function ProjectManagementPage() {
         setError(null);
         try {
             const response = await projectService.getProjects({
-                skip: 0,
-                limit: 100,
+                skip: (page - 1) * pageSize,
+                limit: pageSize,
                 search: searchQuery || undefined,
+                sort_key: 'updated_at',
+                sort_dir: 'desc',
             });
 
-            // Sort by newest first (created_at or updated_at descending)
-            const sortedProjects = (response.data || []).sort((a, b) => {
-                const dateA = new Date(a.updated_at || a.created_at).getTime();
-                const dateB = new Date(b.updated_at || b.created_at).getTime();
-                return dateB - dateA; // Newest first
-            });
+            setProjects(response.data || []);
 
-            setProjects(sortedProjects);
+            // Update pagination info from meta
+            if (response.meta) {
+                setTotal(response.meta.total || 0);
+                setTotalPages(response.meta.total_pages || 0);
+            }
         } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || 'Failed to fetch projects';
             setError(errorMsg);
@@ -75,14 +81,24 @@ export default function ProjectManagementPage() {
         }
     };
 
-    // Load projects on mount and when search changes
+    // Load projects on mount and when search or page changes
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchProjects();
-        }, 300); // Debounce search
+        }, searchQuery ? 300 : 0); // Debounce search only
 
         return () => clearTimeout(timer);
+    }, [searchQuery, page]);
+
+    // Reset to page 1 when search changes
+    useEffect(() => {
+        setPage(1);
     }, [searchQuery]);
+
+    const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleAction = (projectId: string, action: 'open' | 'edit' | 'delete' | 'share') => {
         const project = projects.find(p => p.id === projectId);
@@ -314,6 +330,36 @@ export default function ProjectManagementPage() {
                                         onAction={handleAction}
                                     />
                                 ))}
+                            </Box>
+                        )}
+
+                        {/* Pagination */}
+                        {!loading && totalPages > 1 && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                <Pagination
+                                    count={totalPages}
+                                    page={page}
+                                    onChange={handlePageChange}
+                                    color="primary"
+                                    size="large"
+                                    showFirstButton
+                                    showLastButton
+                                    sx={{
+                                        '& .MuiPaginationItem-root': {
+                                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                                            },
+                                            '&.Mui-selected': {
+                                                backgroundColor: '#1976d2',
+                                                color: '#ffffff',
+                                                '&:hover': {
+                                                    backgroundColor: '#1565c0',
+                                                },
+                                            },
+                                        },
+                                    }}
+                                />
                             </Box>
                         )}
                     </>

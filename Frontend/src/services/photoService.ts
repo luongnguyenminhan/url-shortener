@@ -8,7 +8,7 @@ export const photoService = {
     // Get all photos for a project
     getPhotosByProject: async (
         projectId: string,
-        params?: { page?: number; page_size?: number }
+        params?: { page?: number; limit?: number; is_selected?: boolean; sort_by?: string; sort_order?: 'asc' | 'desc'; search?: string }
     ): Promise<{ data: Photo[]; meta: PhotoListMeta }> => {
         const response = await axiosInstance.get<
             ApiResponse<Photo[]> & { meta: PhotoListMeta }

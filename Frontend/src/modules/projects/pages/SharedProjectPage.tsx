@@ -545,6 +545,7 @@ export const SharedProjectPage = () => {
                             />
                             {isClientSelecting && (
                                 <Button
+                                    disabled={selectedCount == 0}
                                     variant="contained"
                                     startIcon={<SendIcon />}
                                     sx={{

@@ -41,7 +41,9 @@ export interface ProjectResponse extends ProjectBase {
     updated_at: string;
 }
 
-export interface ProjectDetailResponse extends ProjectResponse { }
+export interface ProjectDetailResponse extends ProjectResponse {
+    owner_info: any;
+}
 
 export interface ProjectListResponse {
     total: number;

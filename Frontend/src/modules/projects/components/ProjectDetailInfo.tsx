@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Card, CardContent, Chip, Typography, Stack, Divider, IconButton, Tooltip, useTheme } from '@mui/material';
 import {
     CalendarToday,
@@ -27,16 +28,17 @@ const statusColors: Record<string, 'default' | 'primary' | 'secondary' | 'succes
     completed: 'success',
 };
 
-const statusLabels: Record<string, string> = {
-    draft: 'Bản nháp',
-    client_selecting: 'Khách hàng đang chọn',
-    pending_edit: 'Chờ chỉnh sửa',
-    client_review: 'Khách hàng đánh giá',
-    completed: 'Hoàn thành',
-};
-
 export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, onStatusUpdate }) => {
+    const { t } = useTranslation('projects');
     const theme = useTheme();
+
+    const statusLabels: Record<string, string> = {
+        draft: t('status.draft'),
+        client_selecting: t('status.clientSelecting'),
+        pending_edit: t('status.pendingEdit'),
+        client_review: t('status.clientReview'),
+        completed: t('status.completed'),
+    };
     const [shareLink, setShareLink] = useState<string | null>(null);
     const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
@@ -62,7 +64,7 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
         if (shareLink) {
             try {
                 await navigator.clipboard.writeText(shareLink);
-                showSuccessToast('Đã copy link chia sẻ');
+                showSuccessToast(t('info.copiedLink'));
             } catch (error) {
                 console.error('Failed to copy:', error);
             }
@@ -87,7 +89,7 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                         size="small"
                     />
                     {onStatusUpdate && (
-                        <Tooltip title="Chỉnh sửa trạng thái">
+                        <Tooltip title={t('detail.editStatus')}>
                             <IconButton
                                 size="small"
                                 onClick={onStatusUpdate}
@@ -111,10 +113,10 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                         <ImageIcon sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }} />
                         <Box>
                             <Typography variant="caption" display="block" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
-                                Số lượng ảnh
+                                {t('info.photoCount')}
                             </Typography>
                             <Typography variant="body1" fontWeight="medium" sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
-                                {project.images_count} ảnh
+                                {project.images_count} {t('info.photos')}
                             </Typography>
                         </Box>
                     </Box>
@@ -123,7 +125,7 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                         <CalendarToday sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }} />
                         <Box>
                             <Typography variant="caption" display="block" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
-                                Ngày tạo
+                                {t('info.createdDate')}
                             </Typography>
                             <Typography variant="body1" sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
                                 {format(new Date(project.created_at), 'dd/MM/yyyy HH:mm')}
@@ -135,7 +137,7 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                         <CalendarToday sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }} />
                         <Box>
                             <Typography variant="caption" display="block" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
-                                Cập nhật lần cuối
+                                {t('info.lastUpdated')}
                             </Typography>
                             <Typography variant="body1" sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
                                 {format(new Date(project.updated_at), 'dd/MM/yyyy HH:mm')}
@@ -148,7 +150,7 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                             <CalendarToday sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }} />
                             <Box>
                                 <Typography variant="caption" display="block" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
-                                    Ngày hết hạn
+                                    {t('info.expiryDate')}
                                 </Typography>
                                 <Typography variant="body1" sx={{ color: '#d32f2f' }}>
                                     {format(new Date(project.expired_date), 'dd/MM/yyyy HH:mm')}
@@ -161,10 +163,10 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                         <Person sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }} />
                         <Box>
                             <Typography variant="caption" display="block" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
-                                ID chủ sở hữu
+                                {t('info.owner')}
                             </Typography>
                             <Typography variant="body2" sx={{ wordBreak: 'break-all', color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
-                                {project.owner_id}
+                                {project.owner_info.name}
                             </Typography>
                         </Box>
                     </Box>
@@ -176,7 +178,7 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                                 <LinkIcon sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }} />
                                 <Box sx={{ flex: 1 }}>
                                     <Typography variant="caption" display="block" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
-                                        Link chia sẻ
+                                        {t('info.shareLink')}
                                     </Typography>
                                     <Typography
                                         variant="body2"
@@ -192,11 +194,11 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                                     </Typography>
                                     {expiresAt && (
                                         <Typography variant="caption" display="block" sx={{ mt: 0.5, color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
-                                            Hết hạn: {format(new Date(expiresAt), 'dd/MM/yyyy HH:mm')}
+                                            {t('info.expires')}: {format(new Date(expiresAt), 'dd/MM/yyyy HH:mm')}
                                         </Typography>
                                     )}
                                 </Box>
-                                <Tooltip title="Copy link">
+                                <Tooltip title={t('info.copyLink')}>
                                     <IconButton
                                         size="small"
                                         onClick={handleCopyLink}
@@ -221,7 +223,7 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
                                 <Info sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }} />
                                 <Box>
                                     <Typography variant="caption" display="block" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
-                                        Ghi chú của khách hàng
+                                        {t('info.clientNotes')}
                                     </Typography>
                                     <Typography variant="body1" sx={{ mt: 0.5, whiteSpace: 'pre-wrap', color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
                                         {project.client_notes}

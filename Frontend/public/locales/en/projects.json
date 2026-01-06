@@ -33,6 +33,19 @@
         "clientReview": "Client Review",
         "completed": "Completed"
     },
+    "info": {
+        "photoCount": "Photo Count",
+        "photos": "photos",
+        "createdDate": "Created Date",
+        "lastUpdated": "Last Updated",
+        "expiryDate": "Expiry Date",
+        "owner": "Owner",
+        "shareLink": "Share Link",
+        "expires": "Expires",
+        "copyLink": "Copy link",
+        "copiedLink": "Share link copied",
+        "clientNotes": "Client Notes"
+    },
     "shared": {
         "invalidLink": "Invalid shared link. Please check the URL.",
         "loadingProject": "Loading project...",
