@@ -13,26 +13,31 @@ import {
     CircularProgress,
     Alert,
     Paper,
-    ToggleButtonGroup,
-    ToggleButton,
     Fab,
     Dialog,
     DialogTitle,
     DialogContent,
+    DialogActions,
+    MenuItem,
+    FormControl,
+    Select,
+    useTheme,
+    Pagination,
 } from '@mui/material';
 import {
     ArrowBack,
     Upload,
-    GridView,
-    ViewList,
     Add,
+    Close,
 } from '@mui/icons-material';
+import type { SelectChangeEvent } from '@mui/material';
 import { ProjectDetailInfo } from '../components/ProjectDetailInfo';
 import { PhotoGallery } from '../components/PhotoGallery';
 import { PhotoUploadZone } from '../components/PhotoUploadZone';
 import { projectService } from '@/services/projectService';
 import { photoService } from '@/services/photoService';
 import type { ProjectDetailResponse } from '@/types/project.type';
+import { ProjectStatus } from '@/types/project.type';
 import type { Photo } from '@/types/photo.type';
 import { showSuccessToast, showErrorToast } from '@/hooks/useShowToast';
 
@@ -40,21 +45,32 @@ export const ProjectDetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { t } = useTranslation('projects');
+    const theme = useTheme();
 
     const [project, setProject] = useState<ProjectDetailResponse | null>(null);
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [loading, setLoading] = useState(true);
     const [photosLoading, setPhotosLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
+    const [statusEditModalOpen, setStatusEditModalOpen] = useState(false);
+    const [editingStatus, setEditingStatus] = useState<string>('');
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(24);
+    const [totalPhotos, setTotalPhotos] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     useEffect(() => {
         if (id) {
             loadProjectData();
-            loadPhotos();
         }
     }, [id]);
+
+    useEffect(() => {
+        if (id) {
+            loadPhotos();
+        }
+    }, [id, page, pageSize]);
 
     const loadProjectData = async () => {
         try {
@@ -73,8 +89,10 @@ export const ProjectDetailPage = () => {
     const loadPhotos = async () => {
         try {
             setPhotosLoading(true);
-            const result = await photoService.getPhotosByProject(id!, { page: 1, page_size: 100 });
+            const result = await photoService.getPhotosByProject(id!, { page, page_size: pageSize });
             setPhotos(result.data || []);
+            setTotalPhotos(result.meta.total);
+            setTotalPages(Math.ceil(result.meta.total / pageSize));
         } catch (err: any) {
             console.error('Error loading photos:', err);
             showErrorToast(t('detail.loadPhotosError', 'Không thể tải danh sách ảnh'));
@@ -83,21 +101,14 @@ export const ProjectDetailPage = () => {
         }
     };
 
-    const handlePhotoClick = (photo: Photo) => {
-        console.log('Photo clicked:', photo);
-        // TODO: Open photo detail modal or navigate to photo detail page
+    const handlePhotoUpdate = () => {
+        loadPhotos();
+        loadProjectData(); // Reload to update images_count and photo statuses
     };
 
-    const handlePhotoSelect = async (photoId: string, selected: boolean) => {
-        try {
-            await photoService.toggleSelection(photoId, selected);
-            setPhotos((prev) =>
-                prev.map((p) => (p.id === photoId ? { ...p, is_selected: selected } : p))
-            );
-            showSuccessToast(selected ? t('detail.photoSelected', 'Đã chọn ảnh') : t('detail.photoDeselected', 'Đã bỏ chọn ảnh'));
-        } catch (err: any) {
-            showErrorToast(t('detail.updatePhotoError', 'Không thể cập nhật trạng thái ảnh'));
-        }
+    const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handlePhotoDelete = async (photoId: string) => {
@@ -120,8 +131,31 @@ export const ProjectDetailPage = () => {
     };
 
     const handleUploadComplete = () => {
+        setPage(1); // Reset to first page after upload
         loadPhotos();
         loadProjectData(); // Reload to update images_count
+    };
+
+    const handleOpenStatusEdit = () => {
+        setEditingStatus(project?.status || '');
+        setStatusEditModalOpen(true);
+    };
+
+    const handleStatusChange = (event: SelectChangeEvent) => {
+        setEditingStatus(event.target.value);
+    };
+
+    const handleSaveStatus = async () => {
+        if (!id || !editingStatus) return;
+
+        try {
+            await projectService.updateProject(id, { status: editingStatus as any });
+            showSuccessToast(t('detail.statusUpdateSuccess', 'Đã cập nhật trạng thái'));
+            setStatusEditModalOpen(false);
+            loadProjectData();
+        } catch (err: any) {
+            showErrorToast(t('detail.statusUpdateError', 'Không thể cập nhật trạng thái'));
+        }
     };
 
     if (loading) {
@@ -144,7 +178,7 @@ export const ProjectDetailPage = () => {
     }
 
     return (
-        <Container maxWidth="xl" sx={{ py: 4, bgcolor: 'var(--bg-primary)', minHeight: '100vh' }}>
+        <Container maxWidth="xl" sx={{ py: 4, minHeight: '100vh', bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d' }}>
             {/* Header with Breadcrumbs */}
             <Box mb={3}>
                 <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
@@ -152,11 +186,15 @@ export const ProjectDetailPage = () => {
                         component="button"
                         variant="body1"
                         onClick={() => navigate('/projects')}
-                        sx={{ textDecoration: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                        sx={{
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            color: theme.palette.mode === 'light' ? '#616161' : '#6c757d'
+                        }}
                     >
                         {t('detail.breadcrumb.projects', 'Dự án')}
                     </Link>
-                    <Typography sx={{ color: 'var(--text-primary)' }}>{project.title}</Typography>
+                    <Typography sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>{project.title}</Typography>
                 </Breadcrumbs>
 
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -164,15 +202,15 @@ export const ProjectDetailPage = () => {
                         <IconButton
                             onClick={() => navigate(-1)}
                             sx={{
-                                color: 'var(--text-primary)',
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                                 '&:hover': {
-                                    bgcolor: 'var(--bg-tertiary)',
+                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                                 },
                             }}
                         >
                             <ArrowBack />
                         </IconButton>
-                        <Typography variant="h4" fontWeight="bold" sx={{ color: 'var(--text-primary)' }}>
+                        <Typography variant="h4" fontWeight="bold" sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
                             {t('detail.title', 'Chi tiết dự án')}
                         </Typography>
                     </Stack>
@@ -182,10 +220,10 @@ export const ProjectDetailPage = () => {
                         startIcon={<Upload />}
                         onClick={handleUploadPhotos}
                         sx={{
-                            bgcolor: 'var(--color-primary)',
-                            color: 'var(--text-inverse)',
+                            bgcolor: '#1976d2',
+                            color: '#ffffff',
                             '&:hover': {
-                                bgcolor: 'var(--color-primary-dark)',
+                                bgcolor: '#1565c0',
                             },
                         }}
                     >
@@ -200,7 +238,7 @@ export const ProjectDetailPage = () => {
                 <Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
                     <Paper sx={{
                         p: 3,
-                        bgcolor: 'var(--bg-secondary)',
+                        bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
                         boxShadow: 'var(--shadow-md)',
                         borderRadius: 2,
                     }}>
@@ -210,52 +248,58 @@ export const ProjectDetailPage = () => {
                             alignItems="center"
                             mb={3}
                         >
-                            <Typography variant="h6" fontWeight="bold" sx={{ color: 'var(--text-primary)' }}>
-                                {t('detail.photoList', 'Danh sách ảnh')} ({photos.length})
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
+                                {t('detail.photoList', 'Danh sách ảnh')} ({totalPhotos})
                             </Typography>
-
-                            <ToggleButtonGroup
-                                value={viewMode}
-                                exclusive
-                                onChange={(_, newMode) => newMode && setViewMode(newMode)}
-                                size="small"
-                                sx={{
-                                    '& .MuiToggleButton-root': {
-                                        color: 'var(--text-secondary)',
-                                        borderColor: 'var(--border-primary)',
-                                        '&.Mui-selected': {
-                                            bgcolor: 'var(--bg-tertiary)',
-                                            color: 'var(--color-primary)',
-                                        },
-                                        '&:hover': {
-                                            bgcolor: 'var(--bg-tertiary)',
-                                        },
-                                    },
-                                }}
-                            >
-                                <ToggleButton value="grid" aria-label="grid view">
-                                    <GridView />
-                                </ToggleButton>
-                                <ToggleButton value="list" aria-label="list view">
-                                    <ViewList />
-                                </ToggleButton>
-                            </ToggleButtonGroup>
+                            {totalPages > 1 && (
+                                <Typography variant="body2" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
+                                    Trang {page} / {totalPages}
+                                </Typography>
+                            )}
                         </Stack>
 
                         <PhotoGallery
                             photos={photos}
                             loading={photosLoading}
-                            viewMode={viewMode}
-                            onPhotoClick={handlePhotoClick}
-                            onPhotoSelect={handlePhotoSelect}
                             onPhotoDelete={handlePhotoDelete}
+                            onPhotoUpdate={handlePhotoUpdate}
                         />
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                <Pagination
+                                    count={totalPages}
+                                    page={page}
+                                    onChange={handlePageChange}
+                                    color="primary"
+                                    size="large"
+                                    showFirstButton
+                                    showLastButton
+                                    sx={{
+                                        '& .MuiPaginationItem-root': {
+                                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                                            },
+                                            '&.Mui-selected': {
+                                                backgroundColor: '#1976d2',
+                                                color: '#ffffff',
+                                                '&:hover': {
+                                                    backgroundColor: '#1565c0',
+                                                },
+                                            },
+                                        },
+                                    }}
+                                />
+                            </Box>
+                        )}
                     </Paper>
                 </Box>
 
                 {/* Right side - Project Info */}
                 <Box sx={{ width: { xs: '100%', lg: 400 }, flexShrink: 0 }}>
-                    <ProjectDetailInfo project={project} />
+                    <ProjectDetailInfo project={project} onStatusUpdate={handleOpenStatusEdit} />
                 </Box>
             </Box>
 
@@ -282,20 +326,20 @@ export const ProjectDetailPage = () => {
                 fullWidth
                 sx={{
                     '& .MuiDialog-paper': {
-                        bgcolor: 'var(--bg-secondary)',
-                        color: 'var(--text-primary)',
+                        bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                        color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                     },
                 }}
             >
-                <DialogTitle sx={{ bgcolor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
+                <DialogTitle sx={{ bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40', color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography variant="h6">{t('detail.uploadDialog.title', 'Upload ảnh')}</Typography>
                         <IconButton
                             onClick={() => setUploadModalOpen(false)}
                             sx={{
-                                color: 'var(--text-primary)',
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                                 '&:hover': {
-                                    bgcolor: 'var(--bg-tertiary)',
+                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                                 },
                             }}
                         >
@@ -303,12 +347,112 @@ export const ProjectDetailPage = () => {
                         </IconButton>
                     </Stack>
                 </DialogTitle>
-                <DialogContent sx={{ bgcolor: 'var(--bg-secondary)' }}>
+                <DialogContent sx={{ bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40' }}>
                     <PhotoUploadZone
                         projectId={id!}
                         onUploadComplete={handleUploadComplete}
                     />
                 </DialogContent>
+            </Dialog>
+
+            {/* Status Edit Modal */}
+            <Dialog
+                open={statusEditModalOpen}
+                onClose={() => setStatusEditModalOpen(false)}
+                maxWidth="sm"
+                fullWidth
+                sx={{
+                    '& .MuiDialog-paper': {
+                        bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                        color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                    },
+                }}
+            >
+                <DialogTitle sx={{ bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40', color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6">{t('detail.editStatus', 'Chỉnh sửa trạng thái')}</Typography>
+                        <IconButton
+                            onClick={() => setStatusEditModalOpen(false)}
+                            sx={{
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                '&:hover': {
+                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                                },
+                            }}
+                        >
+                            <Close />
+                        </IconButton>
+                    </Stack>
+                </DialogTitle>
+                <DialogContent sx={{ bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40', pt: 3 }}>
+                    <FormControl fullWidth>
+                        <Select
+                            value={editingStatus}
+                            onChange={handleStatusChange}
+                            MenuProps={{
+                                PaperProps: {
+                                    sx: {
+                                        bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                                        color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                        '& .MuiMenuItem-root': {
+                                            '&:hover': {
+                                                bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                                            },
+                                            '&.Mui-selected': {
+                                                bgcolor: theme.palette.mode === 'light' ? '#e3f2fd' : '#1565c0',
+                                                '&:hover': {
+                                                    bgcolor: theme.palette.mode === 'light' ? '#bbdefb' : '#1976d2',
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            }}
+                            sx={{
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#4b545c',
+                                },
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#1976d2',
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#1976d2',
+                                },
+                                '& .MuiSvgIcon-root': {
+                                    color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                },
+                            }}
+                        >
+                            <MenuItem value={ProjectStatus.DRAFT}>{t('status.draft', 'Bản nháp')}</MenuItem>
+                            <MenuItem value={ProjectStatus.CLIENT_SELECTING}>{t('status.clientSelecting', 'Khách hàng đang chọn')}</MenuItem>
+                            <MenuItem value={ProjectStatus.PENDING_EDIT}>{t('status.pendingEdit', 'Chờ chỉnh sửa')}</MenuItem>
+                            <MenuItem value={ProjectStatus.CLIENT_REVIEW}>{t('status.clientReview', 'Khách hàng đánh giá')}</MenuItem>
+                            <MenuItem value={ProjectStatus.COMPLETED}>{t('status.completed', 'Hoàn thành')}</MenuItem>
+                        </Select>
+                    </FormControl>
+                </DialogContent>
+                <DialogActions sx={{ bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40', p: 2 }}>
+                    <Button
+                        onClick={() => setStatusEditModalOpen(false)}
+                        sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}
+                    >
+                        {t('detail.cancel', 'Hủy')}
+                    </Button>
+                    <Button
+                        onClick={handleSaveStatus}
+                        variant="contained"
+                        sx={{
+                            bgcolor: '#1976d2',
+                            color: '#ffffff',
+                            '&:hover': {
+                                bgcolor: '#1565c0',
+                            },
+                        }}
+                    >
+                        {t('detail.save', 'Lưu')}
+                    </Button>
+                </DialogActions>
             </Dialog>
         </Container>
     );

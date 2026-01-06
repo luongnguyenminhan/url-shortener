@@ -27,10 +27,10 @@ export function ThemeToggle() {
                 onClick={toggleTheme}
                 size="small"
                 sx={{
-                    color: 'var(--text-primary)',
+                    color: '#ffffff',
                     transition: 'color var(--transition-fast)',
                     '&:hover': {
-                        backgroundColor: 'var(--bg-secondary)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     },
                 }}
                 aria-label="toggle theme"

@@ -13,12 +13,25 @@
         "deleteConfirm": "Bạn có chắc chắn muốn xóa ảnh này?",
         "deleteSuccess": "Đã xóa ảnh thành công",
         "deleteError": "Không thể xóa ảnh",
+        "editStatus": "Chỉnh sửa trạng thái",
+        "status": "Trạng thái",
+        "statusUpdateSuccess": "Đã cập nhật trạng thái",
+        "statusUpdateError": "Không thể cập nhật trạng thái",
+        "cancel": "Hủy",
+        "save": "Lưu",
         "breadcrumb": {
             "projects": "Dự án"
         },
         "uploadDialog": {
             "title": "Upload ảnh"
         }
+    },
+    "status": {
+        "draft": "Bản nháp",
+        "clientSelecting": "Khách hàng đang chọn",
+        "pendingEdit": "Chờ chỉnh sửa",
+        "clientReview": "Khách hàng đánh giá",
+        "completed": "Hoàn thành"
     },
     "shared": {
         "invalidLink": "Link chia sẻ không hợp lệ. Vui lòng kiểm tra lại URL.",

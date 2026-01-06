@@ -92,7 +92,11 @@ const MainLayout: React.FC = () => {
     }
 
     const drawer = (
-        <div>
+        <Box sx={{
+            bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+            height: '100%',
+            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0'
+        }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', 'padding': "16px 15px" }}>
                 <Box
                     component="img"
@@ -108,7 +112,7 @@ const MainLayout: React.FC = () => {
                     sx={{
                         fontSize: 'var(--font-size-xl)',
                         fontWeight: 'var(--font-weight-bold)',
-                        color: 'var(--color-primary)',
+                        color: theme.palette.mode === 'light' ? '#1976d2' : '#007bff',
                         cursor: 'pointer',
                         display: { xs: 'none', sm: 'block' },
                     }}
@@ -116,7 +120,7 @@ const MainLayout: React.FC = () => {
                     {brandConfig.name}
                 </Box>
             </Box>
-            <Divider sx={{ borderColor: 'var(--border-primary)' }} />
+            <Divider sx={{ borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#4b545c' }} />
             <List>
                 {menuItems.map((item) => {
                     // Check if current path matches the menu item
@@ -136,17 +140,17 @@ const MainLayout: React.FC = () => {
                                     }
                                 }}
                                 sx={{
-                                    backgroundColor: isActive ? 'var(--bg-tertiary)' : 'transparent',
-                                    color: isActive ? 'var(--color-primary)' : 'var(--text-primary)',
+                                    backgroundColor: isActive ? (theme.palette.mode === 'light' ? '#e3f2fd' : '#1f2d3d') : 'transparent',
+                                    color: isActive ? (theme.palette.mode === 'light' ? '#1976d2' : '#007bff') : (theme.palette.mode === 'light' ? '#212121' : '#c2c7d0'),
                                     '&:hover': {
-                                        backgroundColor: 'var(--bg-tertiary)',
+                                        backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                                     },
                                     '& .MuiListItemIcon-root': {
-                                        color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)',
+                                        color: isActive ? (theme.palette.mode === 'light' ? '#1976d2' : '#007bff') : (theme.palette.mode === 'light' ? '#616161' : '#6c757d'),
                                     },
                                     '& .MuiListItemText-primary': {
                                         fontWeight: isActive ? 600 : 400,
-                                        color: isActive ? 'var(--color-primary)' : 'var(--text-primary)',
+                                        color: isActive ? (theme.palette.mode === 'light' ? '#1976d2' : '#007bff') : (theme.palette.mode === 'light' ? '#212121' : '#c2c7d0'),
                                     },
                                 }}
                             >
@@ -157,18 +161,18 @@ const MainLayout: React.FC = () => {
                     );
                 })}
             </List>
-            <Divider sx={{ borderColor: 'var(--border-primary)' }} />
+            <Divider sx={{ borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#4b545c' }} />
             <List>
                 <ListItem disablePadding>
                     <ListItemButton
                         onClick={handleLogout}
                         sx={{
-                            color: 'var(--text-primary)',
+                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                             '&:hover': {
-                                backgroundColor: 'var(--bg-tertiary)',
+                                backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                             },
                             '& .MuiListItemIcon-root': {
-                                color: 'var(--text-secondary)',
+                                color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
                             },
                         }}
                     >
@@ -179,7 +183,7 @@ const MainLayout: React.FC = () => {
                     </ListItemButton>
                 </ListItem>
             </List>
-        </div>
+        </Box>
     )
 
     return (
@@ -189,10 +193,10 @@ const MainLayout: React.FC = () => {
                 sx={{
                     width: { md: sidebarOpen ? `calc(100% - ${drawerWidth}px)` : "100%" },
                     ml: { md: sidebarOpen ? `${drawerWidth}px` : 0 },
-                    bgcolor: "var(--bg-secondary)",
-                    color: "var(--text-primary)",
-                    boxShadow: "var(--shadow-sm)",
-                    borderBottom: "1px solid var(--border-primary)",
+                    bgcolor: theme.palette.mode === 'light' ? '#1976d2' : '#343a40',
+                    color: '#ffffff',
+                    boxShadow: "var(--shadow-md)",
+                    borderBottom: theme.palette.mode === 'light' ? 'none' : '1px solid #4b545c',
                 }}
             >
                 <Toolbar>
@@ -203,15 +207,15 @@ const MainLayout: React.FC = () => {
                         onClick={handleDrawerToggle}
                         sx={{
                             mr: 2,
-                            color: "var(--text-primary)",
+                            color: "#ffffff",
                         }}
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: "var(--text-primary)" }}>
+                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: "#ffffff" }}>
                         {t('layout.title')}
                     </Typography>
-                    <Typography variant="body2" sx={{ mr: 2, color: "var(--text-secondary)" }}>
+                    <Typography variant="body2" sx={{ mr: 2, color: "rgba(255, 255, 255, 0.9)" }}>
                         {t('layout.greeting')} {user?.email}
                     </Typography>
                     <ThemeToggle />
@@ -220,9 +224,9 @@ const MainLayout: React.FC = () => {
                     </Box>
                     <Button
                         sx={{
-                            color: "var(--text-primary)",
+                            color: "#ffffff",
                             "&:hover": {
-                                bgcolor: "var(--bg-tertiary)"
+                                bgcolor: theme.palette.mode === 'light' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)'
                             }
                         }}
                         onClick={handleLogout}
@@ -244,9 +248,9 @@ const MainLayout: React.FC = () => {
                         "& .MuiDrawer-paper": {
                             boxSizing: "border-box",
                             width: drawerWidth,
-                            bgcolor: "var(--bg-secondary)",
-                            color: "var(--text-primary)",
-                            borderRight: "1px solid var(--border-primary)",
+                            bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                            borderRight: theme.palette.mode === 'light' ? '1px solid #e0e0e0' : '1px solid #4b545c',
                         },
                     }}
                 >
@@ -262,9 +266,9 @@ const MainLayout: React.FC = () => {
                         "& .MuiDrawer-paper": {
                             boxSizing: "border-box",
                             width: drawerWidth,
-                            bgcolor: "var(--bg-secondary)",
-                            color: "var(--text-primary)",
-                            borderRight: "1px solid var(--border-primary)",
+                            bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                            borderRight: theme.palette.mode === 'light' ? '1px solid #e0e0e0' : '1px solid #4b545c',
                         },
                     }}
                 >
@@ -281,7 +285,7 @@ const MainLayout: React.FC = () => {
                         md: sidebarOpen ? `calc(100% - ${drawerWidth}px)` : "100%",
                     },
                     mt: 8,
-                    bgcolor: "var(--bg-primary)",
+                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                     minHeight: "100vh",
                 }}
             >

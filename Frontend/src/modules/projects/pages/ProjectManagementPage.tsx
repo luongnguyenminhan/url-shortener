@@ -19,6 +19,7 @@ import {
     MenuItem,
     ListItemIcon,
     ListItemText,
+    useTheme,
 } from '@mui/material';
 import {
     Search as SearchIcon,
@@ -32,6 +33,7 @@ import {
 export default function ProjectManagementPage() {
     const { t } = useTranslation(['projects', 'admin']);
     const navigate = useNavigate();
+    const theme = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [loading, setLoading] = useState(false);
@@ -140,7 +142,7 @@ export default function ProjectManagementPage() {
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: 'var(--bg-primary)' }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d' }}>
             <Container maxWidth="xl">
                 {/* Google Drive-style Toolbar */}
                 <Toolbar
@@ -162,22 +164,25 @@ export default function ProjectManagementPage() {
                             flexGrow: 1,
                             maxWidth: { xs: '100%', sm: 600 },
                             '& .MuiOutlinedInput-root': {
-                                bgcolor: 'var(--bg-secondary)',
+                                bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
                                 borderRadius: 2,
-                                color: 'var(--text-primary)',
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                                 '& fieldset': {
-                                    borderColor: 'var(--border-primary)',
+                                    borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#4b545c',
                                 },
                                 '&:hover fieldset': {
-                                    borderColor: 'var(--border-focus)',
+                                    borderColor: '#1976d2',
                                 },
                                 '&.Mui-focused fieldset': {
-                                    borderColor: 'var(--border-focus)',
+                                    borderColor: '#1976d2',
                                 },
                             },
                             '& .MuiInputBase-input::placeholder': {
-                                color: 'var(--text-tertiary)',
+                                color: theme.palette.mode === 'light' ? '#9e9e9e' : '#6c757d',
                                 opacity: 1,
+                            },
+                            '& .MuiSvgIcon-root': {
+                                color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
                             },
                         }}
                         InputProps={{
@@ -196,9 +201,9 @@ export default function ProjectManagementPage() {
                             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                             size="small"
                             sx={{
-                                color: 'var(--text-primary)',
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                                 '&:hover': {
-                                    bgcolor: 'var(--bg-tertiary)',
+                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                                 },
                             }}
                         >
@@ -210,9 +215,9 @@ export default function ProjectManagementPage() {
                             size="small"
                             onClick={(e) => setAnchorEl(e.currentTarget)}
                             sx={{
-                                color: 'var(--text-primary)',
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                                 '&:hover': {
-                                    bgcolor: 'var(--bg-tertiary)',
+                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                                 },
                             }}
                         >
@@ -224,14 +229,17 @@ export default function ProjectManagementPage() {
                             onClose={() => setAnchorEl(null)}
                             sx={{
                                 '& .MuiPaper-root': {
-                                    bgcolor: 'var(--bg-secondary)',
-                                    color: 'var(--text-primary)',
+                                    bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                                    color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                                     boxShadow: 'var(--shadow-lg)',
                                 },
                                 '& .MuiMenuItem-root': {
                                     '&:hover': {
-                                        bgcolor: 'var(--bg-tertiary)',
+                                        bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                                     },
+                                },
+                                '& .MuiListItemIcon-root': {
+                                    color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
                                 },
                             }}
                         >

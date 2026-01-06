@@ -1,5 +1,5 @@
 import axiosInstance from '@/config/axiosInstance';
-import type { Photo, PhotoUploadResponse, PhotoListMeta } from '@/types/photo.type';
+import type { Photo, PhotoUploadResponse, PhotoListMeta, PhotoComment } from '@/types/photo.type';
 import type { ApiResponse } from '@/types/common.type';
 
 const BASE_URL = '/be/api/v1/photos';
@@ -75,6 +75,30 @@ export const photoService = {
         const response = await axiosInstance.patch<ApiResponse<Photo>>(
             `${BASE_URL}/${id}/select`,
             { is_selected: isSelected }
+        );
+        return response.data.data!;
+    },
+
+    // Get photo metadata with comments
+    getPhotoMeta: async (photoId: string): Promise<Photo & { comments: PhotoComment[] }> => {
+        const response = await axiosInstance.get<ApiResponse<Photo & { comments: PhotoComment[] }>>(
+            `${BASE_URL}/${photoId}/meta`
+        );
+        return response.data.data!;
+    },
+
+    // Approve photo
+    approvePhoto: async (id: string): Promise<Photo> => {
+        const response = await axiosInstance.patch<ApiResponse<Photo>>(
+            `${BASE_URL}/${id}/approve`
+        );
+        return response.data.data!;
+    },
+
+    // Reject photo
+    rejectPhoto: async (id: string): Promise<Photo> => {
+        const response = await axiosInstance.patch<ApiResponse<Photo>>(
+            `${BASE_URL}/${id}/reject`
         );
         return response.data.data!;
     },
