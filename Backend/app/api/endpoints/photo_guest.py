@@ -8,13 +8,13 @@ from sqlmodel import Session
 
 from app.core.config import settings
 from app.db import get_db
+from app.models.photo_version import VersionType
 from app.schemas.common import (
     ApiResponse,
     PaginationSortSearchSchema,
     create_pagination_meta,
     pagination_params_dep,
 )
-from app.models.photo_version import VersionType
 from app.schemas.photo import PhotoListResponse, PhotoMetaResponse, PhotoSelectRequest
 from app.services import photo_guest_service
 
@@ -91,10 +91,7 @@ def list_project_photos(
     return ApiResponse(
         success=True,
         message="Photo list retrieved successfully",
-        data=[
-            PhotoListResponse.model_validate(item["photo"]).model_copy(update={"edited_version": item["edited_version"]})
-            for item in photos
-        ],
+        data=[PhotoListResponse.model_validate(item["photo"]).model_copy(update={"edited_version": item["edited_version"]}) for item in photos],
         meta=pagination_meta.model_dump(),
     )
 

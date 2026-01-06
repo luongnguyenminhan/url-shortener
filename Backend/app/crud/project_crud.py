@@ -1,4 +1,5 @@
 """CRUD operations for Project model"""
+
 from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import UUID
@@ -32,15 +33,14 @@ def get_by_id(db: Session, project_id: UUID) -> Optional[Project]:
     """Get project by ID"""
     return db.query(Project).filter(Project.id == project_id).options(joinedload(Project.photos), joinedload(Project.owner)).first()
 
+
 def get_by_title_and_owner(
     db: Session,
     title: str,
     owner_id: UUID,
 ) -> Optional[Project]:
     """Get project by title and owner ID"""
-    return db.query(Project).filter(
-        (Project.title == title) & (Project.owner_id == owner_id)
-    ).first()
+    return db.query(Project).filter((Project.title == title) & (Project.owner_id == owner_id)).first()
 
 
 def get_by_owner(
@@ -137,9 +137,7 @@ def count_all(db: Session, status: Optional[str] = None) -> int:
 def get_expired_projects(db: Session) -> List[Project]:
     """Get projects that should be deleted (expired_date passed)"""
     now = datetime.utcnow()
-    return db.query(Project).filter(
-        (Project.expired_date.isnot(None)) & (Project.expired_date < now)
-    ).options(joinedload(Project.owner)).all()
+    return db.query(Project).filter((Project.expired_date.isnot(None)) & (Project.expired_date < now)).options(joinedload(Project.owner)).all()
 
 
 def soft_delete(db: Session, project_id: UUID) -> Optional[Project]:

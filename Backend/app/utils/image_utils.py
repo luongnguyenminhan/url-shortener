@@ -23,7 +23,7 @@ def convert_to_webp(file_bytes: bytes, quality: int = 85) -> bytes:
     try:
         img = Image.open(BytesIO(file_bytes))
         output = BytesIO()
-        img.save(output, format='WEBP', quality=quality)
+        img.save(output, format="WEBP", quality=quality)
         return output.getvalue()
     except Exception as e:
         logger.exception(f"Error converting to WebP: {e}")

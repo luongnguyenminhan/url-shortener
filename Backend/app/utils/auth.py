@@ -37,15 +37,9 @@ def verify_firebase_token(id_token: str) -> dict:
         decoded_token = firebase_auth.verify_id_token(id_token)
         return decoded_token
     except ValueError as e:
-        raise HTTPException(
-            status_code=401,
-            detail=f"{MessageConstants.INVALID_GOOGLE_TOKEN_FORMAT}: {str(e)}"
-        )
+        raise HTTPException(status_code=401, detail=f"{MessageConstants.INVALID_GOOGLE_TOKEN_FORMAT}: {str(e)}")
     except Exception as e:
-        raise HTTPException(
-            status_code=401,
-            detail=f"{MessageConstants.INVALID_GOOGLE_TOKEN}: {str(e)}"
-        )
+        raise HTTPException(status_code=401, detail=f"{MessageConstants.INVALID_GOOGLE_TOKEN}: {str(e)}")
 
 
 def get_firebase_user_info(id_token: str) -> dict:
@@ -115,16 +109,10 @@ class JWTBearer(HTTPBearer):
         try:
             scheme, credentials = authorization.split(" ", 1)
         except ValueError:
-            raise HTTPException(
-                status_code=403,
-                detail=MessageConstants.INVALID_AUTH_SCHEME
-            )
+            raise HTTPException(status_code=403, detail=MessageConstants.INVALID_AUTH_SCHEME)
 
         if scheme.lower() != "bearer":
-            raise HTTPException(
-                status_code=403,
-                detail=MessageConstants.INVALID_AUTH_SCHEME
-            )
+            raise HTTPException(status_code=403, detail=MessageConstants.INVALID_AUTH_SCHEME)
 
         # Return the token - verification will happen in get_current_user
         return credentials
@@ -140,7 +128,8 @@ def get_current_user(token: str = Depends(jwt_bearer), db: Session = Depends(get
     try:
         # Strip Bearer prefix if present (for direct calls to this function)
         import re
-        token = re.sub(r'^[Bb]earer\s+', '', token).strip()
+
+        token = re.sub(r"^[Bb]earer\s+", "", token).strip()
 
         user_id = get_current_user_from_token(token)
         if not user_id:
@@ -154,7 +143,4 @@ def get_current_user(token: str = Depends(jwt_bearer), db: Session = Depends(get
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=401,
-            detail=MessageConstants.TOKEN_VERIFICATION_FAILED
-        ) from e
+        raise HTTPException(status_code=401, detail=MessageConstants.TOKEN_VERIFICATION_FAILED) from e

@@ -1,4 +1,5 @@
 """CRUD operations for ClientSession model"""
+
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
@@ -76,17 +77,14 @@ def get_all(
 
     return query
 
+
 def get_active_sessions(
     db: Session,
     project_id: UUID,
 ) -> List[ClientSession]:
     """Get all active and non-expired sessions for a project"""
     now = common_utils.get_utc_now()
-    query = db.query(ClientSession).filter(
-        (ClientSession.project_id == project_id) &
-        (ClientSession.is_active == True) &
-        ((ClientSession.expires_at.is_(None)) | (ClientSession.expires_at > now))
-    )
+    query = db.query(ClientSession).filter((ClientSession.project_id == project_id) & (ClientSession.is_active == True) & ((ClientSession.expires_at.is_(None)) | (ClientSession.expires_at > now)))
     return query.all()
 
 
@@ -208,9 +206,7 @@ def count_all(db: Session, is_active: Optional[bool] = None) -> int:
 def get_expired_sessions(db: Session) -> List[ClientSession]:
     """Get sessions that have expired"""
     now = common_utils.get_utc_now()
-    return db.query(ClientSession).filter(
-        (ClientSession.expires_at.isnot(None)) & (ClientSession.expires_at < now)
-    ).all()
+    return db.query(ClientSession).filter((ClientSession.expires_at.isnot(None)) & (ClientSession.expires_at < now)).all()
 
 
 def delete_expired_sessions(db: Session) -> int:
@@ -223,14 +219,13 @@ def delete_expired_sessions(db: Session) -> int:
 
     return count
 
+
 def get_session_active_project(
     db: Session,
     project_id: UUID,
 ) -> Optional[ClientSession]:
     """Get session if it is active and not expired"""
-    session = db.query(ClientSession).filter(
-        ClientSession.project_id == project_id
-    ).first()
+    session = db.query(ClientSession).filter(ClientSession.project_id == project_id).first()
     if not session:
         return None
     if not session.is_active:

@@ -1,4 +1,5 @@
 """Authentication service for Firebase Google OAuth"""
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 

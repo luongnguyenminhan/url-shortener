@@ -24,7 +24,4 @@ def get_by_photo_and_version_type(
     Returns:
         PhotoVersion or None if not found
     """
-    return db.query(PhotoVersion).filter(
-        PhotoVersion.photo_id == photo_id,
-        PhotoVersion.version_type == version_type.value
-    ).first()
+    return db.query(PhotoVersion).filter(PhotoVersion.photo_id == photo_id, PhotoVersion.version_type == version_type.value).first()

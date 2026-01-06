@@ -145,10 +145,7 @@ def list_project_photos(
     return ApiResponse(
         success=True,
         message=MessageConstants.PHOTO_LIST_RETRIEVED,
-        data=[
-            PhotoListResponse.model_validate(item["photo"]).model_copy(update={"edited_version": item["edited_version"]})
-            for item in photos
-        ],
+        data=[PhotoListResponse.model_validate(item["photo"]).model_copy(update={"edited_version": item["edited_version"]}) for item in photos],
         meta=pagination_meta.model_dump(),
     )
 
@@ -208,6 +205,7 @@ async def download_photos(
 
         # Get project name for filename
         from app.crud import project_crud
+
         project = project_crud.get_by_id(db, project_id)
         project_name = project.title.replace(" ", "_") if project else "photos"
 

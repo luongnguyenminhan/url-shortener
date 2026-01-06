@@ -1,4 +1,5 @@
 """PhotoComment model - Client comments on photos"""
+
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -29,10 +30,9 @@ class PhotoComment(BaseModel, table=True):
     photo: "Photo" = Relationship(back_populates="photo_comments")
 
     # Constraints
-    __table_args__ = (
-        Index("idx_photo_comment_photo_created", "photo_id", "created_at"),
-    )
+    __table_args__ = (Index("idx_photo_comment_photo_created", "photo_id", "created_at"),)
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True

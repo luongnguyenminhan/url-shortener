@@ -1,4 +1,5 @@
 """Photo model - Logical photo entity (filename is contract)"""
+
 from typing import TYPE_CHECKING, List
 from uuid import UUID
 
@@ -55,6 +56,7 @@ class Photo(BaseModel, table=True):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
     def is_pending_approval(self) -> bool:

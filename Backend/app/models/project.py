@@ -1,4 +1,5 @@
 """Project model - Photo albums with state machine"""
+
 from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, List, Optional
@@ -54,6 +55,7 @@ class Project(BaseModel, table=True):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
     def validate_status(self, status: str) -> bool:

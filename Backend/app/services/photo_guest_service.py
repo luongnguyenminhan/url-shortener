@@ -5,18 +5,14 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from PIL import Image
 
-from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.crud import client_session_crud, photo_comment_crud, photo_crud, photo_version_crud
-from app.models.photo import Photo
 from app.models.photo_version import PhotoVersion, VersionType
 from app.schemas.common import PaginationSortSearchSchema
 from app.schemas.photo import PhotoCommentResponse, PhotoListResponse, PhotoMetaResponse
-from app.utils.image_utils import convert_to_webp, resize_image
+from app.services.photo_service import _download_and_process_photo_image
 from app.utils.logging import logger
-from app.utils.minio import download_file_from_minio
 
 
 async def get_photo_image_guest(
@@ -46,7 +42,6 @@ async def get_photo_image_guest(
     Raises:
         HTTPException: If token is invalid or photo not found
     """
-    from io import BytesIO
 
     # 1. Verify project token
     client_session = client_session_crud.get_by_token(db, project_token)
@@ -71,38 +66,13 @@ async def get_photo_image_guest(
     if not photo_version:
         return None
 
-    try:
-        # Download from MinIO
-        minio_path = f"{photo.project_id}/{version.value}/{photo.filename}"
-        file_bytes = download_file_from_minio(
-            bucket_name=settings.MINIO_BUCKET_NAME,
-            object_name=minio_path,
-        )
-
-        if not file_bytes:
-            return None
-
-        # Resize if parameters provided
-        file_bytes = resize_image(file_bytes, width, height, photo_id)
-
-        # Convert to WebP if thumbnail
-        if is_thumbnail:
-            file_bytes = convert_to_webp(file_bytes, quality=85)
-
-        content_type = "image/webp" if is_thumbnail else "image/jpeg"
-
-        # Create stream
-        stream = BytesIO(file_bytes)
-
-        return {
-            "stream": stream,
-            "content_type": content_type,
-            "filename": photo.filename,
-        }
-
-    except Exception as e:
-        logger.exception(f"Error retrieving photo image {photo_id}: {e}")
-        return None
+    return await _download_and_process_photo_image(
+        photo=photo,
+        version=version,
+        width=width,
+        height=height,
+        is_thumbnail=is_thumbnail,
+    )
 
 
 def select_photo(
@@ -328,14 +298,8 @@ def get_project_photos_guest(
     # Add edited_version flag to each photo
     photo_list = []
     for photo in photos:
-        has_edited = db.query(PhotoVersion).filter(
-            PhotoVersion.photo_id == photo.id,
-            PhotoVersion.version_type != VersionType.ORIGINAL.value
-        ).first() is not None
-        photo_list.append({
-            "photo": photo,
-            "edited_version": has_edited
-        })
+        has_edited = db.query(PhotoVersion).filter(PhotoVersion.photo_id == photo.id, PhotoVersion.version_type != VersionType.ORIGINAL.value).first() is not None
+        photo_list.append({"photo": photo, "edited_version": has_edited})
 
     return photo_list, total
 

@@ -5,12 +5,10 @@ from uuid import UUID
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
-from PIL import Image
 
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.crud import photo_comment_crud, photo_crud, photo_version_crud, project_crud
-from app.models.photo import Photo
 from app.models.photo_version import PhotoVersion, VersionType
 from app.models.user import User
 from app.schemas.common import PaginationSortSearchSchema
@@ -23,6 +21,81 @@ from app.utils.minio import download_file_from_minio, upload_bytes_to_minio
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 ALLOWED_MIME_TYPES = {"image/jpeg"}
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg"}
+
+
+async def _download_and_process_photo_image(
+    photo,
+    version: "VersionType",
+    width: Optional[int] = None,
+    height: Optional[int] = None,
+    is_thumbnail: bool = False,
+) -> Optional[dict]:
+    """
+    Download and process photo image from MinIO with optional resizing and WebP conversion.
+
+    Args:
+        photo: Photo model instance
+        version: Photo version to retrieve
+        width: Optional width for resizing
+        height: Optional height for resizing (maintains aspect ratio)
+        is_thumbnail: Flag to indicate if this is a thumbnail request (returns WebP format)
+
+    Returns:
+        Dict with stream, content_type, filename or None if not found
+    """
+    from io import BytesIO
+
+    try:
+        # Download from MinIO
+        minio_path = f"{photo.project_id}/{version.value}/{photo.filename.rsplit('.', 1)[0]}.webp" if is_thumbnail else f"{photo.project_id}/{version.value}/{photo.filename}"
+        file_bytes = download_file_from_minio(
+            bucket_name=settings.MINIO_BUCKET_NAME,
+            object_name=minio_path,
+        )
+
+        if not file_bytes:
+            if is_thumbnail:
+                # Fallback to original JPEG if WebP thumbnail not found
+                minio_path = f"{photo.project_id}/{version.value}/{photo.filename}"
+                file_bytes = download_file_from_minio(
+                    bucket_name=settings.MINIO_BUCKET_NAME,
+                    object_name=minio_path,
+                )
+                if not file_bytes:
+                    return None
+                file_bytes = convert_to_webp(file_bytes, quality=85)  # Convert to WebP on-the-fly
+                # upload webp to minio for future requests
+                webp_path = f"{photo.project_id}/{version.value}/{photo.filename.rsplit('.', 1)[0]}.webp"
+                upload_bytes_to_minio(
+                    file_bytes=file_bytes,
+                    bucket_name=settings.MINIO_BUCKET_NAME,
+                    object_name=webp_path,
+                    content_type="image/webp",
+                )
+            else:
+                return None
+
+        # Resize if parameters provided
+        file_bytes = resize_image(file_bytes, width, height, photo.id)
+
+        # Convert to WebP if thumbnail
+        if is_thumbnail:
+            file_bytes = convert_to_webp(file_bytes, quality=85)
+
+        content_type = "image/webp" if is_thumbnail else "image/jpeg"
+
+        # Create stream
+        stream = BytesIO(file_bytes)
+
+        return {
+            "stream": stream,
+            "content_type": content_type,
+            "filename": photo.filename,
+        }
+
+    except Exception as e:
+        logger.exception(f"Error retrieving photo image {photo.id}: {e}")
+        return None
 
 
 def validate_file(file: UploadFile) -> None:
@@ -118,6 +191,7 @@ async def upload_photo(
         # 5. Upload file to MinIO
         file_bytes = await file.read()
         minio_path = f"{project_id}/original/{file.filename}"
+        webp_path = f"{project_id}/original/{file.filename.rsplit('.', 1)[0]}.webp"
 
         success = upload_bytes_to_minio(
             file_bytes=file_bytes,
@@ -125,8 +199,14 @@ async def upload_photo(
             object_name=minio_path,
             content_type=file.content_type,
         )
+        webp_success = upload_bytes_to_minio(
+            file_bytes=convert_to_webp(file_bytes, quality=85),
+            bucket_name=settings.MINIO_BUCKET_NAME,
+            object_name=webp_path,
+            content_type="image/webp",
+        )
 
-        if not success:
+        if not success or not webp_success:
             db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -264,14 +344,8 @@ def get_project_photos(
     # Add edited_version flag to each photo
     photo_list = []
     for photo in photos:
-        has_edited = db.query(PhotoVersion).filter(
-            PhotoVersion.photo_id == photo.id,
-            PhotoVersion.version_type != VersionType.ORIGINAL.value
-        ).first() is not None
-        photo_list.append({
-            "photo": photo,
-            "edited_version": has_edited
-        })
+        has_edited = db.query(PhotoVersion).filter(PhotoVersion.photo_id == photo.id, PhotoVersion.version_type != VersionType.ORIGINAL.value).first() is not None
+        photo_list.append({"photo": photo, "edited_version": has_edited})
 
     return photo_list, total
 
@@ -303,7 +377,7 @@ async def get_photo_image(
     Raises:
         HTTPException: If user doesn't have access to photo
     """
-    from io import BytesIO
+
     # Check photo exists and user has access
     photo = photo_crud.get_by_id(db, photo_id)
     if not photo:
@@ -317,38 +391,13 @@ async def get_photo_image(
     if not photo_version:
         return None
 
-    try:
-        # Download from MinIO
-        minio_path = f"{photo.project_id}/{version.value}/{photo.filename}"
-        file_bytes = download_file_from_minio(
-            bucket_name=settings.MINIO_BUCKET_NAME,
-            object_name=minio_path,
-        )
-
-        if not file_bytes:
-            return None
-
-        # Resize if parameters provided
-        file_bytes = resize_image(file_bytes, width, height, photo_id)
-
-        # Convert to WebP if thumbnail
-        if is_thumbnail:
-            file_bytes = convert_to_webp(file_bytes, quality=85)
-
-        content_type = "image/webp" if is_thumbnail else "image/jpeg"
-
-        # Create stream
-        stream = BytesIO(file_bytes)
-
-        return {
-            "stream": stream,
-            "content_type": content_type,
-            "filename": photo.filename,
-        }
-
-    except Exception as e:
-        logger.exception(f"Error retrieving photo image {photo_id}: {e}")
-        return None
+    return await _download_and_process_photo_image(
+        photo=photo,
+        version=version,
+        width=width,
+        height=height,
+        is_thumbnail=is_thumbnail,
+    )
 
 
 def get_photo_meta_by_id_user(

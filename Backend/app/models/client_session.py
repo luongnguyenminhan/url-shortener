@@ -43,6 +43,7 @@ class ClientSession(BaseModel, table=True):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
     def is_expired(self) -> bool:
