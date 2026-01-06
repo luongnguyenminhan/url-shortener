@@ -435,11 +435,11 @@ export const SharedProjectPage = () => {
                 justifyContent="center"
                 alignItems="center"
                 minHeight="100vh"
-                sx={{ bgcolor: '#f8f9fa' }}
+                sx={{ bgcolor: 'var(--bg-primary)' }}
             >
                 <Stack alignItems="center" spacing={2}>
-                    <CircularProgress size={60} />
-                    <Typography variant="body1" color="text.secondary">
+                    <CircularProgress size={60} sx={{ color: 'var(--color-primary)' }} />
+                    <Typography variant="body1" sx={{ color: 'var(--text-secondary)' }}>
                         {t('shared.loadingProject')}
                     </Typography>
                 </Stack>
@@ -454,14 +454,30 @@ export const SharedProjectPage = () => {
                 justifyContent="center"
                 alignItems="center"
                 minHeight="100vh"
-                sx={{ bgcolor: '#f8f9fa', p: 2 }}
+                sx={{ bgcolor: 'var(--bg-primary)', p: 2 }}
             >
                 <Container maxWidth="sm">
-                    <Paper elevation={0} sx={{ p: 4, textAlign: 'center', borderRadius: 3, border: '1px solid #e0e0e0' }}>
-                        <Alert severity="error" sx={{ mb: 2 }}>
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: 4,
+                            textAlign: 'center',
+                            borderRadius: 3,
+                            border: '1px solid var(--border-primary)',
+                            bgcolor: 'var(--bg-secondary)',
+                        }}
+                    >
+                        <Alert
+                            severity="error"
+                            sx={{
+                                mb: 2,
+                                bgcolor: 'var(--bg-tertiary)',
+                                color: 'var(--text-primary)',
+                            }}
+                        >
                             {error}
                         </Alert>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
                             {t('shared.linkExpired')}
                         </Typography>
                     </Paper>
@@ -476,26 +492,27 @@ export const SharedProjectPage = () => {
     const isClientSelecting = projectData?.project?.status === 'client_selecting';
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa' }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: 'var(--bg-primary)' }}>
             {/* Top App Bar */}
             <AppBar
                 position="sticky"
                 elevation={0}
                 sx={{
-                    bgcolor: 'white',
-                    borderBottom: '1px solid #e0e0e0',
-                    color: 'text.primary',
+                    bgcolor: 'var(--bg-secondary)',
+                    borderBottom: '1px solid var(--border-primary)',
+                    color: 'var(--text-primary)',
+                    boxShadow: 'var(--shadow-sm)',
                 }}
             >
                 <Toolbar sx={{ gap: 2 }}>
-                    <ImageIcon sx={{ color: '#5f6368', fontSize: 28 }} />
+                    <ImageIcon sx={{ color: 'var(--text-secondary)', fontSize: 28 }} />
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography
                             variant="h6"
                             component="div"
                             sx={{
                                 fontWeight: 500,
-                                color: '#202124',
+                                color: 'var(--text-primary)',
                                 fontSize: '1.25rem',
                                 lineHeight: 1.2
                             }}
@@ -505,7 +522,7 @@ export const SharedProjectPage = () => {
                         <Typography
                             variant="caption"
                             sx={{
-                                color: '#5f6368',
+                                color: 'var(--text-secondary)',
                                 display: { xs: 'none', sm: 'block' }
                             }}
                         >
@@ -518,11 +535,11 @@ export const SharedProjectPage = () => {
                                 icon={<CheckCircle />}
                                 label={t('shared.selectedCount', { count: selectedCount })}
                                 sx={{
-                                    bgcolor: '#e8f0fe',
-                                    color: '#1a73e8',
+                                    bgcolor: 'var(--bg-tertiary)',
+                                    color: 'var(--color-primary)',
                                     fontWeight: 500,
                                     '& .MuiChip-icon': {
-                                        color: '#1a73e8'
+                                        color: 'var(--color-primary)'
                                     }
                                 }}
                             />
@@ -531,15 +548,15 @@ export const SharedProjectPage = () => {
                                     variant="contained"
                                     startIcon={<SendIcon />}
                                     sx={{
-                                        bgcolor: '#4caf50',
-                                        color: 'white',
+                                        bgcolor: 'var(--color-success)',
+                                        color: 'var(--text-inverse)',
                                         fontWeight: 600,
                                         textTransform: 'none',
                                         px: 3,
-                                        boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                                        boxShadow: 'var(--shadow-md)',
                                         '&:hover': {
                                             bgcolor: '#45a049',
-                                            boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                                            boxShadow: 'var(--shadow-lg)',
                                         },
                                     }}
                                     onClick={handleSendToPhotographer}
@@ -647,7 +664,7 @@ export const SharedProjectPage = () => {
                                         position: 'relative',
                                         paddingBottom: '100%',
                                         overflow: 'hidden',
-                                        bgcolor: '#e0e0e0',
+                                        bgcolor: 'var(--bg-tertiary)',
                                         cursor: 'pointer',
                                         transition: 'opacity 0.2s',
                                         '&:hover': {
@@ -727,7 +744,7 @@ export const SharedProjectPage = () => {
                                     >
                                         <Box
                                             sx={{
-                                                bgcolor: isSelected ? '#4285f4' : 'rgba(0, 0, 0, 0.54)',
+                                                bgcolor: isSelected ? 'var(--color-primary)' : 'rgba(0, 0, 0, 0.54)',
                                                 borderRadius: '50%',
                                                 width: 24,
                                                 height: 24,
@@ -895,18 +912,18 @@ export const SharedProjectPage = () => {
                                     onClick={() => handleToggleSelect(selectedPhoto.id)}
                                     disabled={!isClientSelecting || rejectedPhotos.has(selectedPhoto.id)}
                                     sx={{
-                                        bgcolor: selectedPhotos.has(selectedPhoto.id) ? '#4caf50' : '#2196f3',
+                                        bgcolor: selectedPhotos.has(selectedPhoto.id) ? 'var(--color-success)' : 'var(--color-primary)',
                                         color: 'white',
                                         fontWeight: 600,
                                         fontSize: '1rem',
                                         px: 4,
                                         py: 1.5,
                                         borderRadius: 2,
-                                        boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                                        boxShadow: 'var(--shadow-md)',
                                         textTransform: 'none',
                                         '&:hover': {
-                                            bgcolor: selectedPhotos.has(selectedPhoto.id) ? '#45a049' : '#1976d2',
-                                            boxShadow: '0 6px 16px rgba(33, 150, 243, 0.6)',
+                                            bgcolor: selectedPhotos.has(selectedPhoto.id) ? '#45a049' : 'var(--color-primary-dark)',
+                                            boxShadow: 'var(--shadow-lg)',
                                             transform: 'translateY(-2px)',
                                         },
                                         '&:active': {
@@ -930,18 +947,18 @@ export const SharedProjectPage = () => {
                                     onClick={() => handleRejectPhoto(selectedPhoto.id)}
                                     disabled={!isClientSelecting || selectedPhotos.has(selectedPhoto.id)}
                                     sx={{
-                                        bgcolor: rejectedPhotos.has(selectedPhoto.id) ? '#d32f2f' : '#f44336',
+                                        bgcolor: rejectedPhotos.has(selectedPhoto.id) ? '#d32f2f' : 'var(--color-error)',
                                         color: 'white',
                                         fontWeight: 600,
                                         fontSize: '1rem',
                                         px: 4,
                                         py: 1.5,
                                         borderRadius: 2,
-                                        boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                                        boxShadow: 'var(--shadow-md)',
                                         textTransform: 'none',
                                         '&:hover': {
                                             bgcolor: rejectedPhotos.has(selectedPhoto.id) ? '#c62828' : '#d32f2f',
-                                            boxShadow: '0 6px 16px rgba(244, 67, 54, 0.6)',
+                                            boxShadow: 'var(--shadow-lg)',
                                             transform: 'translateY(-2px)',
                                         },
                                         '&:active': {
@@ -971,11 +988,11 @@ export const SharedProjectPage = () => {
                             }}
                         >
                             {/* Comment Header */}
-                            <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
-                                <Typography variant="h6" fontWeight={600}>
+                            <Box sx={{ p: 2, borderBottom: '1px solid var(--border-primary)', bgcolor: 'var(--bg-secondary)' }}>
+                                <Typography variant="h6" fontWeight={600} sx={{ color: 'var(--text-primary)' }}>
                                     {t('shared.comments')}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">
+                                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
                                     {!isClientSelecting
                                         ? t('shared.projectEnded')
                                         : selectedPhotos.has(selectedPhoto.id)
@@ -985,13 +1002,13 @@ export const SharedProjectPage = () => {
                             </Box>
 
                             {/* Comment List */}
-                            <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+                            <Box sx={{ flex: 1, overflow: 'auto', p: 2, bgcolor: 'var(--bg-primary)' }}>
                                 {loadingComments ? (
                                     <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                                        <CircularProgress size={30} />
+                                        <CircularProgress size={30} sx={{ color: 'var(--color-primary)' }} />
                                     </Box>
                                 ) : photoComments.length === 0 ? (
-                                    <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
+                                    <Typography variant="body2" align="center" sx={{ py: 4, color: 'var(--text-secondary)' }}>
                                         {t('shared.noComments')}
                                     </Typography>
                                 ) : (
@@ -1002,8 +1019,9 @@ export const SharedProjectPage = () => {
                                                 elevation={0}
                                                 sx={{
                                                     p: 2,
-                                                    bgcolor: cmt.author_type === 'admin' ? '#f5f5f5' : '#e3f2fd',
+                                                    bgcolor: cmt.author_type === 'admin' ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
                                                     borderRadius: 2,
+                                                    border: '1px solid var(--border-primary)',
                                                 }}
                                             >
                                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -1013,7 +1031,7 @@ export const SharedProjectPage = () => {
                                                         color={cmt.author_type === 'admin' ? 'default' : 'primary'}
                                                         sx={{ height: 20, fontSize: '0.7rem' }}
                                                     />
-                                                    <Typography variant="caption" color="text.secondary">
+                                                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
                                                         {new Date(cmt.created_at).toLocaleString('vi-VN', {
                                                             day: '2-digit',
                                                             month: '2-digit',
@@ -1023,7 +1041,7 @@ export const SharedProjectPage = () => {
                                                         })}
                                                     </Typography>
                                                 </Box>
-                                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'var(--text-primary)' }}>
                                                     {cmt.content}
                                                 </Typography>
                                             </Paper>
@@ -1033,7 +1051,7 @@ export const SharedProjectPage = () => {
                             </Box>
 
                             {/* Comment Input */}
-                            <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
+                            <Box sx={{ p: 2, borderTop: '1px solid var(--border-primary)', bgcolor: 'var(--bg-secondary)' }}>
                                 <TextField
                                     fullWidth
                                     multiline
@@ -1046,7 +1064,22 @@ export const SharedProjectPage = () => {
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
                                     disabled={!isClientSelecting || !selectedPhotos.has(selectedPhoto.id)}
-                                    sx={{ mb: 2 }}
+                                    sx={{
+                                        mb: 2,
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            '& fieldset': {
+                                                borderColor: 'var(--border-primary)',
+                                            },
+                                            '&:hover fieldset': {
+                                                borderColor: 'var(--border-focus)',
+                                            },
+                                            '&.Mui-focused fieldset': {
+                                                borderColor: 'var(--border-focus)',
+                                            },
+                                        },
+                                    }}
                                 />
                                 <Button
                                     fullWidth
@@ -1055,7 +1088,8 @@ export const SharedProjectPage = () => {
                                     onClick={handleSendComment}
                                     disabled={!isClientSelecting || !comment.trim() || !selectedPhotos.has(selectedPhoto.id)}
                                     sx={{
-                                        bgcolor: '#ff9800',
+                                        bgcolor: 'var(--color-warning)',
+                                        color: 'var(--text-inverse)',
                                         '&:hover': {
                                             bgcolor: '#f57c00',
                                         },

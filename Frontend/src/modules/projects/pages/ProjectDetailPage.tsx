@@ -144,7 +144,7 @@ export const ProjectDetailPage = () => {
     }
 
     return (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ py: 4, bgcolor: 'var(--bg-primary)', minHeight: '100vh' }}>
             {/* Header with Breadcrumbs */}
             <Box mb={3}>
                 <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
@@ -152,19 +152,27 @@ export const ProjectDetailPage = () => {
                         component="button"
                         variant="body1"
                         onClick={() => navigate('/projects')}
-                        sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                        sx={{ textDecoration: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
                     >
                         {t('detail.breadcrumb.projects', 'Dự án')}
                     </Link>
-                    <Typography color="text.primary">{project.title}</Typography>
+                    <Typography sx={{ color: 'var(--text-primary)' }}>{project.title}</Typography>
                 </Breadcrumbs>
 
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Stack direction="row" spacing={2} alignItems="center">
-                        <IconButton onClick={() => navigate(-1)}>
+                        <IconButton
+                            onClick={() => navigate(-1)}
+                            sx={{
+                                color: 'var(--text-primary)',
+                                '&:hover': {
+                                    bgcolor: 'var(--bg-tertiary)',
+                                },
+                            }}
+                        >
                             <ArrowBack />
                         </IconButton>
-                        <Typography variant="h4" fontWeight="bold">
+                        <Typography variant="h4" fontWeight="bold" sx={{ color: 'var(--text-primary)' }}>
                             {t('detail.title', 'Chi tiết dự án')}
                         </Typography>
                     </Stack>
@@ -173,6 +181,13 @@ export const ProjectDetailPage = () => {
                         variant="contained"
                         startIcon={<Upload />}
                         onClick={handleUploadPhotos}
+                        sx={{
+                            bgcolor: 'var(--color-primary)',
+                            color: 'var(--text-inverse)',
+                            '&:hover': {
+                                bgcolor: 'var(--color-primary-dark)',
+                            },
+                        }}
                     >
                         {t('detail.uploadPhotos', 'Tải lên ảnh')}
                     </Button>
@@ -183,14 +198,19 @@ export const ProjectDetailPage = () => {
             <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
                 {/* Left side - Photo Gallery */}
                 <Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
-                    <Paper sx={{ p: 3 }}>
+                    <Paper sx={{
+                        p: 3,
+                        bgcolor: 'var(--bg-secondary)',
+                        boxShadow: 'var(--shadow-md)',
+                        borderRadius: 2,
+                    }}>
                         <Stack
                             direction="row"
                             justifyContent="space-between"
                             alignItems="center"
                             mb={3}
                         >
-                            <Typography variant="h6" fontWeight="bold">
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: 'var(--text-primary)' }}>
                                 {t('detail.photoList', 'Danh sách ảnh')} ({photos.length})
                             </Typography>
 
@@ -199,6 +219,19 @@ export const ProjectDetailPage = () => {
                                 exclusive
                                 onChange={(_, newMode) => newMode && setViewMode(newMode)}
                                 size="small"
+                                sx={{
+                                    '& .MuiToggleButton-root': {
+                                        color: 'var(--text-secondary)',
+                                        borderColor: 'var(--border-primary)',
+                                        '&.Mui-selected': {
+                                            bgcolor: 'var(--bg-tertiary)',
+                                            color: 'var(--color-primary)',
+                                        },
+                                        '&:hover': {
+                                            bgcolor: 'var(--bg-tertiary)',
+                                        },
+                                    },
+                                }}
                             >
                                 <ToggleButton value="grid" aria-label="grid view">
                                     <GridView />
@@ -247,16 +280,30 @@ export const ProjectDetailPage = () => {
                 onClose={() => setUploadModalOpen(false)}
                 maxWidth="md"
                 fullWidth
+                sx={{
+                    '& .MuiDialog-paper': {
+                        bgcolor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
+                    },
+                }}
             >
-                <DialogTitle>
+                <DialogTitle sx={{ bgcolor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography variant="h6">{t('detail.uploadDialog.title', 'Upload ảnh')}</Typography>
-                        <IconButton onClick={() => setUploadModalOpen(false)}>
+                        <IconButton
+                            onClick={() => setUploadModalOpen(false)}
+                            sx={{
+                                color: 'var(--text-primary)',
+                                '&:hover': {
+                                    bgcolor: 'var(--bg-tertiary)',
+                                },
+                            }}
+                        >
                             <ArrowBack />
                         </IconButton>
                     </Stack>
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{ bgcolor: 'var(--bg-secondary)' }}>
                     <PhotoUploadZone
                         projectId={id!}
                         onUploadComplete={handleUploadComplete}

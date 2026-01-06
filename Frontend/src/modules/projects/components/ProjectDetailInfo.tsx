@@ -67,9 +67,13 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project })
     };
 
     return (
-        <Card sx={{ height: '100%' }}>
+        <Card sx={{
+            height: '100%',
+            bgcolor: 'var(--bg-secondary)',
+            boxShadow: 'var(--shadow-md)',
+        }}>
             <CardContent>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ color: 'var(--text-primary)' }}>
                     {project.title}
                 </Typography>
 
@@ -80,40 +84,40 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project })
                     sx={{ mb: 3 }}
                 />
 
-                <Divider sx={{ mb: 3 }} />
+                <Divider sx={{ mb: 3, borderColor: 'var(--border-primary)' }} />
 
                 <Stack spacing={2.5}>
                     <Box display="flex" alignItems="center" gap={1.5}>
-                        <ImageIcon color="action" />
+                        <ImageIcon sx={{ color: 'var(--text-secondary)' }} />
                         <Box>
-                            <Typography variant="caption" color="text.secondary" display="block">
+                            <Typography variant="caption" display="block" sx={{ color: 'var(--text-secondary)' }}>
                                 Số lượng ảnh
                             </Typography>
-                            <Typography variant="body1" fontWeight="medium">
+                            <Typography variant="body1" fontWeight="medium" sx={{ color: 'var(--text-primary)' }}>
                                 {project.images_count} ảnh
                             </Typography>
                         </Box>
                     </Box>
 
                     <Box display="flex" alignItems="center" gap={1.5}>
-                        <CalendarToday color="action" />
+                        <CalendarToday sx={{ color: 'var(--text-secondary)' }} />
                         <Box>
-                            <Typography variant="caption" color="text.secondary" display="block">
+                            <Typography variant="caption" display="block" sx={{ color: 'var(--text-secondary)' }}>
                                 Ngày tạo
                             </Typography>
-                            <Typography variant="body1">
+                            <Typography variant="body1" sx={{ color: 'var(--text-primary)' }}>
                                 {format(new Date(project.created_at), 'dd/MM/yyyy HH:mm')}
                             </Typography>
                         </Box>
                     </Box>
 
                     <Box display="flex" alignItems="center" gap={1.5}>
-                        <CalendarToday color="action" />
+                        <CalendarToday sx={{ color: 'var(--text-secondary)' }} />
                         <Box>
-                            <Typography variant="caption" color="text.secondary" display="block">
+                            <Typography variant="caption" display="block" sx={{ color: 'var(--text-secondary)' }}>
                                 Cập nhật lần cuối
                             </Typography>
-                            <Typography variant="body1">
+                            <Typography variant="body1" sx={{ color: 'var(--text-primary)' }}>
                                 {format(new Date(project.updated_at), 'dd/MM/yyyy HH:mm')}
                             </Typography>
                         </Box>
@@ -121,12 +125,12 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project })
 
                     {project.expired_date && (
                         <Box display="flex" alignItems="center" gap={1.5}>
-                            <CalendarToday color="action" />
+                            <CalendarToday sx={{ color: 'var(--text-secondary)' }} />
                             <Box>
-                                <Typography variant="caption" color="text.secondary" display="block">
+                                <Typography variant="caption" display="block" sx={{ color: 'var(--text-secondary)' }}>
                                     Ngày hết hạn
                                 </Typography>
-                                <Typography variant="body1" color="error">
+                                <Typography variant="body1" sx={{ color: 'var(--color-error)' }}>
                                     {format(new Date(project.expired_date), 'dd/MM/yyyy HH:mm')}
                                 </Typography>
                             </Box>
@@ -134,12 +138,12 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project })
                     )}
 
                     <Box display="flex" alignItems="center" gap={1.5}>
-                        <Person color="action" />
+                        <Person sx={{ color: 'var(--text-secondary)' }} />
                         <Box>
-                            <Typography variant="caption" color="text.secondary" display="block">
+                            <Typography variant="caption" display="block" sx={{ color: 'var(--text-secondary)' }}>
                                 ID chủ sở hữu
                             </Typography>
-                            <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
+                            <Typography variant="body2" sx={{ wordBreak: 'break-all', color: 'var(--text-primary)' }}>
                                 {project.owner_id}
                             </Typography>
                         </Box>
@@ -147,11 +151,11 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project })
 
                     {shareLink && (
                         <>
-                            <Divider />
+                            <Divider sx={{ borderColor: 'var(--border-primary)' }} />
                             <Box display="flex" alignItems="flex-start" gap={1.5}>
-                                <LinkIcon color="action" />
+                                <LinkIcon sx={{ color: 'var(--text-secondary)' }} />
                                 <Box sx={{ flex: 1 }}>
-                                    <Typography variant="caption" color="text.secondary" display="block">
+                                    <Typography variant="caption" display="block" sx={{ color: 'var(--text-secondary)' }}>
                                         Link chia sẻ
                                     </Typography>
                                     <Typography
@@ -159,7 +163,7 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project })
                                         sx={{
                                             mt: 0.5,
                                             wordBreak: 'break-all',
-                                            color: 'primary.main',
+                                            color: 'var(--color-primary)',
                                             cursor: 'pointer'
                                         }}
                                         onClick={handleCopyLink}
@@ -167,13 +171,22 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project })
                                         {shareLink}
                                     </Typography>
                                     {expiresAt && (
-                                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                                        <Typography variant="caption" display="block" sx={{ mt: 0.5, color: 'var(--text-secondary)' }}>
                                             Hết hạn: {format(new Date(expiresAt), 'dd/MM/yyyy HH:mm')}
                                         </Typography>
                                     )}
                                 </Box>
                                 <Tooltip title="Copy link">
-                                    <IconButton size="small" onClick={handleCopyLink}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={handleCopyLink}
+                                        sx={{
+                                            color: 'var(--text-primary)',
+                                            '&:hover': {
+                                                bgcolor: 'var(--bg-tertiary)',
+                                            },
+                                        }}
+                                    >
                                         <CopyIcon fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
@@ -183,14 +196,14 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project })
 
                     {project.client_notes && (
                         <>
-                            <Divider />
+                            <Divider sx={{ borderColor: 'var(--border-primary)' }} />
                             <Box display="flex" alignItems="flex-start" gap={1.5}>
-                                <Info color="action" />
+                                <Info sx={{ color: 'var(--text-secondary)' }} />
                                 <Box>
-                                    <Typography variant="caption" color="text.secondary" display="block">
+                                    <Typography variant="caption" display="block" sx={{ color: 'var(--text-secondary)' }}>
                                         Ghi chú của khách hàng
                                     </Typography>
-                                    <Typography variant="body1" sx={{ mt: 0.5, whiteSpace: 'pre-wrap' }}>
+                                    <Typography variant="body1" sx={{ mt: 0.5, whiteSpace: 'pre-wrap', color: 'var(--text-primary)' }}>
                                         {project.client_notes}
                                     </Typography>
                                 </Box>

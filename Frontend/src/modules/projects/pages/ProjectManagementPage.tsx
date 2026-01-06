@@ -140,7 +140,7 @@ export default function ProjectManagementPage() {
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: 'var(--bg-primary)' }}>
             <Container maxWidth="xl">
                 {/* Google Drive-style Toolbar */}
                 <Toolbar
@@ -148,7 +148,8 @@ export default function ProjectManagementPage() {
                         px: { xs: 1, sm: 2 },
                         py: 2,
                         gap: 2,
-                        flexWrap: 'wrap'
+                        flexWrap: 'wrap',
+                        bgcolor: 'transparent',
                     }}
                 >
                     {/* Search Bar */}
@@ -161,9 +162,23 @@ export default function ProjectManagementPage() {
                             flexGrow: 1,
                             maxWidth: { xs: '100%', sm: 600 },
                             '& .MuiOutlinedInput-root': {
-                                bgcolor: 'background.paper',
+                                bgcolor: 'var(--bg-secondary)',
                                 borderRadius: 2,
-                            }
+                                color: 'var(--text-primary)',
+                                '& fieldset': {
+                                    borderColor: 'var(--border-primary)',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'var(--border-focus)',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'var(--border-focus)',
+                                },
+                            },
+                            '& .MuiInputBase-input::placeholder': {
+                                color: 'var(--text-tertiary)',
+                                opacity: 1,
+                            },
                         }}
                         InputProps={{
                             startAdornment: (
@@ -180,6 +195,12 @@ export default function ProjectManagementPage() {
                         <IconButton
                             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                             size="small"
+                            sx={{
+                                color: 'var(--text-primary)',
+                                '&:hover': {
+                                    bgcolor: 'var(--bg-tertiary)',
+                                },
+                            }}
                         >
                             {viewMode === 'grid' ? <ViewListIcon /> : <ViewModuleIcon />}
                         </IconButton>
@@ -188,6 +209,12 @@ export default function ProjectManagementPage() {
                         <IconButton
                             size="small"
                             onClick={(e) => setAnchorEl(e.currentTarget)}
+                            sx={{
+                                color: 'var(--text-primary)',
+                                '&:hover': {
+                                    bgcolor: 'var(--bg-tertiary)',
+                                },
+                            }}
                         >
                             <MoreVertIcon />
                         </IconButton>
@@ -195,6 +222,18 @@ export default function ProjectManagementPage() {
                             anchorEl={anchorEl}
                             open={Boolean(anchorEl)}
                             onClose={() => setAnchorEl(null)}
+                            sx={{
+                                '& .MuiPaper-root': {
+                                    bgcolor: 'var(--bg-secondary)',
+                                    color: 'var(--text-primary)',
+                                    boxShadow: 'var(--shadow-lg)',
+                                },
+                                '& .MuiMenuItem-root': {
+                                    '&:hover': {
+                                        bgcolor: 'var(--bg-tertiary)',
+                                    },
+                                },
+                            }}
                         >
                             <MenuItem onClick={() => { handleOpenCreateDialog(); setAnchorEl(null); }}>
                                 <ListItemIcon>

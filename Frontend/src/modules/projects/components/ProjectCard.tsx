@@ -109,11 +109,12 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     border: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: 'var(--border-primary)',
+                    bgcolor: 'var(--bg-secondary)',
                     boxShadow: 'none',
                     '&:hover': {
-                        boxShadow: 2,
-                        borderColor: 'primary.main',
+                        boxShadow: 'var(--shadow-md)',
+                        borderColor: 'var(--color-primary)',
                     },
                     borderRadius: 2,
                     p: 2,
@@ -126,9 +127,9 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 {/* Folder Icon */}
                 <Box sx={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
                     {isHovered ? (
-                        <FolderOpenIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+                        <FolderOpenIcon sx={{ fontSize: 64, color: 'var(--color-primary)' }} />
                     ) : (
-                        <FolderIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+                        <FolderIcon sx={{ fontSize: 64, color: 'var(--color-primary)' }} />
                     )}
 
                     {/* More Menu Button */}
@@ -141,6 +142,10 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                             right: -8,
                             opacity: isHovered ? 1 : 0,
                             transition: 'opacity 0.2s',
+                            color: 'var(--text-primary)',
+                            '&:hover': {
+                                bgcolor: 'var(--bg-tertiary)',
+                            },
                         }}
                     >
                         <MoreVertIcon fontSize="small" />
@@ -157,6 +162,7 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
+                        color: 'var(--text-primary)',
                     }}
                 >
                     {project.title}
@@ -183,8 +189,7 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 {/* Last Modified */}
                 <Typography
                     variant="caption"
-                    color="text.secondary"
-                    sx={{ textAlign: 'center' }}
+                    sx={{ textAlign: 'center', color: 'var(--text-secondary)' }}
                 >
                     {formatDate(project.updated_at)}
                 </Typography>
@@ -195,6 +200,18 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                     onClick={(e) => e.stopPropagation()}
+                    sx={{
+                        '& .MuiPaper-root': {
+                            bgcolor: 'var(--bg-secondary)',
+                            color: 'var(--text-primary)',
+                            boxShadow: 'var(--shadow-lg)',
+                        },
+                        '& .MuiMenuItem-root': {
+                            '&:hover': {
+                                bgcolor: 'var(--bg-tertiary)',
+                            },
+                        },
+                    }}
                 >
                     <MenuItem onClick={handleEdit}>
                         <ListItemIcon>
@@ -238,16 +255,16 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 px: 2,
                 borderRadius: 1,
                 '&:hover': {
-                    bgcolor: 'action.hover',
+                    bgcolor: 'var(--bg-tertiary)',
                 },
             }}
         >
             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
                 {/* Folder Icon */}
                 {isHovered ? (
-                    <FolderOpenIcon sx={{ fontSize: 24, color: 'primary.main' }} />
+                    <FolderOpenIcon sx={{ fontSize: 24, color: 'var(--color-primary)' }} />
                 ) : (
-                    <FolderIcon sx={{ fontSize: 24, color: 'primary.main' }} />
+                    <FolderIcon sx={{ fontSize: 24, color: 'var(--color-primary)' }} />
                 )}
 
                 {/* Project Title */}
@@ -259,6 +276,7 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
+                        color: 'var(--text-primary)',
                     }}
                 >
                     {project.title}
@@ -284,8 +302,8 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         gap: 0.5,
                         minWidth: 80
                     }}>
-                        <ScheduleIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                        <Typography variant="caption" color="text.secondary">
+                        <ScheduleIcon sx={{ fontSize: 16, color: 'var(--text-secondary)' }} />
+                        <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
                             {project.images_count} {t('projects.images', 'images')}
                         </Typography>
                     </Box>
@@ -294,11 +312,11 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 {/* Last Modified */}
                 <Typography
                     variant="caption"
-                    color="text.secondary"
                     sx={{
                         minWidth: 120,
                         textAlign: 'right',
                         display: { xs: 'none', sm: 'block' },
+                        color: 'var(--text-secondary)',
                     }}
                 >
                     {formatDate(project.updated_at)}
@@ -311,6 +329,10 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                     sx={{
                         opacity: isHovered ? 1 : 0,
                         transition: 'opacity 0.2s',
+                        color: 'var(--text-primary)',
+                        '&:hover': {
+                            bgcolor: 'var(--bg-tertiary)',
+                        },
                     }}
                 >
                     <MoreVertIcon fontSize="small" />
@@ -322,6 +344,18 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                     onClick={(e) => e.stopPropagation()}
+                    sx={{
+                        '& .MuiPaper-root': {
+                            bgcolor: 'var(--bg-secondary)',
+                            color: 'var(--text-primary)',
+                            boxShadow: 'var(--shadow-lg)',
+                        },
+                        '& .MuiMenuItem-root': {
+                            '&:hover': {
+                                bgcolor: 'var(--bg-tertiary)',
+                            },
+                        },
+                    }}
                 >
                     <MenuItem onClick={handleEdit}>
                         <ListItemIcon>
