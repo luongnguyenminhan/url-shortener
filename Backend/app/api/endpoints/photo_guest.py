@@ -15,7 +15,7 @@ from app.schemas.common import (
     pagination_params_dep,
 )
 from app.models.photo_version import VersionType
-from app.schemas.photo import PhotoMetaResponse, PhotoSelectRequest
+from app.schemas.photo import PhotoListResponse, PhotoMetaResponse, PhotoSelectRequest
 from app.services import photo_guest_service
 
 router = APIRouter(
