@@ -4,9 +4,14 @@ import type { Photo } from '@/types/photo.type';
 
 const BASE_URL = '/be/api/v1/photos-guest';
 
-export interface PhotoGuestParams extends PaginationParams {
+export interface PhotoGuestParams {
     project_token: string;
-    is_selected?: boolean;
+    page?: number;
+    page_size?: number;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    search?: string;
+    status?: 'origin' | 'selected' | 'edited';
 }
 
 export interface SelectPhotoRequest {
