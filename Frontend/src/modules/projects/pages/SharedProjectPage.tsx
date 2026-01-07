@@ -22,8 +22,11 @@ import {
     DialogContent,
     DialogActions,
     Drawer,
-    Divider,
-    Pagination,
+    Tabs,
+    Tab,
+    Select,
+    MenuItem,
+    FormControl,
 } from '@mui/material';
 import {
     Close as CloseIcon,
@@ -35,6 +38,8 @@ import {
     RadioButtonUnchecked,
     Cancel as CancelIcon,
     Send as SendIcon,
+    Edit as EditIcon,
+    ChatBubbleOutline as CommentIcon,
 } from '@mui/icons-material';
 import { projectService } from '@/services/projectService';
 import { photoGuestService } from '@/services/photoGuestService';
@@ -72,10 +77,38 @@ export const SharedProjectPage = () => {
         updated_at: string;
     }>>([]);
     const [loadingComments, setLoadingComments] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPhotos, setTotalPhotos] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const pageSize = 12;
+    const [skip, setSkip] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const limit = 12;
+    const [activeTab, setActiveTab] = useState<'all' | 'edited'>('all');
+    const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
+    const [selectedVersion, setSelectedVersion] = useState<'original' | 'edited'>('original');
+    const [mobileCommentOpen, setMobileCommentOpen] = useState(false);
+
+    // Infinity scroll handler
+    useEffect(() => {
+        const handleScroll = () => {
+            if (loadingMore || !hasMore || loading || isLoadingPhotos) return;
+
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+
+            // Load more when user scrolls to 80% of the page
+            if (scrollTop + clientHeight >= scrollHeight - 500) {
+                if (token) {
+                    setIsLoadingPhotos(true);
+                    loadPhotos(token, skip, activeTab).finally(() => {
+                        setIsLoadingPhotos(false);
+                    });
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [skip, hasMore, loadingMore, loading, token, activeTab, isLoadingPhotos]);
 
     // Show password dialog on mount if token exists
     useEffect(() => {
@@ -99,7 +132,7 @@ export const SharedProjectPage = () => {
                 .then(async (response) => {
                     setProjectData(response);
                     setPasswordDialogOpen(false);
-                    await loadPhotos(token, currentPage);
+                    await loadPhotos(token, 0, activeTab);
                 })
                 .catch((error) => {
                     console.error('Auto-verify failed:', error);
@@ -174,7 +207,7 @@ export const SharedProjectPage = () => {
             showSnackbar(t('shared.authSuccess'));
 
             // Load photos from the project
-            await loadPhotos(token, currentPage);
+            await loadPhotos(token, 0, activeTab);
         } catch (error: any) {
             console.error('Password verification failed:', error);
             const errorMessage = error?.response?.data?.message ||
@@ -186,30 +219,36 @@ export const SharedProjectPage = () => {
         }
     };
 
-    const loadPhotos = async (projectToken: string, page: number = 1) => {
-        setLoading(true);
+    const loadPhotos = async (projectToken: string, skipCount: number = 0, filter: 'all' | 'edited' = 'all') => {
+        if (skipCount === 0) {
+            setLoading(true);
+        } else {
+            setLoadingMore(true);
+        }
         setError(null);
 
         try {
             const response = await photoGuestService.getPhotos({
                 project_token: projectToken,
-                page: page,
-                page_size: pageSize,
+                skip: skipCount,
+                limit: limit,
+                ...(filter === 'edited' && { status: 'edited' }),
             });
 
             const photoList = response.data || [];
-            setPhotos(photoList);
 
-            // Update pagination metadata
-            if (response.meta) {
-                setTotalPhotos(response.meta.total || 0);
-                setTotalPages(response.meta.total_pages || 0);
+            // Append photos for infinity scroll, replace for initial load
+            if (skipCount === 0) {
+                setPhotos(photoList);
+            } else {
+                setPhotos(prev => [...prev, ...photoList]);
             }
 
-            // Set initially selected photos from current page
-            const initialSelected = new Set(
-                photoList.filter((p: Photo) => p.is_selected).map((p: Photo) => p.id)
-            );
+            // Update hasMore based on response
+            setHasMore(photoList.length === limit);
+            setSkip(skipCount + photoList.length);
+
+            // Set initially selected photos
             setSelectedPhotos(prev => {
                 const newSet = new Set(prev);
                 photoList.forEach((p: Photo) => {
@@ -227,6 +266,7 @@ export const SharedProjectPage = () => {
             setError(errorMessage);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     };
 
@@ -482,6 +522,24 @@ export const SharedProjectPage = () => {
     const selectedCount = selectedPhotos.size;
     const projectTitle = projectData?.project?.title || 'Dự Án';
     const isClientSelecting = projectData?.project?.status === 'client_selecting';
+    const isClientReview = projectData?.project?.status === 'client_review';
+
+    const handleTabChange = async (_event: React.SyntheticEvent, newValue: 'all' | 'edited') => {
+        // Prevent any ongoing loads
+        setIsLoadingPhotos(true);
+
+        // Reset all pagination state
+        setActiveTab(newValue);
+        setSkip(0);
+        setHasMore(true);
+        setPhotos([]); // Clear photos immediately to prevent duplicates
+
+        if (token) {
+            await loadPhotos(token, 0, newValue);
+        }
+
+        setIsLoadingPhotos(false);
+    };
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: 'var(--bg-primary)' }}>
@@ -518,7 +576,7 @@ export const SharedProjectPage = () => {
                                 display: { xs: 'none', sm: 'block' }
                             }}
                         >
-                            {t('shared.photoCount', { count: totalPhotos })}
+                            {t('shared.photoCount', { count: photos.length })}
                         </Typography>
                     </Box>
                     {selectedCount > 0 && (
@@ -587,7 +645,7 @@ export const SharedProjectPage = () => {
                                         {t('shared.totalPhotos')}
                                     </Typography>
                                     <Typography variant="h6" fontWeight={600}>
-                                        {totalPhotos}
+                                        {photos.length}
                                     </Typography>
                                 </Box>
 
@@ -602,6 +660,15 @@ export const SharedProjectPage = () => {
 
                                 <Box>
                                     <Typography variant="caption" color="text.secondary" display="block">
+                                        {t('shared.status')}
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight={600}>
+                                        {t(`status.${projectData.project.status}`)}
+                                    </Typography>
+                                </Box>
+
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary" display="block">
                                         {t('shared.expiresAt')}
                                     </Typography>
                                     <Typography variant="h6" fontWeight={600}>
@@ -610,6 +677,67 @@ export const SharedProjectPage = () => {
                                 </Box>
                             </Stack>
                         </Stack>
+                    </Paper>
+                </Container>
+            )}
+
+            {/* Tabs for filtering (only show when status is client_review) */}
+            {isClientReview && (
+                <Container maxWidth="xl" sx={{ pb: 2 }}>
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            borderRadius: 2,
+                            border: '1px solid #e0e0e0',
+                            bgcolor: 'white'
+                        }}
+                    >
+                        <Tabs
+                            value={activeTab}
+                            onChange={handleTabChange}
+                            sx={{
+                                '& .MuiTabs-indicator': {
+                                    backgroundColor: 'var(--color-primary)',
+                                },
+                            }}
+                        >
+                            <Tab
+                                label={t('shared.allPhotos')}
+                                value="all"
+                                sx={{
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    fontSize: '0.95rem',
+                                    minWidth: 120,
+                                    color: 'var(--text-primary)',
+                                    '&.Mui-selected': {
+                                        color: 'var(--color-primary)',
+                                    },
+                                    '&:hover': {
+                                        color: 'var(--color-primary) !important',
+                                        backgroundColor: 'transparent',
+                                    },
+                                }}
+                            />
+                            <Tab
+                                label={t('shared.editedPhotos')}
+                                value="edited"
+                                sx={{
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    fontSize: '0.95rem',
+                                    minWidth: 120,
+                                    color: 'var(--text-primary)',
+                                    '&.Mui-selected': {
+                                        color: 'var(--color-primary)',
+                                    },
+                                    '&:hover': {
+                                        color: 'var(--color-primary) !important',
+                                        backgroundColor: 'transparent',
+                                    },
+                                }}
+                            />
+                        </Tabs>
                     </Paper>
                 </Container>
             )}
@@ -744,11 +872,6 @@ export const SharedProjectPage = () => {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                border: '2px solid white',
-                                                cursor: 'pointer',
-                                                '&:hover': {
-                                                    transform: 'scale(1.1)',
-                                                },
                                             }}
                                         >
                                             {isSelected ? (
@@ -758,40 +881,53 @@ export const SharedProjectPage = () => {
                                             )}
                                         </Box>
                                     </Box>
+
+                                    {/* Edited version badge */}
+                                    {photo.edited_version && (
+                                        <Box
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 8,
+                                                right: 8,
+                                            }}
+                                        >
+                                            <Chip
+                                                icon={<EditIcon sx={{ fontSize: 12 }} />}
+                                                label="Edited"
+                                                size="small"
+                                                sx={{
+                                                    bgcolor: '#4caf50',
+                                                    color: 'white',
+                                                    fontWeight: 600,
+                                                    fontSize: '0.65rem',
+                                                    height: 20,
+                                                    '& .MuiChip-icon': {
+                                                        color: 'white',
+                                                        fontSize: 12,
+                                                    },
+                                                }}
+                                            />
+                                        </Box>
+                                    )}
                                 </Box>
                             );
                         })}
                     </Box>
                 )}
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                        <Pagination
-                            count={totalPages}
-                            page={currentPage}
-                            onChange={async (event, page) => {
-                                setCurrentPage(page);
-                                if (token) {
-                                    await loadPhotos(token, page);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }
-                            }}
-                            color="primary"
-                            size="large"
-                            showFirstButton
-                            showLastButton
-                            sx={{
-                                '& .MuiPaginationItem-root': {
-                                    color: 'var(--text-primary)',
-                                    borderColor: 'var(--border-primary)',
-                                },
-                                '& .Mui-selected': {
-                                    bgcolor: 'var(--color-primary) !important',
-                                    color: 'var(--text-inverse)',
-                                },
-                            }}
-                        />
+                {/* Loading More Indicator */}
+                {loadingMore && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
+                        <CircularProgress size={40} sx={{ color: 'var(--color-primary)' }} />
+                    </Box>
+                )}
+
+                {/* No More Photos Message */}
+                {!hasMore && photos.length > 0 && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
+                        <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
+                            {t('shared.noMorePhotos') || 'Đã tải hết ảnh'}
+                        </Typography>
                     </Box>
                 )}
             </Container>
@@ -843,11 +979,55 @@ export const SharedProjectPage = () => {
                                     zIndex: 2,
                                 }}
                             >
-                                <Typography variant="body1" sx={{ color: 'white', ml: 1 }}>
-                                    {selectedPhotoIndex! + 1} / {photos.length}
-                                </Typography>
+                                <Stack direction="row" spacing={2} alignItems="center">
+                                    <Typography variant="body1" sx={{ color: 'white', ml: 1 }}>
+                                        {selectedPhotoIndex! + 1} / {photos.length}
+                                    </Typography>
+
+                                    {/* Version Selector - Only show when status is client_review */}
+                                    {isClientReview && (
+                                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                                            <Select
+                                                value={selectedVersion}
+                                                onChange={(e) => setSelectedVersion(e.target.value as 'original' | 'edited')}
+                                                sx={{
+                                                    color: 'white',
+                                                    fontSize: '0.875rem',
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                                                    },
+                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                                                    },
+                                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'white',
+                                                    },
+                                                    '& .MuiSvgIcon-root': {
+                                                        color: 'white',
+                                                    },
+                                                }}
+                                            >
+                                                <MenuItem value="original" sx={{ fontSize: '0.875rem' }}>
+                                                    {t('shared.originalVersion')}
+                                                </MenuItem>
+                                                <MenuItem value="edited" sx={{ fontSize: '0.875rem' }}>
+                                                    {t('shared.editedVersion')}
+                                                </MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    )}
+                                </Stack>
 
                                 <Stack direction="row" spacing={1}>
+                                    <IconButton
+                                        onClick={() => setMobileCommentOpen(true)}
+                                        sx={{
+                                            color: 'white',
+                                            display: { xs: 'flex', md: 'none' },
+                                        }}
+                                    >
+                                        <CommentIcon />
+                                    </IconButton>
                                     <IconButton
                                         onClick={() => handleDownload(selectedPhoto)}
                                         sx={{ color: 'white' }}
@@ -898,7 +1078,7 @@ export const SharedProjectPage = () => {
                             {/* Main Image */}
                             <Box
                                 component="img"
-                                src={token ? photoGuestService.getPhotoUrl(selectedPhoto.id, token) : ''}
+                                src={token ? photoGuestService.getPhotoUrl(selectedPhoto.id, token, undefined, undefined, false, selectedVersion) : ''}
                                 alt={selectedPhoto.filename}
                                 sx={{
                                     maxWidth: '90%',
@@ -1126,6 +1306,146 @@ export const SharedProjectPage = () => {
                     </Box>
                 )}
             </Dialog>
+
+            {/* Mobile Comment Drawer */}
+            <Drawer
+                anchor="bottom"
+                open={mobileCommentOpen && selectedPhotoIndex !== null}
+                onClose={() => setMobileCommentOpen(false)}
+                sx={{
+                    display: { xs: 'block', md: 'none' },
+                    '& .MuiDrawer-paper': {
+                        maxHeight: '80vh',
+                        borderTopLeftRadius: 16,
+                        borderTopRightRadius: 16,
+                    },
+                }}
+            >
+                <Box sx={{ height: '80vh', display: 'flex', flexDirection: 'column' }}>
+                    {/* Header */}
+                    <Box sx={{
+                        p: 2,
+                        borderBottom: '1px solid var(--border-primary)',
+                        bgcolor: 'var(--bg-secondary)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}>
+                        <Typography variant="h6" fontWeight={600} sx={{ color: 'var(--text-primary)' }}>
+                            {t('shared.comments')}
+                        </Typography>
+                        <IconButton onClick={() => setMobileCommentOpen(false)} size="small">
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
+
+                    <Typography variant="caption" sx={{ px: 2, pt: 1, color: 'var(--text-secondary)' }}>
+                        {!isClientSelecting
+                            ? t('shared.projectEnded')
+                            : selectedPhoto && selectedPhotos.has(selectedPhoto.id)
+                                ? t('shared.photoSelectedComment')
+                                : t('shared.selectToComment')}
+                    </Typography>
+
+                    {/* Comment List */}
+                    <Box sx={{ flex: 1, overflow: 'auto', p: 2, bgcolor: 'var(--bg-primary)' }}>
+                        {loadingComments ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                <CircularProgress size={30} sx={{ color: 'var(--color-primary)' }} />
+                            </Box>
+                        ) : photoComments.length === 0 ? (
+                            <Typography variant="body2" align="center" sx={{ py: 4, color: 'var(--text-secondary)' }}>
+                                {t('shared.noComments')}
+                            </Typography>
+                        ) : (
+                            <Stack spacing={2}>
+                                {photoComments.map((cmt) => (
+                                    <Paper
+                                        key={cmt.id}
+                                        elevation={0}
+                                        sx={{
+                                            p: 2,
+                                            bgcolor: cmt.author_type === 'admin' ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
+                                            borderRadius: 2,
+                                            border: '1px solid var(--border-primary)',
+                                        }}
+                                    >
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                            <Chip
+                                                label={cmt.author_type === 'admin' ? t('shared.admin') : t('shared.client')}
+                                                size="small"
+                                                color={cmt.author_type === 'admin' ? 'default' : 'primary'}
+                                                sx={{ height: 20, fontSize: '0.7rem' }}
+                                            />
+                                            <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                                                {new Date(cmt.created_at).toLocaleString('vi-VN', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                })}
+                                            </Typography>
+                                        </Box>
+                                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'var(--text-primary)' }}>
+                                            {cmt.content}
+                                        </Typography>
+                                    </Paper>
+                                ))}
+                            </Stack>
+                        )}
+                    </Box>
+
+                    {/* Comment Input */}
+                    <Box sx={{ p: 2, borderTop: '1px solid var(--border-primary)', bgcolor: 'var(--bg-secondary)' }}>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={3}
+                            placeholder={!isClientSelecting
+                                ? t('shared.projectEnded')
+                                : selectedPhoto && selectedPhotos.has(selectedPhoto.id)
+                                    ? t('shared.writeComment')
+                                    : t('shared.selectToComment')}
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            disabled={!isClientSelecting || !selectedPhoto || !selectedPhotos.has(selectedPhoto.id)}
+                            sx={{
+                                mb: 2,
+                                '& .MuiOutlinedInput-root': {
+                                    bgcolor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    '& fieldset': {
+                                        borderColor: 'var(--border-primary)',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'var(--border-focus)',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'var(--border-focus)',
+                                    },
+                                },
+                            }}
+                        />
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            endIcon={<SendIcon />}
+                            onClick={handleSendComment}
+                            disabled={!isClientSelecting || !comment.trim() || !selectedPhoto || !selectedPhotos.has(selectedPhoto.id)}
+                            sx={{
+                                bgcolor: 'var(--color-warning)',
+                                color: 'var(--text-inverse)',
+                                '&:hover': {
+                                    bgcolor: '#f57c00',
+                                },
+                            }}
+                        >
+                            {t('shared.sendComment')}
+                        </Button>
+                    </Box>
+                </Box>
+            </Drawer>
 
             {/* Password Dialog */}
             <Dialog

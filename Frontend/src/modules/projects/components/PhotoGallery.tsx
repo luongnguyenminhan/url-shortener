@@ -14,6 +14,7 @@ import {
     ThumbUp,
     ThumbDown,
     ImageOutlined,
+    Edit as EditIcon,
 } from '@mui/icons-material';
 import type { Photo } from '@/types/photo.type';
 import { photoService } from '@/services/photoService';
@@ -24,6 +25,8 @@ interface PhotoGalleryProps {
     loading?: boolean;
     onPhotoDelete?: (photoId: string) => void;
     onPhotoUpdate?: () => void;
+    projectStatus?: string;
+    projectId?: string;
 }
 
 export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
@@ -31,6 +34,8 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     loading = false,
     onPhotoDelete,
     onPhotoUpdate,
+    projectStatus,
+    projectId,
 }) => {
     const [hoveredPhoto, setHoveredPhoto] = useState<string | null>(null);
     const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
@@ -248,17 +253,33 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                                     sx={{
                                         color: '#fff',
                                         pointerEvents: 'auto',
+                                        '&.Mui-checked': {
+                                            color: '#1a73e8',
+                                        },
                                         opacity: isHovered || isSelected ? 1 : 0,
                                         transition: 'opacity 0.2s',
-                                        '&.Mui-checked': {
-                                            color: '#fff',
-                                        },
-                                        bgcolor: isSelected || isHovered ? 'rgba(0,0,0,0.3)' : 'transparent',
-                                        borderRadius: '50%',
-                                        p: 0.5,
                                     }}
-                                    onClick={(e) => e.stopPropagation()}
                                 />
+
+                                {/* Edited version badge */}
+                                {photo.edited_version && (
+                                    <Chip
+                                        icon={<EditIcon sx={{ fontSize: 14 }} />}
+                                        label="Edited"
+                                        size="small"
+                                        sx={{
+                                            bgcolor: '#4caf50',
+                                            color: 'white',
+                                            fontWeight: 600,
+                                            fontSize: '0.7rem',
+                                            height: 24,
+                                            pointerEvents: 'auto',
+                                            '& .MuiChip-icon': {
+                                                color: 'white',
+                                            },
+                                        }}
+                                    />
+                                )}
                             </Box>
 
                             {/* Bottom overlay - Status chips */}
@@ -339,6 +360,8 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                 }}
                 onNavigate={handleNavigate}
                 onDelete={onPhotoDelete}
+                projectStatus={projectStatus}
+                projectId={projectId}
             />
         </>
     );

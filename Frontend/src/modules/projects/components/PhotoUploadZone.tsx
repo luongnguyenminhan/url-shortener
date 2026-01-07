@@ -36,11 +36,13 @@ interface FileWithPreview {
 interface PhotoUploadZoneProps {
     projectId: string;
     onUploadComplete?: () => void;
+    uploadType?: 'original' | 'edited';
 }
 
 export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
     projectId,
     onUploadComplete,
+    uploadType = 'original',
 }) => {
     const { t } = useTranslation('projects');
     const [files, setFiles] = useState<FileWithPreview[]>([]);
@@ -119,7 +121,11 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
             );
 
             // Upload single file with real progress tracking
-            await photoService.uploadPhoto(
+            const uploadFunc = uploadType === 'edited'
+                ? photoService.uploadEditedPhoto
+                : photoService.uploadPhoto;
+
+            await uploadFunc(
                 projectId,
                 fileWithPreview.file,
                 (progress) => {
@@ -235,10 +241,14 @@ export const PhotoUploadZone: React.FC<PhotoUploadZoneProps> = ({
             >
                 <CloudUpload sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
                 <Typography variant="h6" gutterBottom>
-                    {t('upload.dropZoneTitle', 'Kéo thả ảnh vào đây hoặc click để chọn')}
+                    {uploadType === 'edited'
+                        ? t('upload.dropZoneTitleEdited', 'Kéo thả ảnh đã chỉnh sửa vào đây hoặc click để chọn')
+                        : t('upload.dropZoneTitle', 'Kéo thả ảnh vào đây hoặc click để chọn')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    {t('upload.dropZoneSubtitle', 'Hỗ trợ nhiều file cùng lúc')}
+                    {uploadType === 'edited'
+                        ? t('upload.dropZoneSubtitleEdited', 'Upload ảnh đã chỉnh sửa - Hỗ trợ nhiều file cùng lúc')
+                        : t('upload.dropZoneSubtitle', 'Hỗ trợ nhiều file cùng lúc')}
                 </Typography>
                 <input
                     ref={fileInputRef}
