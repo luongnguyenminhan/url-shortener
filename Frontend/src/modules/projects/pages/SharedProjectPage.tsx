@@ -679,7 +679,7 @@ export const SharedProjectPage = () => {
                                     {/* Image */}
                                     <Box
                                         component="img"
-                                        src={token ? photoGuestService.getPhotoUrl(photo.id, token, 200, 200) : ''}
+                                        src={token ? photoGuestService.getPhotoUrl(photo.id, token, 200, 200, true) : ''}
                                         alt={photo.filename}
                                         loading="lazy"
                                         onLoad={() => setImageLoaded({ ...imageLoaded, [photo.id]: true })}

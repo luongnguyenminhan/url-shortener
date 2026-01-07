@@ -21,16 +21,16 @@ Exchange Firebase ID token for system access and refresh tokens.
   "message": "Authentication successful",
   "data": {
     "user": {
-      "id": "uuid",
+      "id": "string (UUID)",
       "email": "string",
-      "name": "string",
-      "google_uid": "string",
-      "created_at": "datetime",
-      "updated_at": "datetime"
+      "name": "string | null"
     },
-    "access_token": "string",
-    "refresh_token": "string",
-    "token_type": "Bearer"
+    "token": {
+      "access_token": "string",
+      "refresh_token": "string",
+      "token_type": "bearer",
+      "expires_in": 3600
+    }
   }
 }
 ```
@@ -58,12 +58,12 @@ Authorization: Bearer {access_token}
   "success": true,
   "message": "User information retrieved successfully",
   "data": {
-    "id": "uuid",
+    "id": "string (UUID)",
     "email": "string",
-    "name": "string",
+    "name": "string | null",
     "google_uid": "string",
-    "created_at": "datetime",
-    "updated_at": "datetime"
+    "created_at": "string (ISO datetime)",
+    "updated_at": "string (ISO datetime)"
   }
 }
 ```
@@ -91,7 +91,7 @@ Authorization: Bearer {access_token}
 ```json
 {
   "title": "string (max 255 chars)",
-  "status": "DRAFT | ACTIVE | ARCHIVED | COMPLETED",
+  "status": "draft | client_selecting | pending_edit | client_review | completed",
   "expired_days": 30
 }
 ```
@@ -109,7 +109,12 @@ Authorization: Bearer {access_token}
     "images_count": 0,
     "client_notes": "string | null",
     "created_at": "datetime",
-    "updated_at": "datetime"
+    "updated_at": "datetime",
+    "owner_info": {
+      "id": "uuid",
+      "email": "string",
+      "name": "string | null"
+    }
   }
 }
 ```
@@ -152,7 +157,12 @@ Authorization: Bearer {access_token}
       "images_count": 0,
       "client_notes": "string | null",
       "created_at": "datetime",
-      "updated_at": "datetime"
+      "updated_at": "datetime",
+      "owner_info": {
+        "id": "uuid",
+        "email": "string",
+        "name": "string | null"
+      }
     }
   ],
   "meta": {
@@ -196,7 +206,12 @@ Authorization: Bearer {access_token}
     "images_count": 0,
     "client_notes": "string | null",
     "created_at": "datetime",
-    "updated_at": "datetime"
+    "updated_at": "datetime",
+    "owner_info": {
+      "id": "uuid",
+      "email": "string",
+      "name": "string | null"
+    }
   }
 }
 ```
@@ -225,7 +240,7 @@ Authorization: Bearer {access_token}
 ```json
 {
   "title": "string (max 255 chars, optional)",
-  "status": "DRAFT | ACTIVE | ARCHIVED | COMPLETED (optional)",
+  "status": "draft | client_selecting | pending_edit | client_review | completed (optional)",
   "client_notes": "string (max 1000 chars, optional)",
   "expired_date": "datetime (optional)"
 }
@@ -244,7 +259,12 @@ Authorization: Bearer {access_token}
     "images_count": 0,
     "client_notes": "string | null",
     "created_at": "datetime",
-    "updated_at": "datetime"
+    "updated_at": "datetime",
+    "owner_info": {
+      "id": "uuid",
+      "email": "string",
+      "name": "string | null"
+    }
   }
 }
 ```
@@ -273,7 +293,7 @@ Authorization: Bearer {access_token}
 **Request Body:**
 ```json
 {
-  "status": "DRAFT | ACTIVE | ARCHIVED | COMPLETED"
+  "status": "draft | client_selecting | pending_edit | client_review | completed"
 }
 ```
 
@@ -290,7 +310,12 @@ Authorization: Bearer {access_token}
     "images_count": 0,
     "client_notes": "string | null",
     "created_at": "datetime",
-    "updated_at": "datetime"
+    "updated_at": "datetime",
+    "owner_info": {
+      "id": "uuid",
+      "email": "string",
+      "name": "string | null"
+    }
   }
 }
 ```
@@ -460,10 +485,12 @@ Download photo image with optional resizing - requires project token for authori
 - `project_token` (required): Project access token for authorization
 - `w` (optional): Width for resizing (min: 1, max: 2000)
 - `h` (optional): Height for resizing (min: 1, max: 2000)
+- `is_thumbnail` (optional): Get thumbnail version as WebP (default: false)
+- `version` (optional): Photo version to retrieve - `original` or `edited` (default: `original`)
 
 **Response:**
 - Binary image data (streaming response)
-- Content-Type: `image/jpeg`
+- Content-Type: `image/jpeg` or `image/webp` (if is_thumbnail=true)
 - Content-Disposition: `inline; filename={filename}`
 
 **Status Codes:**
@@ -473,7 +500,7 @@ Download photo image with optional resizing - requires project token for authori
 
 **Example:**
 ```
-GET /api/v1/photos-guest/550e8400-e29b-41d4-a716-446655440000?project_token=abc123&w=800&h=600
+GET /api/v1/photos-guest/550e8400-e29b-41d4-a716-446655440000?project_token=abc123&w=800&h=600&version=edited&is_thumbnail=true
 ```
 
 ---
@@ -481,7 +508,7 @@ GET /api/v1/photos-guest/550e8400-e29b-41d4-a716-446655440000?project_token=abc1
 ### GET `/api/v1/photos-guest`
 **List project photos (guest)**
 
-Get all photos in a project with pagination and optional filtering by selection status.
+Get all photos in a project with pagination and optional filtering by photo status.
 
 **Query Parameters:**
 - `project_token` (required): Project access token for authorization
@@ -490,7 +517,7 @@ Get all photos in a project with pagination and optional filtering by selection 
 - `sort_by` (optional): Field to sort by
 - `sort_order` (optional): asc | desc
 - `search` (optional): Search query
-- `is_selected` (optional): Filter by selection status (true/false)
+- `status` (optional): Filter by photo status - `origin`, `selected`, or `edited`
 
 **Response:**
 ```json
@@ -506,7 +533,8 @@ Get all photos in a project with pagination and optional filtering by selection 
       "is_approved": false,
       "is_rejected": false,
       "created_at": "datetime",
-      "updated_at": "datetime"
+      "updated_at": "datetime",
+      "edited_version": false
     }
   ],
   "meta": {
@@ -524,7 +552,7 @@ Get all photos in a project with pagination and optional filtering by selection 
 
 **Example:**
 ```
-GET /api/v1/photos-guest?project_token=abc123&page=1&page_size=20&is_selected=true
+GET /api/v1/photos-guest?project_token=abc123&page=1&page_size=20&status=selected
 ```
 
 ---
@@ -587,7 +615,7 @@ Mark a photo as selected and optionally add a comment.
 ```json
 {
   "project_token": "string",
-  "comment": "string (optional, max 500 chars)"
+  "comment": "string | null (optional, max 500 chars)"
 }
 ```
 
@@ -627,7 +655,7 @@ Mark a photo as unselected and optionally add a comment.
 ```json
 {
   "project_token": "string",
-  "comment": "string (optional, max 500 chars)"
+  "comment": "string | null (optional, max 500 chars)"
 }
 ```
 
@@ -652,6 +680,336 @@ Mark a photo as unselected and optionally add a comment.
   "comment": "Changed my mind on this one"
 }
 ```
+
+---
+
+## Photo APIs (Authenticated)
+
+These endpoints require authentication for project owners to manage their photos.
+
+### POST `/api/v1/photos`
+**Upload photo**
+
+Upload a JPEG photo to a project.
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+Content-Type: multipart/form-data
+```
+
+**Request Body (multipart/form-data):**
+- `file` (required): JPEG image file
+- `project_id` (required): UUID of the project
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Photo uploaded successfully",
+  "data": {
+    "photo": {
+      "id": "uuid",
+      "filename": "string",
+      "project_id": "uuid",
+      "is_selected": false,
+      "is_approved": false,
+      "is_rejected": false,
+      "created_at": "datetime",
+      "updated_at": "datetime"
+    },
+    "version": {
+      "id": "uuid",
+      "photo_id": "uuid",
+      "version_type": "original",
+      "image_url": "string",
+      "created_at": "datetime",
+      "updated_at": "datetime"
+    }
+  }
+}
+```
+
+**Status Codes:**
+- `201 Created` - Photo uploaded successfully
+- `400 Bad Request` - Invalid file format or project_id
+- `401 Unauthorized` - User not authenticated
+
+---
+
+### POST `/api/v1/photos/edited`
+**Upload edited photo**
+
+Upload an edited version of a JPEG photo to a project.
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+Content-Type: multipart/form-data
+```
+
+**Request Body (multipart/form-data):**
+- `file` (required): JPEG image file
+- `project_id` (required): UUID of the project
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Photo uploaded successfully",
+  "data": {
+    "photo": {
+      "id": "uuid",
+      "filename": "string",
+      "project_id": "uuid",
+      "is_selected": false,
+      "is_approved": false,
+      "is_rejected": false,
+      "created_at": "datetime",
+      "updated_at": "datetime"
+    },
+    "version": {
+      "id": "uuid",
+      "photo_id": "uuid",
+      "version_type": "edited",
+      "image_url": "string",
+      "created_at": "datetime",
+      "updated_at": "datetime"
+    }
+  }
+}
+```
+
+**Status Codes:**
+- `201 Created` - Edited photo uploaded successfully
+- `400 Bad Request` - Invalid file format or project_id
+- `401 Unauthorized` - User not authenticated
+
+---
+
+### GET `/api/v1/photos/{photo_id}`
+**Get photo image**
+
+Retrieve photo image with optional resizing and version selection.
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Path Parameters:**
+- `photo_id` (required): UUID of the photo
+
+**Query Parameters:**
+- `w` (optional): Width for resizing (min: 1, max: 2000)
+- `h` (optional): Height for resizing (min: 1, max: 2000)
+- `is_thumbnail` (optional): Get thumbnail version as WebP (default: false)
+- `version` (optional): Photo version to retrieve - `original` or `edited` (default: `original`)
+
+**Response:**
+- Binary image data (streaming response)
+- Content-Type: `image/jpeg` or `image/webp` (if is_thumbnail=true)
+- Content-Disposition: `inline; filename={filename}`
+
+**Status Codes:**
+- `200 OK` - Image retrieved successfully
+- `401 Unauthorized` - User not authenticated
+- `404 Not Found` - Photo not found
+
+**Example:**
+```
+GET /api/v1/photos/550e8400-e29b-41d4-a716-446655440000?w=800&h=600&version=edited&is_thumbnail=true
+```
+
+---
+
+### GET `/api/v1/photos/projects/{project_id}`
+**List project photos**
+
+Get all photos in a project with pagination and optional filtering.
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Path Parameters:**
+- `project_id` (required): UUID of the project
+
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `page_size` (optional): Items per page (default: 10)
+- `sort_by` (optional): Field to sort by
+- `sort_order` (optional): asc | desc
+- `search` (optional): Search query
+- `status` (optional): Filter by photo status - `origin`, `selected`, or `edited`
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Photo list retrieved successfully",
+  "data": [
+    {
+      "id": "uuid",
+      "filename": "string",
+      "project_id": "uuid",
+      "is_selected": false,
+      "is_approved": false,
+      "is_rejected": false,
+      "created_at": "datetime",
+      "updated_at": "datetime",
+      "edited_version": false
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "page_size": 10,
+    "total": 50,
+    "total_pages": 5
+  }
+}
+```
+
+**Status Codes:**
+- `200 OK` - Photos retrieved successfully
+- `401 Unauthorized` - User not authenticated
+- `404 Not Found` - Project not found
+
+---
+
+### GET `/api/v1/photos/{photo_id}/meta`
+**Get photo metadata**
+
+Get photo details with all comments (authenticated user only).
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Path Parameters:**
+- `photo_id` (required): UUID of the photo
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Photo meta retrieved successfully",
+  "data": {
+    "id": "uuid",
+    "filename": "string",
+    "project_id": "uuid",
+    "is_selected": false,
+    "is_approved": false,
+    "is_rejected": false,
+    "created_at": "datetime",
+    "updated_at": "datetime",
+    "comments": [
+      {
+        "id": "uuid",
+        "photo_id": "uuid",
+        "author_type": "client | admin",
+        "content": "string",
+        "created_at": "datetime",
+        "updated_at": "datetime"
+      }
+    ]
+  }
+}
+```
+
+**Status Codes:**
+- `200 OK` - Photo metadata retrieved successfully
+- `401 Unauthorized` - User not authenticated
+- `404 Not Found` - Photo not found
+
+---
+
+### GET `/api/v1/photos/{project_id}/download-photos`
+**Download project photos**
+
+Download selected photos as manifest ZIP or get script templates.
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Path Parameters:**
+- `project_id` (required): UUID of the project
+
+**Query Parameters:**
+- `type` (required): Download type - `manifest` or `scripts`
+  - `manifest`: Returns ZIP with selected photos organized by extension + photos.csv
+  - `scripts`: Returns JSON with PowerShell, Bash, and Zsh script templates
+
+**Response (type=manifest):**
+- Binary ZIP file (streaming response)
+- Content-Type: `application/zip`
+- Content-Disposition: `attachment; filename={project_name}_selected_photos.zip`
+
+**ZIP Structure:**
+```
+Selected/
+  JPG/
+    photo1.jpg
+    photo2.jpg
+  PNG/
+    photo3.png
+photos.csv
+```
+
+**Response (type=scripts):**
+```json
+{
+  "success": true,
+  "message": "Script templates generated successfully",
+  "data": {
+    "powershell": "PowerShell script content",
+    "bash": "Bash script content",
+    "zsh": "Zsh script content",
+    "csv_url": "/api/v1/photos/{project_id}/download-photos/csv"
+  }
+}
+```
+
+**Status Codes:**
+- `200 OK` - Download initiated successfully
+- `401 Unauthorized` - User not authenticated
+- `404 Not Found` - Project not found or no selected photos
+
+---
+
+### GET `/api/v1/photos/{project_id}/download-photos/csv`
+**Download photos as CSV**
+
+Download selected photos with comments as CSV file.
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Path Parameters:**
+- `project_id` (required): UUID of the project
+
+**Response:**
+- CSV file (streaming response)
+- Content-Type: `text/csv`
+- Content-Disposition: `attachment; filename={project_name}_photos.csv`
+
+**CSV Format:**
+```csv
+filename,extension,comment,url
+photo1.jpg,JPG,"Client comment here",https://...
+photo2.jpg,JPG,"",https://...
+```
+
+**Status Codes:**
+- `200 OK` - CSV file generated successfully
+- `401 Unauthorized` - User not authenticated
+- `404 Not Found` - Project not found or no selected photos
 
 ---
 
@@ -695,5 +1053,5 @@ Obtain access token through the `/api/v1/auth/firebase/login` endpoint.
 
 ## Base URL
 
-Development: `http://localhost:8000`
-Production: TBD
+Development: `http://localhost:8081/be`
+Production: `https://photo.wc504.io.vn/be`
