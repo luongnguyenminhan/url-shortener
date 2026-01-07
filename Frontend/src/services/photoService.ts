@@ -104,4 +104,9 @@ export const photoService = {
         );
         return response.data.data!;
     },
+
+    deletePhoto: async (photoId: string): Promise<void> => {
+        await axiosInstance.delete(`${BASE_URL}/photos/${photoId}`);
+    },
+
 };

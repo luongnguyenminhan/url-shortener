@@ -119,9 +119,10 @@ export const ProjectDetailPage = () => {
 
         try {
             await photoService.deletePhoto(photoId);
-            setPhotos((prev) => prev.filter((p) => p.id !== photoId));
             showSuccessToast(t('detail.deleteSuccess', 'Đã xóa ảnh thành công'));
-            loadProjectData(); // Reload to update images_count
+
+            // Reload photos and project data to update counts and pagination
+            await Promise.all([loadPhotos(), loadProjectData()]);
         } catch (err: any) {
             showErrorToast(t('detail.deleteError', 'Không thể xóa ảnh'));
         }
