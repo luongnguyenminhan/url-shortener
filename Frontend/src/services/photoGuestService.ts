@@ -8,6 +8,8 @@ export interface PhotoGuestParams {
     project_token: string;
     page?: number;
     page_size?: number;
+    skip?: number;
+    limit?: number;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
     search?: string;

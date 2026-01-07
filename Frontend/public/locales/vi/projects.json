@@ -23,14 +23,20 @@
             "projects": "Dự án"
         },
         "uploadDialog": {
-            "title": "Upload ảnh"
-        }
+            "title": "Upload ảnh gốc",
+            "titleEdited": "Upload ảnh đã chỉnh sửa"
+        },
+        "uploadPhotos": "Tải lên ảnh gốc",
+        "uploadEditedPhotos": "Tải lên ảnh đã edit"
     },
     "status": {
         "draft": "Bản nháp",
         "clientSelecting": "Khách hàng đang chọn",
+        "client_selecting": "Khách hàng đang chọn",
         "pendingEdit": "Chờ chỉnh sửa",
+        "pending_edit": "Chờ chỉnh sửa",
         "clientReview": "Khách hàng đánh giá",
+        "client_review": "Khách hàng đánh giá",
         "completed": "Hoàn thành"
     },
     "info": {
@@ -55,9 +61,15 @@
         "sendToPhotographer": "Gửi cho Photographer",
         "totalPhotos": "Tổng số ảnh",
         "selected": "Đã chọn",
+        "status": "Trạng thái",
         "expiresAt": "Hết hạn",
         "noPhotos": "Chưa có ảnh nào",
         "noPhotosDesc": "Dự án này chưa có ảnh được tải lên",
+        "noMorePhotos": "Đã tải hết ảnh",
+        "allPhotos": "TẤT CẢ",
+        "editedPhotos": "ĐÃ CHỈNH SỬA",
+        "originalVersion": "Ảnh gốc (Original)",
+        "editedVersion": "Ảnh đã edit (Edited)",
         "photoSelected": "Đã chọn ảnh",
         "photoDeselected": "Đã bỏ chọn ảnh",
         "photoRejected": "Đã từ chối ảnh",
@@ -101,7 +113,9 @@
         "successCount": "Đã upload thành công {{count}} ảnh",
         "failCount": "Upload thất bại {{count}} ảnh",
         "dropZoneTitle": "Kéo thả ảnh vào đây hoặc click để chọn",
+        "dropZoneTitleEdited": "Kéo thả ảnh đã chỉnh sửa vào đây hoặc click để chọn",
         "dropZoneSubtitle": "Hỗ trợ nhiều file cùng lúc",
+        "dropZoneSubtitleEdited": "Upload ảnh đã chỉnh sửa - Hỗ trợ nhiều file cùng lúc",
         "statusPending": "{{count}} chờ upload",
         "statusUploading": "{{count}} đang upload",
         "statusSuccess": "{{count}} thành công",

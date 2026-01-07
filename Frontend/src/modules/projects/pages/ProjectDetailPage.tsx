@@ -55,6 +55,7 @@ export const ProjectDetailPage = () => {
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const [statusEditModalOpen, setStatusEditModalOpen] = useState(false);
     const [editingStatus, setEditingStatus] = useState<string>('');
+    const [uploadType, setUploadType] = useState<'original' | 'edited'>('original');
     const [page, setPage] = useState(1);
     const [pageSize] = useState(24);
     const [totalPhotos, setTotalPhotos] = useState(0);
@@ -127,6 +128,12 @@ export const ProjectDetailPage = () => {
     };
 
     const handleUploadPhotos = () => {
+        setUploadType('original');
+        setUploadModalOpen(true);
+    };
+
+    const handleUploadEditedPhotos = () => {
+        setUploadType('edited');
         setUploadModalOpen(true);
     };
 
@@ -178,64 +185,66 @@ export const ProjectDetailPage = () => {
     }
 
     return (
-        <Container maxWidth="xl" sx={{ py: 4, minHeight: '100vh', bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d' }}>
-            {/* Header with Breadcrumbs */}
-            <Box mb={3}>
-                <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-                    <Link
-                        component="button"
-                        variant="body1"
-                        onClick={() => navigate('/projects')}
-                        sx={{
-                            textDecoration: 'none',
-                            cursor: 'pointer',
-                            color: theme.palette.mode === 'light' ? '#616161' : '#6c757d'
-                        }}
-                    >
-                        {t('detail.breadcrumb.projects', 'Dự án')}
-                    </Link>
-                    <Typography sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>{project.title}</Typography>
-                </Breadcrumbs>
-
+        <Container maxWidth="xl" sx={{ py: 2, height: '100vh', overflow: 'hidden', bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d' }}>
+            {/* Header */}
+            <Box mb={2}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Stack direction="row" spacing={2} alignItems="center">
+                    <Stack direction="row" spacing={1.5} alignItems="center">
                         <IconButton
                             onClick={() => navigate(-1)}
+                            size="small"
                             sx={{
-                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
                                 '&:hover': {
                                     bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                                 },
                             }}
                         >
-                            <ArrowBack />
+                            <ArrowBack fontSize="small" />
                         </IconButton>
-                        <Typography variant="h4" fontWeight="bold" sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
-                            {t('detail.title', 'Chi tiết dự án')}
+                        <Typography variant="h5" fontWeight="600" sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
+                            {project.title}
                         </Typography>
                     </Stack>
 
-                    <Button
-                        variant="contained"
-                        startIcon={<Upload />}
-                        onClick={handleUploadPhotos}
-                        sx={{
-                            bgcolor: '#1976d2',
-                            color: '#ffffff',
-                            '&:hover': {
-                                bgcolor: '#1565c0',
-                            },
-                        }}
-                    >
-                        {t('detail.uploadPhotos', 'Tải lên ảnh')}
-                    </Button>
+                    <Stack direction="row" spacing={2}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<Upload />}
+                            onClick={handleUploadEditedPhotos}
+                            sx={{
+                                borderColor: '#4caf50',
+                                color: '#4caf50',
+                                '&:hover': {
+                                    borderColor: '#45a049',
+                                    bgcolor: 'rgba(76, 175, 80, 0.08)',
+                                },
+                            }}
+                        >
+                            {t('detail.uploadEditedPhotos', 'Tải lên ảnh đã edit')}
+                        </Button>
+                        <Button
+                            variant="contained"
+                            startIcon={<Upload />}
+                            onClick={handleUploadPhotos}
+                            sx={{
+                                bgcolor: '#1976d2',
+                                color: '#ffffff',
+                                '&:hover': {
+                                    bgcolor: '#1565c0',
+                                },
+                            }}
+                        >
+                            {t('detail.uploadPhotos', 'Tải lên ảnh gốc')}
+                        </Button>
+                    </Stack>
                 </Stack>
             </Box>
 
             {/* Main Content */}
-            <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
-                {/* Left side - Photo Gallery */}
-                <Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
+            <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' }, alignItems: 'flex-start', height: 'calc(100vh - 140px)' }}>
+                {/* Left side - Photo Gallery - Scrollable */}
+                <Box sx={{ flex: '1 1 auto', minWidth: 0, height: '100%', overflowY: 'auto' }}>
                     <Paper sx={{
                         p: 3,
                         bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
@@ -263,6 +272,8 @@ export const ProjectDetailPage = () => {
                             loading={photosLoading}
                             onPhotoDelete={handlePhotoDelete}
                             onPhotoUpdate={handlePhotoUpdate}
+                            projectStatus={project?.status}
+                            projectId={id}
                         />
 
                         {/* Pagination */}
@@ -297,8 +308,13 @@ export const ProjectDetailPage = () => {
                     </Paper>
                 </Box>
 
-                {/* Right side - Project Info */}
-                <Box sx={{ width: { xs: '100%', lg: 400 }, flexShrink: 0 }}>
+                {/* Right side - Project Info - Sticky */}
+                <Box sx={{
+                    width: { xs: '100%', lg: 400 },
+                    flexShrink: 0,
+                    height: '100%',
+                    overflowY: 'auto'
+                }}>
                     <ProjectDetailInfo project={project} onStatusUpdate={handleOpenStatusEdit} />
                 </Box>
             </Box>
@@ -333,7 +349,11 @@ export const ProjectDetailPage = () => {
             >
                 <DialogTitle sx={{ bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40', color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="h6">{t('detail.uploadDialog.title', 'Upload ảnh')}</Typography>
+                        <Typography variant="h6">
+                            {uploadType === 'edited'
+                                ? t('detail.uploadDialog.titleEdited', 'Upload ảnh đã chỉnh sửa')
+                                : t('detail.uploadDialog.title', 'Upload ảnh gốc')}
+                        </Typography>
                         <IconButton
                             onClick={() => setUploadModalOpen(false)}
                             sx={{
@@ -343,7 +363,7 @@ export const ProjectDetailPage = () => {
                                 },
                             }}
                         >
-                            <ArrowBack />
+                            <Close />
                         </IconButton>
                     </Stack>
                 </DialogTitle>
@@ -351,6 +371,7 @@ export const ProjectDetailPage = () => {
                     <PhotoUploadZone
                         projectId={id!}
                         onUploadComplete={handleUploadComplete}
+                        uploadType={uploadType}
                     />
                 </DialogContent>
             </Dialog>

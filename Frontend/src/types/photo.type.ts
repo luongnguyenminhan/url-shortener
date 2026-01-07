@@ -14,6 +14,7 @@ export interface Photo {
     is_rejected: boolean;
     created_at: string;
     updated_at: string;
+    edited_version?: boolean; // Indicates if photo has an edited version
 }
 
 export interface PhotoVersion {

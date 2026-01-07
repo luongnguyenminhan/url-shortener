@@ -23,14 +23,20 @@
             "projects": "Projects"
         },
         "uploadDialog": {
-            "title": "Upload Photos"
-        }
+            "title": "Upload Original Photos",
+            "titleEdited": "Upload Edited Photos"
+        },
+        "uploadPhotos": "Upload Original Photos",
+        "uploadEditedPhotos": "Upload Edited Photos"
     },
     "status": {
         "draft": "Draft",
         "clientSelecting": "Client Selecting",
+        "client_selecting": "Client Selecting",
         "pendingEdit": "Pending Edit",
+        "pending_edit": "Pending Edit",
         "clientReview": "Client Review",
+        "client_review": "Client Review",
         "completed": "Completed"
     },
     "info": {
@@ -56,9 +62,15 @@
         "sendToPhotographer": "Send to Photographer",
         "totalPhotos": "Total Photos",
         "selected": "Selected",
+        "status": "Status",
         "expiresAt": "Expires",
         "noPhotos": "No photos yet",
         "noPhotosDesc": "This project has no photos uploaded yet",
+        "noMorePhotos": "All photos loaded",
+        "allPhotos": "ALL",
+        "editedPhotos": "EDITED",
+        "originalVersion": "Original Photo",
+        "editedVersion": "Edited Photo",
         "photoSelected": "Photo selected",
         "photoDeselected": "Photo deselected",
         "photoRejected": "Photo rejected",
@@ -104,7 +116,9 @@
         "failCount": "Failed to upload {{count}} photo",
         "failCount_plural": "Failed to upload {{count}} photos",
         "dropZoneTitle": "Drag and drop images here or click to select",
+        "dropZoneTitleEdited": "Drag and drop edited images here or click to select",
         "dropZoneSubtitle": "Supports multiple files at once",
+        "dropZoneSubtitleEdited": "Upload edited photos - Supports multiple files at once",
         "statusPending": "{{count}} waiting",
         "statusUploading": "{{count}} uploading",
         "statusSuccess": "{{count}} success",

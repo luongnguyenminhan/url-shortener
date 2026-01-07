@@ -11,6 +11,9 @@ import {
     Avatar,
     TextField,
     Paper,
+    Select,
+    MenuItem,
+    FormControl,
 } from '@mui/material';
 import {
     Close,
@@ -20,11 +23,14 @@ import {
     ChatBubbleOutline,
     Send,
     CheckCircle,
+    CloudUpload,
 } from '@mui/icons-material';
 import type { Photo, PhotoComment } from '@/types/photo.type';
 import { photoService } from '@/services/photoService';
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { Button } from '@mui/material';
+import { showSuccessToast, showErrorToast } from '@/hooks/useShowToast';
 
 interface PhotoDetailModalProps {
     open: boolean;
@@ -36,6 +42,8 @@ interface PhotoDetailModalProps {
     onApprove?: (photoId: string) => void;
     onReject?: (photoId: string) => void;
     onToggleSelect?: (photoId: string, selected: boolean) => void;
+    projectStatus?: string;
+    projectId?: string;
 }
 
 export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
@@ -48,6 +56,8 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     onApprove,
     onReject,
     onToggleSelect,
+    projectStatus,
+    projectId,
 }) => {
     const [imageUrl, setImageUrl] = useState<string>('');
     const [loading, setLoading] = useState(false);
@@ -56,6 +66,8 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [showInfo, setShowInfo] = useState(true);
     const [newComment, setNewComment] = useState('');
+    const [selectedVersion, setSelectedVersion] = useState<'original' | 'edited'>('original');
+    const [uploading, setUploading] = useState(false);
 
     const currentIndex = photos.findIndex((p) => p.id === photo?.id);
     const hasPrev = currentIndex > 0;
@@ -71,7 +83,7 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                 URL.revokeObjectURL(imageUrl);
             }
         };
-    }, [photo?.id, open]);
+    }, [photo?.id, open, selectedVersion]);
 
     const loadPhotoData = async () => {
         if (!photo) return;
@@ -81,9 +93,13 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
         setError(null);
 
         try {
-            // Load full-size image
-            const url = await photoService.getPhotoImage(photo.id, { is_thumbnail: false });
+            // Load full-size image with selected version
+            const url = await photoService.getPhotoImage(photo.id, {
+                is_thumbnail: false,
+                version: selectedVersion
+            });
             setImageUrl(url);
+            setError(null); // Clear any previous errors
 
             // Load metadata with comments
             try {
@@ -95,7 +111,14 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
             }
         } catch (err: any) {
             console.error('Failed to load photo:', err);
-            setError('Không thể tải ảnh');
+            const errorMsg = selectedVersion === 'edited' && !photo.edited_version
+                ? 'Ảnh chưa có phiên bản đã chỉnh sửa'
+                : 'Không thể tải ảnh';
+            setError(errorMsg);
+            // Reset to original version if edited version fails
+            if (selectedVersion === 'edited' && !photo.edited_version) {
+                setSelectedVersion('original');
+            }
         } finally {
             setLoading(false);
             setLoadingComments(false);
@@ -135,6 +158,33 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
             // TODO: Implement send comment API
             console.log('Sending comment:', newComment);
             setNewComment('');
+        }
+    };
+
+    const handleUploadEditedPhoto = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!event.target.files || event.target.files.length === 0 || !photo || !projectId) {
+            return;
+        }
+
+        const file = event.target.files[0];
+        setUploading(true);
+
+        try {
+            await photoService.uploadEditedPhoto(projectId, file);
+            // Switch to edited version to show the new photo
+            setSelectedVersion('edited');
+            // Reload photo data to update metadata
+            await loadPhotoData();
+            // Show success message
+            showSuccessToast('Đã tải lên ảnh đã chỉnh sửa thành công');
+        } catch (err: any) {
+            console.error('Failed to upload edited photo:', err);
+            const errorMessage = err?.response?.data?.message || 'Không thể tải lên ảnh đã chỉnh sửa';
+            showErrorToast(errorMessage);
+        } finally {
+            setUploading(false);
+            // Reset input
+            event.target.value = '';
         }
     };
 
@@ -295,10 +345,18 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                             display: 'flex',
                             flexDirection: 'column',
                             overflow: 'hidden',
+                            height: '100vh',
                         }}
                     >
-                        {/* Info Section */}
-                        <Box sx={{ p: 3 }}>
+                        {/* Info Section - Fixed */}
+                        <Box
+                            sx={{
+                                p: 3,
+                                maxHeight: '60vh',
+                                overflowY: 'auto',
+                                borderBottom: '1px solid #e8eaed',
+                            }}
+                        >
                             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
                                 <InfoIcon sx={{ color: '#5f6368', fontSize: 20 }} />
                                 <Typography
@@ -313,6 +371,103 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                             </Stack>
 
                             <Stack spacing={2.5}>
+                                {/* Version Selector */}
+                                <Box>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            color: '#5f6368',
+                                            textTransform: 'uppercase',
+                                            fontSize: '0.6875rem',
+                                            fontWeight: 500,
+                                            letterSpacing: '0.07em'
+                                        }}
+                                        display="block"
+                                        mb={0.5}
+                                    >
+                                        Phiên bản ảnh
+                                    </Typography>
+                                    <FormControl fullWidth size="small">
+                                        <Select
+                                            value={selectedVersion}
+                                            onChange={(e) => setSelectedVersion(e.target.value as 'original' | 'edited')}
+                                            sx={{
+                                                fontSize: '0.875rem',
+                                                '& .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: '#dadce0',
+                                                },
+                                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: '#1a73e8',
+                                                },
+                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: '#1a73e8',
+                                                },
+                                            }}
+                                        >
+                                            <MenuItem value="original" sx={{ fontSize: '0.875rem' }}>
+                                                Ảnh gốc (Original)
+                                            </MenuItem>
+                                            <MenuItem
+                                                value="edited"
+                                                disabled={!photo.edited_version}
+                                                sx={{
+                                                    fontSize: '0.875rem',
+                                                    '&.Mui-disabled': {
+                                                        opacity: 0.5,
+                                                    }
+                                                }}
+                                            >
+                                                Ảnh đã chỉnh sửa (Edited)
+                                                {!photo.edited_version && ' - Chưa có'}
+                                            </MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+
+                                {/* Upload Edited Photo - Only show when status is pending_edit */}
+                                {projectStatus === 'pending_edit' && (
+                                    <Box>
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                color: '#5f6368',
+                                                textTransform: 'uppercase',
+                                                fontSize: '0.6875rem',
+                                                fontWeight: 500,
+                                                letterSpacing: '0.07em'
+                                            }}
+                                            display="block"
+                                            mb={0.5}
+                                        >
+                                            Tải lên ảnh đã chỉnh sửa
+                                        </Typography>
+                                        <Button
+                                            component="label"
+                                            variant="outlined"
+                                            fullWidth
+                                            startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
+                                            disabled={uploading}
+                                            sx={{
+                                                textTransform: 'none',
+                                                borderColor: '#dadce0',
+                                                color: '#1a73e8',
+                                                '&:hover': {
+                                                    borderColor: '#1a73e8',
+                                                    bgcolor: '#f1f3f4',
+                                                },
+                                            }}
+                                        >
+                                            {uploading ? 'Đang tải lên...' : 'Chọn ảnh đã edit'}
+                                            <input
+                                                type="file"
+                                                hidden
+                                                accept="image/*"
+                                                onChange={handleUploadEditedPhoto}
+                                            />
+                                        </Button>
+                                    </Box>
+                                )}
+
                                 {/* Status */}
                                 <Box>
                                     <Typography
@@ -415,11 +570,9 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                             </Stack>
                         </Box>
 
-                        <Divider sx={{ borderColor: '#e8eaed' }} />
-
-                        {/* Comments Section */}
-                        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                            <Box sx={{ p: 3, pb: 2 }}>
+                        {/* Comments Section - Scrollable */}
+                        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                            <Box sx={{ p: 3, pb: 2, flexShrink: 0 }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
                                     <ChatBubbleOutline sx={{ color: '#5f6368', fontSize: 20 }} />
                                     <Typography
