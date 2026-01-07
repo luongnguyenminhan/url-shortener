@@ -82,7 +82,7 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
 
         try {
             // Load full-size image
-            const url = await photoService.getPhotoImage(photo.id);
+            const url = await photoService.getPhotoImage(photo.id, { is_thumbnail: false });
             setImageUrl(url);
 
             // Load metadata with comments

@@ -52,7 +52,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                 await Promise.all(
                     batch.map(async (photo) => {
                         try {
-                            const url = await photoService.getPhotoImage(photo.id, { w: 400, h: 400 });
+                            const url = await photoService.getPhotoImage(photo.id, { w: 400, h: 400, is_thumbnail: true });
                             urls[photo.id] = url;
                         } catch (error) {
                             console.error(`Failed to load image for photo ${photo.id}:`, error);
