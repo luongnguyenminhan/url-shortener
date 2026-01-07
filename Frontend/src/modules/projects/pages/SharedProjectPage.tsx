@@ -23,6 +23,7 @@ import {
     DialogActions,
     Drawer,
     Divider,
+    Pagination,
 } from '@mui/material';
 import {
     Close as CloseIcon,
@@ -71,6 +72,10 @@ export const SharedProjectPage = () => {
         updated_at: string;
     }>>([]);
     const [loadingComments, setLoadingComments] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPhotos, setTotalPhotos] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const pageSize = 12;
 
     // Show password dialog on mount if token exists
     useEffect(() => {
@@ -94,7 +99,7 @@ export const SharedProjectPage = () => {
                 .then(async (response) => {
                     setProjectData(response);
                     setPasswordDialogOpen(false);
-                    await loadPhotos(token);
+                    await loadPhotos(token, currentPage);
                 })
                 .catch((error) => {
                     console.error('Auto-verify failed:', error);
@@ -168,8 +173,8 @@ export const SharedProjectPage = () => {
             setPassword('');
             showSnackbar(t('shared.authSuccess'));
 
-            // Load all photos from the project
-            await loadPhotos(token);
+            // Load photos from the project
+            await loadPhotos(token, currentPage);
         } catch (error: any) {
             console.error('Password verification failed:', error);
             const errorMessage = error?.response?.data?.message ||
@@ -181,52 +186,39 @@ export const SharedProjectPage = () => {
         }
     };
 
-    const loadPhotos = async (projectToken: string) => {
+    const loadPhotos = async (projectToken: string, page: number = 1) => {
         setLoading(true);
         setError(null);
 
         try {
-            let allPhotos: Photo[] = [];
-            let currentPage = 1;
-            const pageSize = 100; // Max allowed by API
-            let hasMorePages = true;
+            const response = await photoGuestService.getPhotos({
+                project_token: projectToken,
+                page: page,
+                page_size: pageSize,
+            });
 
-            // Fetch all pages
-            while (hasMorePages) {
-                const response = await photoGuestService.getPhotos({
-                    project_token: projectToken,
-                    limit: pageSize,
-                    skip: (currentPage - 1) * pageSize,
-                });
+            const photoList = response.data || [];
+            setPhotos(photoList);
 
-                const photoList = response.data || [];
-                allPhotos = [...allPhotos, ...photoList];
-
-                // Check if there are more pages
-                const meta = response.meta;
-                if (meta && meta.page && meta.total_pages) {
-                    hasMorePages = meta.page < meta.total_pages;
-                    currentPage++;
-                } else {
-                    // No pagination info or last page
-                    hasMorePages = photoList.length === pageSize;
-                    currentPage++;
-                }
-
-                // Safety check to prevent infinite loop
-                if (currentPage > 100) {
-                    console.warn('Too many pages, stopping pagination');
-                    break;
-                }
+            // Update pagination metadata
+            if (response.meta) {
+                setTotalPhotos(response.meta.total || 0);
+                setTotalPages(response.meta.total_pages || 0);
             }
 
-            setPhotos(allPhotos);
-
-            // Set initially selected photos
+            // Set initially selected photos from current page
             const initialSelected = new Set(
-                allPhotos.filter((p: Photo) => p.is_selected).map((p: Photo) => p.id)
+                photoList.filter((p: Photo) => p.is_selected).map((p: Photo) => p.id)
             );
-            setSelectedPhotos(initialSelected);
+            setSelectedPhotos(prev => {
+                const newSet = new Set(prev);
+                photoList.forEach((p: Photo) => {
+                    if (p.is_selected) {
+                        newSet.add(p.id);
+                    }
+                });
+                return newSet;
+            });
         } catch (error: any) {
             console.error('Failed to load photos:', error);
             const errorMessage = error?.response?.data?.message ||
@@ -526,7 +518,7 @@ export const SharedProjectPage = () => {
                                 display: { xs: 'none', sm: 'block' }
                             }}
                         >
-                            {t('shared.photoCount', { count: photos.length })}
+                            {t('shared.photoCount', { count: totalPhotos })}
                         </Typography>
                     </Box>
                     {selectedCount > 0 && (
@@ -595,7 +587,7 @@ export const SharedProjectPage = () => {
                                         {t('shared.totalPhotos')}
                                     </Typography>
                                     <Typography variant="h6" fontWeight={600}>
-                                        {photos.length}
+                                        {totalPhotos}
                                     </Typography>
                                 </Box>
 
@@ -769,6 +761,37 @@ export const SharedProjectPage = () => {
                                 </Box>
                             );
                         })}
+                    </Box>
+                )}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                        <Pagination
+                            count={totalPages}
+                            page={currentPage}
+                            onChange={async (event, page) => {
+                                setCurrentPage(page);
+                                if (token) {
+                                    await loadPhotos(token, page);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            }}
+                            color="primary"
+                            size="large"
+                            showFirstButton
+                            showLastButton
+                            sx={{
+                                '& .MuiPaginationItem-root': {
+                                    color: 'var(--text-primary)',
+                                    borderColor: 'var(--border-primary)',
+                                },
+                                '& .Mui-selected': {
+                                    bgcolor: 'var(--color-primary) !important',
+                                    color: 'var(--text-inverse)',
+                                },
+                            }}
+                        />
                     </Box>
                 )}
             </Container>

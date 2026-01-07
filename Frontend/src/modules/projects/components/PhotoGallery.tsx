@@ -97,32 +97,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         }
     };
 
-    const handleToggleSelect = async (photoId: string, selected: boolean) => {
-        try {
-            await photoService.toggleSelection(photoId, selected);
-            onPhotoUpdate?.();
-        } catch (error) {
-            console.error('Failed to toggle selection:', error);
-        }
-    };
-
-    const handleApprove = async (photoId: string) => {
-        try {
-            await photoService.approvePhoto(photoId);
-            onPhotoUpdate?.();
-        } catch (error) {
-            console.error('Failed to approve photo:', error);
-        }
-    };
-
-    const handleReject = async (photoId: string) => {
-        try {
-            await photoService.rejectPhoto(photoId);
-            onPhotoUpdate?.();
-        } catch (error) {
-            console.error('Failed to reject photo:', error);
-        }
-    };
+    // Note: Selection, approval, and rejection are handled by guest endpoints or admin panel
 
     const handleBulkSelect = (photoId: string, checked: boolean) => {
         const newSelected = new Set(selectedPhotos);
@@ -364,9 +339,6 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                 }}
                 onNavigate={handleNavigate}
                 onDelete={onPhotoDelete}
-                onApprove={handleApprove}
-                onReject={handleReject}
-                onToggleSelect={handleToggleSelect}
             />
         </>
     );
