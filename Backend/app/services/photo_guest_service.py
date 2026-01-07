@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.constant.messages import MessageConstants
 from app.crud import client_session_crud, photo_comment_crud, photo_crud, photo_version_crud
+from app.models.photo import PhotoStatus
 from app.models.photo_version import PhotoVersion, VersionType
 from app.schemas.common import PaginationSortSearchSchema
 from app.schemas.photo import PhotoCommentResponse, PhotoListResponse, PhotoMetaResponse
@@ -258,6 +259,7 @@ def get_project_photos_guest(
     project_token: str,
     pagination_params: PaginationSortSearchSchema,
     is_selected: Optional[bool] = None,
+    status: Optional[PhotoStatus] = None,
 ) -> tuple[list[dict], int]:
     """
     Get all photos in a project with authorization check via project token and optional filtering.
@@ -287,12 +289,12 @@ def get_project_photos_guest(
         db,
         client_session.project_id,
         pagination_params,
-        is_selected=is_selected,
+        status=status,
     )
     total = photo_crud.count_by_project(
         db,
         client_session.project_id,
-        is_selected=is_selected,
+        status=status,
     )
 
     # Add edited_version flag to each photo

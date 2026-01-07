@@ -5,7 +5,8 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.models.photo import Photo
+from app.models.photo import Photo, PhotoStatus
+from app.models.photo_version import VersionType
 from app.schemas.common import PaginationSortSearchSchema
 from app.schemas.photo import PhotoCreate
 
@@ -94,23 +95,33 @@ def get_by_project(
     db: Session,
     project_id: UUID,
     pagination_params: PaginationSortSearchSchema,
-    is_selected: Optional[bool] = None,
+    status: Optional[PhotoStatus] = None,
 ) -> List[Photo]:
-    """Get all photos in a project with pagination and optional filtering"""
+    """Get all photos in a project with pagination and optional filtering by status"""
     query = db.query(Photo).filter(Photo.project_id == project_id)
 
-    if is_selected is not None:
-        query = query.filter(Photo.is_selected == is_selected)
+    if status == PhotoStatus.SELECTED:
+        query = query.filter(Photo.is_selected == True)
+    elif status == PhotoStatus.ORIGIN:
+        query = query.filter(Photo.is_selected == False)
+    elif status == PhotoStatus.EDITED:
+        from app.models.photo_version import PhotoVersion
+        query = query.join(PhotoVersion, PhotoVersion.photo_id == Photo.id).filter(PhotoVersion.version_type == VersionType.EDITED.value)
 
     return query.offset(pagination_params.skip).limit(pagination_params.limit).all()
 
 
-def count_by_project(db: Session, project_id: UUID, is_selected: Optional[bool] = None) -> int:
-    """Count photos in a project with optional filtering"""
+def count_by_project(db: Session, project_id: UUID, status: Optional[PhotoStatus] = None) -> int:
+    """Count photos in a project with optional filtering by status"""
     query = db.query(Photo).filter(Photo.project_id == project_id)
 
-    if is_selected is not None:
-        query = query.filter(Photo.is_selected == is_selected)
+    if status == PhotoStatus.SELECTED:
+        query = query.filter(Photo.is_selected == True)
+    elif status == PhotoStatus.ORIGIN:
+        query = query.filter(Photo.is_selected == False)
+    elif status == PhotoStatus.EDITED:
+        from app.models.photo_version import PhotoVersion
+        query = query.join(PhotoVersion, PhotoVersion.photo_id == Photo.id).filter(PhotoVersion.version_type == VersionType.EDITED.value)
 
     return query.count()
 

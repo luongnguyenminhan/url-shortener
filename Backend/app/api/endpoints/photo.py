@@ -9,6 +9,7 @@ from sqlmodel import Session
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.db import get_db
+from app.models.photo import PhotoStatus
 from app.models.photo_version import VersionType
 from app.models.user import User
 from app.schemas.common import (
@@ -162,17 +163,17 @@ async def get_photo(
 def list_project_photos(
     project_id: UUID,
     pagination_params: PaginationSortSearchSchema = Depends(pagination_params_dep),
-    is_selected: bool = Query(None, description="Filter by selection status (true/false)"),
+    status: PhotoStatus = Query(None, description="Filter by status (origin/selected/edited)"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> ApiResponse:
-    """Get all photos in a project with optional is_selected filter"""
+    """Get all photos in a project with optional status filter"""
     photos, total = photo_service.get_project_photos(
         db=db,
         user=current_user,
         project_id=project_id,
         pagination_params=pagination_params,
-        is_selected=is_selected,
+        status=status,
     )
 
     page = (pagination_params.skip // pagination_params.limit) + 1

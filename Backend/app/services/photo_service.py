@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.crud import photo_comment_crud, photo_crud, photo_version_crud, project_crud
+from app.models.photo import PhotoStatus
 from app.models.photo_version import PhotoVersion, VersionType
 from app.models.user import User
 from app.schemas.common import PaginationSortSearchSchema
@@ -25,7 +26,7 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg"}
 
 async def _download_and_process_photo_image(
     photo,
-    version: "VersionType",
+    version: VersionType,
     width: Optional[int] = None,
     height: Optional[int] = None,
     is_thumbnail: bool = False,
@@ -47,7 +48,8 @@ async def _download_and_process_photo_image(
 
     try:
         # Download from MinIO
-        minio_path = f"{photo.project_id}/{version.value}/{photo.filename.rsplit('.', 1)[0]}.webp" if is_thumbnail else f"{photo.project_id}/{version.value}/{photo.filename}"
+        photo_filename = photo.filename if not is_thumbnail else f"{photo.filename.rsplit('.', 1)[0]}.webp"
+        minio_path = f"{photo.project_id}/{version.value}/{photo_filename}"
         file_bytes = download_file_from_minio(
             bucket_name=settings.MINIO_BUCKET_NAME,
             object_name=minio_path,
@@ -78,10 +80,6 @@ async def _download_and_process_photo_image(
         # Resize if parameters provided
         file_bytes = resize_image(file_bytes, width, height, photo.id)
 
-        # Convert to WebP if thumbnail
-        if is_thumbnail:
-            file_bytes = convert_to_webp(file_bytes, quality=85)
-
         content_type = "image/webp" if is_thumbnail else "image/jpeg"
 
         # Create stream
@@ -90,7 +88,7 @@ async def _download_and_process_photo_image(
         return {
             "stream": stream,
             "content_type": content_type,
-            "filename": photo.filename,
+            "filename": photo_filename,
         }
 
     except Exception as e:
@@ -419,17 +417,17 @@ def get_project_photos(
     user: User,
     project_id: UUID,
     pagination_params: PaginationSortSearchSchema,
-    is_selected: Optional[bool] = None,
+    status: Optional[PhotoStatus] = None,
 ) -> tuple[list[dict], int]:
     """
-    Get all photos in a project with authorization check and optional filtering.
+    Get all photos in a project with authorization check and optional filtering by status.
 
     Args:
         db: Database session
         user: Authenticated user
         project_id: Project ID
         pagination_params: Pagination parameters
-        is_selected: Optional filter by selection status (True/False/None)
+        status: Optional filter by status (PhotoStatus.ORIGIN, PhotoStatus.SELECTED, PhotoStatus.EDITED)
 
     Returns:
         Tuple of (photos list with edited_version flag, total count)
@@ -454,8 +452,8 @@ def get_project_photos(
         )
 
     # Get photos with optional filtering
-    photos = photo_crud.get_by_project(db, project_id, pagination_params, is_selected=is_selected)
-    total = photo_crud.count_by_project(db, project_id, is_selected=is_selected)
+    photos = photo_crud.get_by_project(db, project_id, pagination_params, status=status)
+    total = photo_crud.count_by_project(db, project_id, status=status)
 
     # Add edited_version flag to each photo
     photo_list = []

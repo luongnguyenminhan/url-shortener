@@ -1,5 +1,6 @@
 """Photo model - Logical photo entity (filename is contract)"""
 
+from enum import Enum
 from typing import TYPE_CHECKING, List
 from uuid import UUID
 
@@ -12,6 +13,13 @@ if TYPE_CHECKING:
     from app.models.photo_comment import PhotoComment
     from app.models.photo_version import PhotoVersion
     from app.models.project import Project
+
+
+class PhotoStatus(str, Enum):
+    """Photo status enumeration"""
+    ORIGIN = "origin"
+    SELECTED = "selected"
+    EDITED = "edited"
 
 
 class Photo(BaseModel, table=True):
