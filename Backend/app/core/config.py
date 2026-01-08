@@ -10,9 +10,9 @@ from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Load configuration from Vault before initializing settings
-from app.core.vault_loader import load_config
+from app.core.vault_loader import load_config_from_api_v2
 
-load_config()
+load_config_from_api_v2()
 
 
 class Settings(BaseSettings):

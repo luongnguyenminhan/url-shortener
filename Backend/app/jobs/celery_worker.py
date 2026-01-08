@@ -1,10 +1,10 @@
 from celery import Celery
-from app.core.vault_loader import load_config
+from app.core.vault_loader import load_config_from_api_v2
 from app.core.config import settings
 from app.core.firebase import initialize_firebase
 
 # Load configuration from Vault before anything else
-load_config()
+load_config_from_api_v2()
 
 initialize_firebase()
 
