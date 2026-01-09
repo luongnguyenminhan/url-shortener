@@ -2,6 +2,7 @@ import json
 import os
 
 import requests
+from dotenv import load_dotenv
 
 from app.utils.logging import logger
 
@@ -82,7 +83,9 @@ def load_config_from_api_v2() -> None:
     For local development without Vault, gracefully skip if unavailable.
     """
     print("🔐 [V2] Loading configuration from Vault API...")
+    load_dotenv()  # Load environment variables from .env file
     vault_addr = os.getenv("VAULT_ADDR")
+    logger.info(f"[V2] VAULT_ADDR: {vault_addr}")
     vault_token = os.getenv("VAULT_TOKEN")
     service_env = os.getenv("PYTHON_ENVIRONMENT", "development").lower()
 
