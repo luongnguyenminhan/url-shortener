@@ -46,11 +46,11 @@ def custom_openapi():
         "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png",
         "altText": "SecureScribe API Logo",
     }
-
+    server_url = settings.SERVER_HOST if settings.SERVER_HOST else "http://localhost:8081/be"
     # Add custom servers for different environments
     openapi_schema["servers"] = [
         {"url": "http://localhost:8081/be", "description": "Development server"},
-        {"url": "https://photo.wc504.io.vn/be", "description": "Production server"},
+        {"url": server_url, "description": "Production server"},
     ]
 
     # Add security schemes

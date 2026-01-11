@@ -68,8 +68,8 @@ def setup_logging(level: str = "INFO") -> None:
         try:
             loki_handler = LokiLoggerHandler(
                 url=loki_url,
-                labels={"service": f"urls-backend-{os.getenv('PYTHON_ENVIRONMENT', 'development')}", "env": os.getenv("PYTHON_ENVIRONMENT", "development")},
-                timeout=5,
+                labels={"application": f"urls-backend-{os.getenv('PYTHON_ENVIRONMENT', 'development')}", "environment": os.getenv("PYTHON_ENVIRONMENT", "development")},
+                timeout=10,
                 label_keys={},
                 default_formatter=LoguruFormatter(),
             )

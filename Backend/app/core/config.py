@@ -30,7 +30,7 @@ class Settings(BaseSettings):
 
     # Server Configuration
     SERVER_NAME: str = "UrlsBE"
-    SERVER_HOST: str = "http://localhost"
+    SERVER_HOST: str = "http://localhost:8081/be"
     SERVER_PORT: int = 8081
 
     # CORS Configuration
