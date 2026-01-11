@@ -6,13 +6,13 @@ from fastapi.routing import APIRoute
 from app.api import register_routers
 from app.core.config import settings
 from app.core.firebase import initialize_firebase
-from app.core.vault_loader import load_config
+from app.core.vault_loader import load_config_from_api_v2
 from app.db import create_tables
 from app.exception_handlers.http_exception import custom_exception_handler, custom_http_exception_handler
 from app.utils.logging import FastAPILoggingMiddleware, logger, setup_logging
 
 # Load configuration from .env or Vault
-load_config()
+load_config_from_api_v2()
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -46,13 +46,13 @@ def custom_openapi():
         "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png",
         "altText": "SecureScribe API Logo",
     }
-
+    server_urls = settings.SERVER_HOST if settings.SERVER_HOST else "http://localhost:8081/be"
     # Add custom servers for different environments
     openapi_schema["servers"] = [
         {"url": "http://localhost:8081/be", "description": "Development server"},
-        {"url": "https://photo.wc504.io.vn/be", "description": "Production server"},
     ]
-
+    for url in server_urls.split(","):
+        openapi_schema["servers"].append({"url": url.strip(), "description": f"Server at {url.strip()}"})
     # Add security schemes
     openapi_schema["components"]["securitySchemes"] = {
         "BearerAuth": {
