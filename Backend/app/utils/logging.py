@@ -24,11 +24,13 @@ Usage:
     logger.success("Operation completed successfully")
 """
 
+import os
 import sys
 import time
 from pathlib import Path
 
 from loguru import logger as loguru_logger
+from loki_logger_handler.loki_logger_handler import LoguruFormatter, LokiLoggerHandler
 
 # Export logger for easy import
 logger = loguru_logger
@@ -36,11 +38,15 @@ logger = loguru_logger
 
 def setup_logging(level: str = "INFO", log_dir: str = "logs") -> None:
     """
-    Setup logging configuration using loguru.
+    Setup logging configuration using loguru with console and Loki HTTP streaming.
 
     Args:
         level: Log level ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
         log_dir: Directory to store log files
+
+    Environment Variables:
+        LOKI_URL: Loki HTTP API endpoint (e.g., https://loki.wc504.io.vn/loki/api/v1/push)
+                 If not set, only console logging is enabled.
 
     Example:
         setup_logging("DEBUG")  # Enable debug logging
@@ -56,29 +62,23 @@ def setup_logging(level: str = "INFO", log_dir: str = "logs") -> None:
         colorize=True,
     )
 
-    # Create logs directory if it doesn't exist
-    log_path = Path(log_dir)
-    log_path.mkdir(exist_ok=True)
-
-    # Add file handler with rotation
-    loguru_logger.add(
-        log_path / "app_{time:YYYY-MM-DD}.log",
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
-        level=level,
-        rotation="00:00",  # Rotate daily at midnight
-        retention="7 days",  # Keep logs for 7 days
-        compression="zip",  # Compress rotated logs
-    )
-
-    # Add error log file
-    loguru_logger.add(
-        log_path / "error_{time:YYYY-MM-DD}.log",
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
-        level="ERROR",
-        rotation="00:00",
-        retention="30 days",
-        compression="zip",
-    )
+    # Add Loki HTTP handler if LOKI_URL is configured
+    loki_url = "https://loki.wc504.io.vn/loki/api/v1/push"
+    if loki_url:
+        try:
+            loki_handler = LokiLoggerHandler(
+                url=loki_url,
+                labels={"service": f"urls-backend-{os.getenv('PYTHON_ENVIRONMENT', 'development')}", "env": os.getenv("PYTHON_ENVIRONMENT", "development")},
+                labelKeys={},
+                timeout=5,
+                default_formatter=LoguruFormatter(),
+            )
+            loguru_logger.add(loki_handler, serialize=True, level=level)
+            loguru_logger.info(f"Loki HTTP logging configured: {loki_url}")
+        except Exception as e:
+            loguru_logger.warning(f"Failed to configure Loki logging: {e}")
+    else:
+        loguru_logger.debug("LOKI_URL not set, Loki HTTP logging disabled")
 
 
 # FastAPI middleware for request/response logging
