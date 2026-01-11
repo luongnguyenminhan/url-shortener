@@ -27,16 +27,16 @@ Usage:
 import os
 import sys
 import time
-from pathlib import Path
 
 from loguru import logger as loguru_logger
-from loki_logger_handler.loki_logger_handler import LoguruFormatter, LokiLoggerHandler
+from loki_logger_handler.formatters.loguru_formatter import LoguruFormatter
+from loki_logger_handler.loki_logger_handler import LokiLoggerHandler
 
 # Export logger for easy import
 logger = loguru_logger
 
 
-def setup_logging(level: str = "INFO", log_dir: str = "logs") -> None:
+def setup_logging(level: str = "INFO") -> None:
     """
     Setup logging configuration using loguru with console and Loki HTTP streaming.
 
@@ -69,8 +69,8 @@ def setup_logging(level: str = "INFO", log_dir: str = "logs") -> None:
             loki_handler = LokiLoggerHandler(
                 url=loki_url,
                 labels={"service": f"urls-backend-{os.getenv('PYTHON_ENVIRONMENT', 'development')}", "env": os.getenv("PYTHON_ENVIRONMENT", "development")},
-                labelKeys={},
                 timeout=5,
+                label_keys={},
                 default_formatter=LoguruFormatter(),
             )
             loguru_logger.add(loki_handler, serialize=True, level=level)
