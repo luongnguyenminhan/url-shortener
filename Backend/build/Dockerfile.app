@@ -19,4 +19,4 @@ USER appuser
 EXPOSE 8000
 
 # Run application
-CMD ["/bin/bash", "-c", "exec ./start.sh"]
+CMD ["./start.sh"]

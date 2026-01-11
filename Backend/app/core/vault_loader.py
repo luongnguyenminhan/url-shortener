@@ -88,6 +88,7 @@ def load_config_from_api_v2() -> None:
     logger.info(f"[V2] VAULT_ADDR: {vault_addr}")
     vault_token = os.getenv("VAULT_TOKEN")
     service_env = os.getenv("PYTHON_ENVIRONMENT", "development").lower()
+    logger.info(f"[V2] PYTHON_ENVIRONMENT: {service_env}")
 
     if not vault_addr or not vault_token:
         logger.warning("[V2] VAULT_ADDR or VAULT_TOKEN not set, skipping Vault API connection")
