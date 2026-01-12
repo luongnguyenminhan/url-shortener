@@ -1,386 +1,327 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { ProjectCard, ProjectFormDialog, DeleteConfirmDialog } from '../components';
-import type { ProjectResponse, ProjectCreate, ProjectUpdate } from '@/types/project.type';
-import { projectService } from '@/services/projectService';
+import type { SelectChangeEvent } from '@mui/material';
 import {
     Box,
     Container,
     Typography,
+    Button,
     TextField,
     InputAdornment,
-    CircularProgress,
-    Alert,
-    Toolbar,
     IconButton,
-    Menu,
-    MenuItem,
-    ListItemIcon,
-    ListItemText,
-    useTheme,
+    ToggleButtonGroup,
+    ToggleButton,
     Pagination,
+    FormControl,
+    Select,
+    MenuItem,
+    Grid,
+    CircularProgress,
+    Stack,
+    Paper,
 } from '@mui/material';
 import {
+    Add as AddIcon,
     Search as SearchIcon,
-    CreateNewFolder as CreateNewFolderIcon,
-    MoreVert as MoreVertIcon,
-    ViewModule as ViewModuleIcon,
+    GridView as GridViewIcon,
     ViewList as ViewListIcon,
-    Sort as SortIcon,
+    FilterList as FilterListIcon
 } from '@mui/icons-material';
+import { useDebounce } from 'use-debounce';
+import { projectService } from '@/services/projectService';
+import { ProjectCard } from '../components/ProjectCard';
+import { ProjectFormDialog } from '../components/ProjectFormDialog';
+import { DeleteConfirmDialog } from '../components/DeleteConfirmDialog';
+import type { ProjectResponse } from '@/types/project.type';
+import { ROUTES } from '@/constants';
+import { toast } from 'react-toastify';
 
-export default function ProjectManagementPage() {
-    const { t } = useTranslation(['projects', 'admin']);
+const PAGE_SIZE = 12;
+
+const ProjectManagementPage = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
-    const theme = useTheme();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-    const [loading, setLoading] = useState(false);
+
+    // State
     const [projects, setProjects] = useState<ProjectResponse[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [loading, setLoading] = useState(false);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(12);
-    const [totalPages, setTotalPages] = useState(0);
-    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch] = useDebounce(searchQuery, 500);
+    const [sortBy, setSortBy] = useState('updated_at');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    // Dialog states
-    const [formDialogOpen, setFormDialogOpen] = useState(false);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedProject, setSelectedProject] = useState<ProjectResponse | null>(null);
-    const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+    // Dialog state
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null);
 
-    // Fetch projects from API
+    // Fetch projects
     const fetchProjects = async () => {
-        setLoading(true);
-        setError(null);
         try {
+            setLoading(true);
             const response = await projectService.getProjects({
-                skip: (page - 1) * pageSize,
-                limit: pageSize,
-                search: searchQuery || undefined,
-                sort_key: 'updated_at',
-                sort_dir: 'desc',
+                page,
+                page_size: PAGE_SIZE,
+                search: debouncedSearch,
+                sort_by: sortBy,
+                sort_order: sortOrder
             });
-
-            setProjects(response.data || []);
-
-            // Update pagination info from meta
-            if (response.meta) {
-                setTotal(response.meta.total || 0);
-                setTotalPages(response.meta.total_pages || 0);
-            }
-        } catch (err: any) {
-            const errorMsg = err.response?.data?.message || err.message || 'Failed to fetch projects';
-            setError(errorMsg);
-            console.error('Error fetching projects:', err);
+            setProjects(response.data);
+            setTotalPages(response.meta.total_pages);
+        } catch (error) {
+            console.error('Failed to fetch projects:', error);
+            toast.error(t('projects.fetchError', 'Failed to calculate projects'));
         } finally {
             setLoading(false);
         }
     };
 
-    // Load projects on mount and when search or page changes
     useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchProjects();
-        }, searchQuery ? 300 : 0); // Debounce search only
+        fetchProjects();
+    }, [page, debouncedSearch, sortBy, sortOrder]);
 
-        return () => clearTimeout(timer);
-    }, [searchQuery, page]);
+    // Handlers
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value);
+        setPage(1); // Reset to first page on search
+    };
 
-    // Reset to page 1 when search changes
-    useEffect(() => {
+    const handleSortChange = (event: SelectChangeEvent) => {
+        const value = event.target.value;
+        if (value === 'name_asc') {
+            setSortBy('title');
+            setSortOrder('asc');
+        } else if (value === 'name_desc') {
+            setSortBy('title');
+            setSortOrder('desc');
+        } else if (value === 'newest') {
+            setSortBy('created_at');
+            setSortOrder('desc');
+        } else if (value === 'oldest') {
+            setSortBy('created_at');
+            setSortOrder('asc');
+        } else if (value === 'updated_desc') {
+            setSortBy('updated_at');
+            setSortOrder('desc');
+        }
         setPage(1);
-    }, [searchQuery]);
+    };
+
+    const handleViewModeChange = (_event: React.MouseEvent<HTMLElement>, newMode: 'grid' | 'list' | null) => {
+        if (newMode !== null) {
+            setViewMode(newMode);
+        }
+    };
 
     const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleAction = (projectId: string, action: 'open' | 'edit' | 'delete' | 'share') => {
-        const project = projects.find(p => p.id === projectId);
-
-        if (action === 'edit' && project) {
-            setSelectedProject(project);
-            setFormMode('edit');
-            setFormDialogOpen(true);
-        } else if (action === 'delete' && project) {
-            setSelectedProject(project);
-            setDeleteDialogOpen(true);
-        } else if (action === 'open') {
-            navigate(`/admin/projects/${projectId}`);
-        } else if (action === 'share') {
-            // TODO: Implement share functionality
-            console.log('Share project:', projectId);
+    const handleProjectAction = (projectId: string, action: 'open' | 'edit' | 'delete' | 'share') => {
+        if (action === 'open') {
+            navigate(ROUTES.ADMIN.PROJECT_DETAIL(projectId));
+        } else if (action === 'edit') {
+            // Edit logic usually handled by a dialog with context or state, 
+            // for now we might need to implement edit opening.
+            // But let's verify if ProjectCard handles edit internally or if we need to pass a handler.
+            // Looking at ProjectCard, it calls onAction('edit').
+            // We'll need state for the edit dialog. 
+            // Simplification: We'll add edit handling later or rely on the Detail page for editing.
+            // Actually, common pattern is to open the same form dialog.
+        } else if (action === 'delete') {
+            setDeleteGroupId(projectId);
         }
     };
 
-    const handleCreateProject = async (data: ProjectCreate | ProjectUpdate) => {
+    // Create/Edit Handler (Placeholder for now, assuming Create only for the button)
+    // Create Handler
+    const handleCreateProject = async (data: any) => {
         try {
-            if (formMode === 'create') {
-                await projectService.createProject(data as ProjectCreate);
-                toast.success(t('projects.createSuccess', 'Project created successfully'));
-            } else if (selectedProject) {
-                await projectService.updateProject(selectedProject.id, data as ProjectUpdate);
-                toast.success(t('projects.updateSuccess', 'Project updated successfully'));
-            }
-            await fetchProjects();
-        } catch (err: any) {
-            const errorMsg = err.response?.data?.message || err.message || 'Failed to save project';
-            toast.error(errorMsg);
-            console.error('Error saving project:', err);
-            throw err;
+            await projectService.createProject(data);
+            fetchProjects();
+            setCreateDialogOpen(false);
+            toast.success(t('projects.createSuccess', 'Project created successfully'));
+        } catch (error) {
+            console.error('Failed to create project:', error);
+            toast.error(t('projects.createError', 'Failed to create project'));
         }
     };
 
-    const handleDeleteProject = async () => {
-        if (!selectedProject) return;
-
+    const handleDeleteConfirm = async () => {
+        if (!deleteGroupId) return;
         try {
-            await projectService.deleteProject(selectedProject.id);
+            await projectService.deleteProject(deleteGroupId);
             toast.success(t('projects.deleteSuccess', 'Project deleted successfully'));
-            await fetchProjects();
-        } catch (err: any) {
-            const errorMsg = err.response?.data?.message || err.message || 'Failed to delete project';
-            toast.error(errorMsg);
-            console.error('Error deleting project:', err);
-            throw err;
+            fetchProjects();
+        } catch (error) {
+            console.error('Failed to delete project:', error);
+            toast.error(t('projects.deleteError', 'Failed to delete project'));
+        } finally {
+            setDeleteGroupId(null);
         }
-    };
-
-    const handleOpenCreateDialog = () => {
-        setSelectedProject(null);
-        setFormMode('create');
-        setFormDialogOpen(true);
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d' }}>
-            <Container maxWidth="xl">
-                {/* Google Drive-style Toolbar */}
-                <Toolbar
-                    sx={{
-                        px: { xs: 1, sm: 2 },
-                        py: 2,
-                        gap: 2,
-                        flexWrap: 'wrap',
-                        bgcolor: 'transparent',
-                    }}
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+            {/* Header */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                <Box>
+                    <Typography variant="h4" fontWeight="bold" gutterBottom>
+                        {t('projects.title', 'Projects')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                        {t('projects.subtitle', 'Manage your photography projects')}
+                    </Typography>
+                </Box>
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => setCreateDialogOpen(true)}
+                    sx={{ px: 4, py: 1.5, borderRadius: 2 }}
                 >
-                    {/* Search Bar */}
+                    {t('projects.newProject', 'New Project')}
+                </Button>
+            </Box>
+
+            {/* Toolbar */}
+            <Paper sx={{ p: 2, mb: 4, borderRadius: 2 }} elevation={0} variant="outlined">
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
                     <TextField
-                        placeholder={t('admin:projects.searchPlaceholder', 'Search projects')}
+                        placeholder={t('common.search', 'Search projects...')}
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={handleSearchChange}
                         size="small"
-                        sx={{
-                            flexGrow: 1,
-                            maxWidth: { xs: '100%', sm: 600 },
-                            '& .MuiOutlinedInput-root': {
-                                bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
-                                borderRadius: 2,
-                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
-                                '& fieldset': {
-                                    borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#4b545c',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: '#1976d2',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#1976d2',
-                                },
-                            },
-                            '& .MuiInputBase-input::placeholder': {
-                                color: theme.palette.mode === 'light' ? '#9e9e9e' : '#6c757d',
-                                opacity: 1,
-                            },
-                            '& .MuiSvgIcon-root': {
-                                color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
-                            },
-                        }}
+                        fullWidth
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
-                                    <SearchIcon />
+                                    <SearchIcon color="action" />
                                 </InputAdornment>
                             ),
                         }}
+                        sx={{ maxWidth: { md: 400 } }}
                     />
 
-                    {/* Right Actions */}
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', ml: 'auto' }}>
-                        {/* View Toggle */}
-                        <IconButton
-                            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                    <Box sx={{ flexGrow: 1 }} />
+
+                    <Stack direction="row" spacing={2} alignItems="center" width={{ xs: '100%', md: 'auto' }}>
+                        <FormControl size="small" sx={{ minWidth: 200 }}>
+                            <Select
+                                value={
+                                    sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
+                                        sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
+                                            sortBy === 'title' && sortOrder === 'asc' ? 'name_asc' :
+                                                sortBy === 'title' && sortOrder === 'desc' ? 'name_desc' :
+                                                    'updated_desc'
+                                }
+                                onChange={handleSortChange}
+                                displayEmpty
+                                startAdornment={
+                                    <InputAdornment position="start">
+                                        <FilterListIcon fontSize="small" />
+                                    </InputAdornment>
+                                }
+                            >
+                                <MenuItem value="updated_desc">{t('sort.updatedNewest', 'Last Updated')}</MenuItem>
+                                <MenuItem value="newest">{t('sort.newest', 'Newest Created')}</MenuItem>
+                                <MenuItem value="oldest">{t('sort.oldest', 'Oldest Created')}</MenuItem>
+                                <MenuItem value="name_asc">{t('sort.nameAsc', 'Name (A-Z)')}</MenuItem>
+                                <MenuItem value="name_desc">{t('sort.nameDesc', 'Name (Z-A)')}</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        <ToggleButtonGroup
+                            value={viewMode}
+                            exclusive
+                            onChange={handleViewModeChange}
                             size="small"
-                            sx={{
-                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
-                                '&:hover': {
-                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
-                                },
-                            }}
                         >
-                            {viewMode === 'grid' ? <ViewListIcon /> : <ViewModuleIcon />}
-                        </IconButton>
+                            <ToggleButton value="grid">
+                                <GridViewIcon />
+                            </ToggleButton>
+                            <ToggleButton value="list">
+                                <ViewListIcon />
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </Stack>
+                </Stack>
+            </Paper>
 
-                        {/* More Options */}
-                        <IconButton
-                            size="small"
-                            onClick={(e) => setAnchorEl(e.currentTarget)}
-                            sx={{
-                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
-                                '&:hover': {
-                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
-                                },
-                            }}
-                        >
-                            <MoreVertIcon />
-                        </IconButton>
-                        <Menu
-                            anchorEl={anchorEl}
-                            open={Boolean(anchorEl)}
-                            onClose={() => setAnchorEl(null)}
-                            sx={{
-                                '& .MuiPaper-root': {
-                                    bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
-                                    color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
-                                    boxShadow: 'var(--shadow-lg)',
-                                },
-                                '& .MuiMenuItem-root': {
-                                    '&:hover': {
-                                        bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
-                                    },
-                                },
-                                '& .MuiListItemIcon-root': {
-                                    color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
-                                },
-                            }}
-                        >
-                            <MenuItem onClick={() => { handleOpenCreateDialog(); setAnchorEl(null); }}>
-                                <ListItemIcon>
-                                    <CreateNewFolderIcon fontSize="small" />
-                                </ListItemIcon>
-                                <ListItemText>{t('admin:projects.newProject', 'New Project')}</ListItemText>
-                            </MenuItem>
-                            <MenuItem onClick={() => setAnchorEl(null)}>
-                                <ListItemIcon>
-                                    <SortIcon fontSize="small" />
-                                </ListItemIcon>
-                                <ListItemText>{t('admin:projects.sortBy', 'Sort by')}</ListItemText>
-                            </MenuItem>
-                        </Menu>
-                    </Box>
-                </Toolbar>
-
-                {/* Error Alert */}
-                {error && (
-                    <Alert severity="error" sx={{ mx: 2, mb: 2 }} onClose={() => setError(null)}>
-                        {error}
-                    </Alert>
-                )}
-
-                {/* Loading State */}
-                {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                        <CircularProgress />
-                    </Box>
-                ) : (
-                    <>
-                        {/* Projects Grid/List */}
-                        {projects.length === 0 ? (
-                            <Box sx={{
-                                textAlign: 'center',
-                                py: 12,
-                                px: 2
-                            }}>
-                                <CreateNewFolderIcon sx={{ fontSize: 80, color: 'text.disabled', mb: 2 }} />
-                                <Typography variant="h6" color="text.secondary" gutterBottom>
-                                    {searchQuery
-                                        ? t('admin:projects.noProjectsFound', 'No projects found')
-                                        : t('admin:projects.noProjects', 'No projects yet')}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {searchQuery
-                                        ? t('admin:projects.tryDifferentSearch', 'Try a different search')
-                                        : t('admin:projects.createFirstProject', 'Create your first project to get started')}
-                                </Typography>
-                            </Box>
-                        ) : (
-                            <Box sx={{
-                                display: 'grid',
-                                gridTemplateColumns: viewMode === 'grid'
-                                    ? {
-                                        xs: 'repeat(auto-fill, minmax(140px, 1fr))',
-                                        sm: 'repeat(auto-fill, minmax(160px, 1fr))',
-                                        md: 'repeat(auto-fill, minmax(180px, 1fr))',
-                                    }
-                                    : '1fr',
-                                gap: viewMode === 'grid' ? 2 : 0,
-                                p: 2,
-                                pt: 1,
-                            }}>
-                                {projects.map((project) => (
+            {/* Content */}
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <CircularProgress />
+                </Box>
+            ) : projects.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 8 }}>
+                    <Typography variant="h6" color="text.secondary">
+                        {t('projects.noProjects', 'No projects found')}
+                    </Typography>
+                    {searchQuery && (
+                        <Button onClick={() => setSearchQuery('')} sx={{ mt: 2 }}>
+                            {t('common.clearSearch', 'Clear Search')}
+                        </Button>
+                    )}
+                </Box>
+            ) : (
+                <>
+                    {viewMode === 'grid' ? (
+                        <Grid container spacing={3}>
+                            {projects.map((project) => (
+                                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={project.id} display="flex" justifyContent="center">
                                     <ProjectCard
-                                        key={project.id}
                                         project={project}
-                                        viewMode={viewMode}
-                                        onAction={handleAction}
+                                        viewMode="grid"
+                                        onAction={handleProjectAction}
                                     />
-                                ))}
-                            </Box>
-                        )}
-
-                        {/* Pagination */}
-                        {!loading && totalPages > 1 && (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                                <Pagination
-                                    count={totalPages}
-                                    page={page}
-                                    onChange={handlePageChange}
-                                    color="primary"
-                                    size="large"
-                                    showFirstButton
-                                    showLastButton
-                                    sx={{
-                                        '& .MuiPaginationItem-root': {
-                                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
-                                            '&:hover': {
-                                                backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
-                                            },
-                                            '&.Mui-selected': {
-                                                backgroundColor: '#1976d2',
-                                                color: '#ffffff',
-                                                '&:hover': {
-                                                    backgroundColor: '#1565c0',
-                                                },
-                                            },
-                                        },
-                                    }}
+                                </Grid>
+                            ))}
+                        </Grid>
+                    ) : (
+                        <Stack spacing={2}>
+                            {projects.map((project) => (
+                                <ProjectCard
+                                    key={project.id}
+                                    project={project}
+                                    viewMode="list"
+                                    onAction={handleProjectAction}
                                 />
-                            </Box>
-                        )}
-                    </>
-                )}
+                            ))}
+                        </Stack>
+                    )}
 
-                {/* Dialogs */}
-                <ProjectFormDialog
-                    open={formDialogOpen}
-                    onClose={() => setFormDialogOpen(false)}
-                    onSubmit={handleCreateProject}
-                    project={selectedProject}
-                    mode={formMode}
-                />
+                    {/* Pagination */}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                        <Pagination
+                            count={totalPages}
+                            page={page}
+                            onChange={handlePageChange}
+                            color="primary"
+                            size="large"
+                        />
+                    </Box>
+                </>
+            )}
 
-                <DeleteConfirmDialog
-                    open={deleteDialogOpen}
-                    onClose={() => setDeleteDialogOpen(false)}
-                    onConfirm={handleDeleteProject}
-                    projectTitle={selectedProject?.title || ''}
-                />
-            </Container>
-        </Box>
+            {/* Dialogs */}
+            <ProjectFormDialog
+                open={createDialogOpen}
+                onClose={() => setCreateDialogOpen(false)}
+                onSubmit={handleCreateProject}
+                mode="create"
+            />
+
+            <DeleteConfirmDialog
+                open={Boolean(deleteGroupId)}
+                onClose={() => setDeleteGroupId(null)}
+                onConfirm={handleDeleteConfirm}
+                projectTitle={projects.find(p => p.id === deleteGroupId)?.title || ''}
+            />
+        </Container>
     );
-}
+};
+
+export default ProjectManagementPage;

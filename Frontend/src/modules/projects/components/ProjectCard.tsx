@@ -108,6 +108,8 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 onMouseLeave={() => setIsHovered(false)}
                 onClick={handleOpen}
                 sx={{
+                    height: 220,
+                    width: 280, // Fixed width
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     border: '1px solid',

@@ -8,7 +8,7 @@ export const ROUTES = {
         ROOT: '/admin',
         DASHBOARD: '/admin',
         PROJECTS: '/admin/projects',
-        PROJECT_DETAIL: '/admin/projects/:id',
+        PROJECT_DETAIL: (id?: string) => `/admin/projects/${id || ':id'}`,
     },
 
     CLIENT: {

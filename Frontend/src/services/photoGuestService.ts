@@ -61,8 +61,8 @@ export const photoGuestService = {
     // Get photo image URL (guest access)
     getPhotoUrl: (photoId: string, projectToken: string, width?: number, height?: number, isThumbnail?: boolean, version?: 'original' | 'edited'): string => {
         const params = new URLSearchParams({ project_token: projectToken });
-        if (width) params.append('w', width.toString());
-        if (height) params.append('h', height.toString());
+        // if (width) params.append('w', width.toString());
+        // if (height) params.append('h', height.toString());
         if (isThumbnail !== undefined) params.append('is_thumbnail', isThumbnail.toString());
         if (version) params.append('version', version);
 

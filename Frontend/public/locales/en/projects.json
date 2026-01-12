@@ -5,7 +5,6 @@
         "loadPhotosError": "Cannot load photo list",
         "notFound": "Project not found",
         "goBack": "Go back",
-        "uploadPhotos": "Upload Photos",
         "photoList": "Photo List",
         "photoSelected": "Photo selected",
         "photoDeselected": "Photo deselected",
@@ -102,7 +101,8 @@
         "confirm": "Confirm",
         "authSuccess": "Authentication successful!",
         "loadPhotoError": "Cannot load photos. Please try again later.",
-        "sentPhotos": "Sent {{count}} photos to Photographer!"
+        "sentPhotos": "Sent {{count}} photos to Photographer!",
+        "loadMore": "Load More"
     },
     "createSuccess": "Project created successfully",
     "updateSuccess": "Project updated successfully",
@@ -127,6 +127,43 @@
         "clearAll": "Clear all",
         "uploading": "Uploading...",
         "uploadButton": "Upload {{count}} photo",
-        "uploadButton_plural": "Upload {{count}} photos"
+        "uploadButton_plural": "Upload {{count}} photos",
+        "original": "Original Photos",
+        "edited": "Edited Photos"
+    },
+    "overview": "Overview",
+    "tabs": {
+        "overview": "Overview",
+        "photos": "Photos",
+        "upload": "Upload"
+    },
+    "stats": "Statistics",
+    "expiryInfo": "Project expires in",
+    "updateError": "Failed to update project",
+    "filter": {
+        "all": "All Photos",
+        "selected": "Selected",
+        "edited": "Edited"
+    },
+    "createProject": "Create New Project",
+    "editProject": "Edit Project",
+    "deleteProject": "Delete Project",
+    "deleteConfirmMessage": "Are you sure you want to delete project: {{title}}?",
+    "shareProject": "Share Project",
+    "shareProjectDescription": "Generate a share link for",
+    "expiresIn": "Expires In",
+    "linkExpiresAt": "This link will expire at",
+    "generateLink": "Generate Link",
+    "shareLinkGenerated": "Share link generated successfully",
+    "shareLinkError": "Failed to generate share link",
+    "tokenAlreadyExists": "A share link already exists for this project. Please wait for it to expire or contact support to revoke it.",
+    "form": {
+        "title": "Project Title",
+        "status": "Status",
+        "clientNotes": "Client Notes",
+        "expiredDate": "Expiration Date",
+        "expiredDateHelp": "Set the expiration date for client access",
+        "expiredDays": "Expiration (days)",
+        "expiredDaysHelp": "Set expiration days for client access (default: 10 days)"
     }
 }

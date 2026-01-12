@@ -80,35 +80,15 @@ export const SharedProjectPage = () => {
     const [skip, setSkip] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
-    const limit = 12;
+    const limit = 10;
     const [activeTab, setActiveTab] = useState<'all' | 'edited'>('all');
     const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
     const [selectedVersion, setSelectedVersion] = useState<'original' | 'edited'>('original');
     const [mobileCommentOpen, setMobileCommentOpen] = useState(false);
+    const [totalPhotos, setTotalPhotos] = useState(0);
+    const [detailImageLoading, setDetailImageLoading] = useState(false);
 
-    // Infinity scroll handler
-    useEffect(() => {
-        const handleScroll = () => {
-            if (loadingMore || !hasMore || loading || isLoadingPhotos) return;
 
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const scrollHeight = document.documentElement.scrollHeight;
-            const clientHeight = document.documentElement.clientHeight;
-
-            // Load more when user scrolls to 80% of the page
-            if (scrollTop + clientHeight >= scrollHeight - 500) {
-                if (token) {
-                    setIsLoadingPhotos(true);
-                    loadPhotos(token, skip, activeTab).finally(() => {
-                        setIsLoadingPhotos(false);
-                    });
-                }
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [skip, hasMore, loadingMore, loading, token, activeTab, isLoadingPhotos]);
 
     // Show password dialog on mount if token exists
     useEffect(() => {
@@ -175,6 +155,24 @@ export const SharedProjectPage = () => {
 
         loadPhotoComments();
     }, [selectedPhotoIndex, photos, token]);
+
+    useEffect(() => {
+        if (selectedPhotoIndex !== null) {
+            setDetailImageLoading(true);
+        }
+
+        // Auto-load more photos if we reached the last one in detail view
+        if (
+            selectedPhotoIndex !== null &&
+            selectedPhotoIndex === photos.length - 1 &&
+            hasMore &&
+            !loadingMore &&
+            !isLoadingPhotos &&
+            token
+        ) {
+            loadPhotos(token, skip, activeTab);
+        }
+    }, [selectedPhotoIndex, photos.length, hasMore, loadingMore, isLoadingPhotos, token, skip, activeTab]);
 
     const handlePasswordSubmit = async () => {
         if (!password.trim()) {
@@ -258,6 +256,10 @@ export const SharedProjectPage = () => {
                 });
                 return newSet;
             });
+
+            if (response.meta?.total !== undefined) {
+                setTotalPhotos(response.meta.total);
+            }
         } catch (error: any) {
             console.error('Failed to load photos:', error);
             const errorMessage = error?.response?.data?.message ||
@@ -576,7 +578,7 @@ export const SharedProjectPage = () => {
                                 display: { xs: 'none', sm: 'block' }
                             }}
                         >
-                            {t('shared.photoCount', { count: photos.length })}
+                            {t('shared.photoCount', { count: totalPhotos })}
                         </Typography>
                     </Box>
                     {selectedCount > 0 && (
@@ -645,7 +647,7 @@ export const SharedProjectPage = () => {
                                         {t('shared.totalPhotos')}
                                     </Typography>
                                     <Typography variant="h6" fontWeight={600}>
-                                        {photos.length}
+                                        {totalPhotos}
                                     </Typography>
                                 </Box>
 
@@ -802,7 +804,8 @@ export const SharedProjectPage = () => {
                                         src={token ? photoGuestService.getPhotoUrl(photo.id, token, 200, 200, true) : ''}
                                         alt={photo.filename}
                                         loading="lazy"
-                                        onLoad={() => setImageLoaded({ ...imageLoaded, [photo.id]: true })}
+                                        onLoad={() => setImageLoaded(prev => ({ ...prev, [photo.id]: true }))}
+                                        onError={() => setImageLoaded(prev => ({ ...prev, [photo.id]: true }))}
                                         sx={{
                                             position: 'absolute',
                                             top: 0,
@@ -915,10 +918,28 @@ export const SharedProjectPage = () => {
                     </Box>
                 )}
 
-                {/* Loading More Indicator */}
-                {loadingMore && (
+                {/* Load More Button */}
+                {hasMore && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
-                        <CircularProgress size={40} sx={{ color: 'var(--color-primary)' }} />
+                        <Button
+                            variant="outlined"
+                            onClick={() => token && loadPhotos(token, skip, activeTab)}
+                            disabled={loadingMore || isLoadingPhotos}
+                            startIcon={loadingMore && <CircularProgress size={20} color="inherit" />}
+                            sx={{
+                                color: 'var(--color-primary)',
+                                borderColor: 'var(--color-primary)',
+                                minWidth: 200,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                '&:hover': {
+                                    borderColor: 'var(--color-primary-dark)',
+                                    bgcolor: 'var(--bg-secondary)',
+                                },
+                            }}
+                        >
+                            {loadingMore ? (t('shared.loading') || 'Đang tải...') : (t('shared.loadMore') || 'Xem thêm')}
+                        </Button>
                     </Box>
                 )}
 
@@ -1047,6 +1068,7 @@ export const SharedProjectPage = () => {
                                     sx={{
                                         position: 'absolute',
                                         left: 16,
+                                        zIndex: 10,
                                         color: 'white',
                                         bgcolor: 'rgba(255, 255, 255, 0.1)',
                                         '&:hover': {
@@ -1064,6 +1086,7 @@ export const SharedProjectPage = () => {
                                     sx={{
                                         position: 'absolute',
                                         right: 16,
+                                        zIndex: 10,
                                         color: 'white',
                                         bgcolor: 'rgba(255, 255, 255, 0.1)',
                                         '&:hover': {
@@ -1077,16 +1100,41 @@ export const SharedProjectPage = () => {
 
                             {/* Main Image */}
                             <Box
-                                component="img"
-                                src={token ? photoGuestService.getPhotoUrl(selectedPhoto.id, token, undefined, undefined, false, selectedVersion) : ''}
-                                alt={selectedPhoto.filename}
                                 sx={{
-                                    maxWidth: '90%',
-                                    maxHeight: '85vh',
-                                    objectFit: 'contain',
-                                    userSelect: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '100%',
+                                    height: '85vh',
+                                    position: 'relative',
                                 }}
-                            />
+                            >
+                                {detailImageLoading && (
+                                    <CircularProgress
+                                        size={50}
+                                        sx={{
+                                            color: 'white',
+                                            position: 'absolute',
+                                            zIndex: 1,
+                                        }}
+                                    />
+                                )}
+                                <Box
+                                    component="img"
+                                    src={token ? photoGuestService.getPhotoUrl(selectedPhoto.id, token, undefined, undefined, false, selectedVersion) : ''}
+                                    alt={selectedPhoto.filename}
+                                    onLoad={() => setDetailImageLoading(false)}
+                                    onError={() => setDetailImageLoading(false)}
+                                    sx={{
+                                        maxWidth: '90%',
+                                        maxHeight: '85vh',
+                                        objectFit: 'contain',
+                                        userSelect: 'none',
+                                        opacity: detailImageLoading ? 0.5 : 1,
+                                        transition: 'opacity 0.2s',
+                                    }}
+                                />
+                            </Box>
 
                             {/* Bottom Bar with Selection and Rejection */}
                             <Box
