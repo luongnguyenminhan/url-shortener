@@ -16,7 +16,7 @@ export interface ApiResponse<T = any> {
 }
 
 export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
-    pagination?: PaginationMeta | null;
+    meta?: PaginationMeta | null;
 }
 
 export interface PaginationParams {

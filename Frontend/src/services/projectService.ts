@@ -5,7 +5,9 @@ import type {
     ProjectUpdate,
     ProjectDetailResponse,
     CreateProjectTokenRequest,
-    ProjectTokenResponse
+    ProjectTokenResponse,
+    VerifyProjectTokenRequest,
+    VerifyProjectTokenResponse
 } from '@/types/project.type';
 import type { PaginatedResponse, PaginationParams, ApiResponse } from '@/types/common.type';
 
@@ -44,6 +46,25 @@ export const projectService = {
     // Create project token for sharing
     createProjectToken: async (data: CreateProjectTokenRequest): Promise<ProjectTokenResponse> => {
         const response = await axiosInstance.post<ApiResponse<ProjectTokenResponse>>(`${BASE_URL}/create-project-token`, data);
+        return response.data.data!;
+    },
+
+    // Get active project token
+    getActiveProjectToken: async (projectId: string): Promise<ProjectTokenResponse | null> => {
+        try {
+            const response = await axiosInstance.get<ApiResponse<ProjectTokenResponse>>(`${BASE_URL}/active-project-token/${projectId}`);
+            return response.data.data!;
+        } catch (error: any) {
+            if (error?.response?.status === 404) {
+                return null;
+            }
+            throw error;
+        }
+    },
+
+    // Verify project token (guest access)
+    verifyProjectToken: async (data: VerifyProjectTokenRequest): Promise<VerifyProjectTokenResponse> => {
+        const response = await axiosInstance.post<ApiResponse<VerifyProjectTokenResponse>>(`${BASE_URL}/verify-project-token`, data);
         return response.data.data!;
     },
 };

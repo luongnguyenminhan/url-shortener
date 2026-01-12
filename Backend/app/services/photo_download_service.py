@@ -211,9 +211,7 @@ def build_photo_download_scripts_response(manifest: PhotoManifest, csv_url: str)
     )
 
 
-def build_photo_manifest_zip(
-    db: Session, project_id: UUID, current_user_id: UUID
-) -> io.BytesIO:
+def build_photo_manifest_zip(db: Session, project_id: UUID, current_user_id: UUID) -> io.BytesIO:
     """Build ZIP with selected photos organized by extension + CSV"""
     # Get project and verify ownership
     project = db.get(Project, project_id)

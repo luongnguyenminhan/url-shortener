@@ -5,7 +5,8 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.models.photo import Photo
+from app.models.photo import Photo, PhotoStatus
+from app.models.photo_version import VersionType
 from app.schemas.common import PaginationSortSearchSchema
 from app.schemas.photo import PhotoCreate
 
@@ -43,27 +44,84 @@ def exists_by_filename(
     return db.query(Photo).filter((Photo.project_id == project_id) & (Photo.filename == filename)).first() is not None
 
 
+def get_by_filename_with_variant(
+    db: Session,
+    project_id: UUID,
+    filename: str,
+) -> Optional[Photo]:
+    """
+    Validate and get photo by filename, handling variants with postfix.
+
+    Naming Rule: <Name>.<ext> (original) or <Name>_<postfix>.<ext> (variant)
+
+    Example: If IMG_1000_v2.JPG is provided and exists in DB:
+    - Extract base name: IMG_1000
+    - Return the Photo object for IMG_1000.JPG
+
+    Args:
+        db: Database session
+        project_id: Project ID
+        filename: Filename to validate (can be original or with postfix)
+
+    Returns:
+        Photo object for the base filename if found, else None
+    """
+    # First, try exact match
+    exact_photo = get_by_project_and_filename(db, project_id, filename)
+    if exact_photo:
+        return exact_photo
+
+    # If not found, extract base name and postfix
+    # Naming pattern: <Name>_<postfix>.<ext>
+    base_name, dot, ext = filename.rpartition(".")
+
+    # Check if filename has postfix pattern (underscore followed by version/variant)
+    if "_" in base_name:
+        # Get the last underscore-separated part
+        parts = base_name.rsplit("_", 1)
+        potential_base = parts[0]
+
+        # Try to find the base filename
+        base_filename = f"{potential_base}{dot}{ext}" if dot else potential_base
+        base_photo = get_by_project_and_filename(db, project_id, base_filename)
+
+        if base_photo:
+            return base_photo
+
+    return None
+
+
 def get_by_project(
     db: Session,
     project_id: UUID,
     pagination_params: PaginationSortSearchSchema,
-    is_selected: Optional[bool] = None,
+    status: Optional[PhotoStatus] = None,
 ) -> List[Photo]:
-    """Get all photos in a project with pagination and optional filtering"""
+    """Get all photos in a project with pagination and optional filtering by status"""
     query = db.query(Photo).filter(Photo.project_id == project_id)
 
-    if is_selected is not None:
-        query = query.filter(Photo.is_selected == is_selected)
+    if status == PhotoStatus.SELECTED:
+        query = query.filter(Photo.is_selected == True)
+    elif status == PhotoStatus.ORIGIN:
+        query = query.filter(Photo.is_selected == False)
+    elif status == PhotoStatus.EDITED:
+        from app.models.photo_version import PhotoVersion
+        query = query.join(PhotoVersion, PhotoVersion.photo_id == Photo.id).filter(PhotoVersion.version_type == VersionType.EDITED.value)
 
     return query.offset(pagination_params.skip).limit(pagination_params.limit).all()
 
 
-def count_by_project(db: Session, project_id: UUID, is_selected: Optional[bool] = None) -> int:
-    """Count photos in a project with optional filtering"""
+def count_by_project(db: Session, project_id: UUID, status: Optional[PhotoStatus] = None) -> int:
+    """Count photos in a project with optional filtering by status"""
     query = db.query(Photo).filter(Photo.project_id == project_id)
 
-    if is_selected is not None:
-        query = query.filter(Photo.is_selected == is_selected)
+    if status == PhotoStatus.SELECTED:
+        query = query.filter(Photo.is_selected == True)
+    elif status == PhotoStatus.ORIGIN:
+        query = query.filter(Photo.is_selected == False)
+    elif status == PhotoStatus.EDITED:
+        from app.models.photo_version import PhotoVersion
+        query = query.join(PhotoVersion, PhotoVersion.photo_id == Photo.id).filter(PhotoVersion.version_type == VersionType.EDITED.value)
 
     return query.count()
 

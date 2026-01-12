@@ -1,4 +1,5 @@
 """Models package - Database models using SQLModel"""
+
 from app.models.base import BaseModel
 from app.models.client_session import ClientSession
 from app.models.photo import Photo

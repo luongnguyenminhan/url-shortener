@@ -1,4 +1,5 @@
 """User model - Photographers (authenticated via Google OAuth)"""
+
 from typing import TYPE_CHECKING, List, Optional
 from uuid import UUID
 
@@ -24,4 +25,5 @@ class User(BaseModel, table=True):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True

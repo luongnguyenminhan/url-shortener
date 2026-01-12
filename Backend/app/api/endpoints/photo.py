@@ -9,6 +9,8 @@ from sqlmodel import Session
 from app.core.config import settings
 from app.core.constant.messages import MessageConstants
 from app.db import get_db
+from app.models.photo import PhotoStatus
+from app.models.photo_version import VersionType
 from app.models.user import User
 from app.schemas.common import (
     ApiResponse,
@@ -72,6 +74,42 @@ async def upload_photo(
         data=photo_detail,
     )
 
+@router.post(
+    "/edited",
+    response_model=ApiResponse[PhotoDetailResponse],
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload photo",
+    description="Upload a JPEG photo to a project",
+)
+async def upload_edited_photo(
+    file: UploadFile = File(..., description="JPEG image file"),
+    project_id: str = Form(..., description="Project ID to upload photo to"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ApiResponse[PhotoDetailResponse]:
+    """Upload a JPEG photo to a project"""
+    from uuid import UUID
+
+    # Convert project_id string to UUID
+    try:
+        project_uuid = UUID(project_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid project_id format",
+        )
+
+    photo_detail = await photo_service.upload_edited_photo(
+        db=db,
+        user=current_user,
+        project_id=project_uuid,
+        file=file,
+    )
+    return ApiResponse(
+        success=True,
+        message=MessageConstants.PHOTO_UPLOADED,
+        data=photo_detail,
+    )
 
 @router.get(
     "/{photo_id}",
@@ -83,6 +121,8 @@ async def get_photo(
     photo_id: UUID,
     w: int = Query(None, ge=1, le=2000, description="Width for resizing"),
     h: int = Query(None, ge=1, le=2000, description="Height for resizing"),
+    is_thumbnail: bool = Query(False, description="Get thumbnail version of the photo"),
+    version: VersionType = Query(VersionType.ORIGINAL, description="Photo version to retrieve"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -95,6 +135,8 @@ async def get_photo(
         photo_id=photo_id,
         width=w,
         height=h,
+        is_thumbnail=is_thumbnail,
+        version=version,
     )
 
     if not photo_response:
@@ -121,17 +163,17 @@ async def get_photo(
 def list_project_photos(
     project_id: UUID,
     pagination_params: PaginationSortSearchSchema = Depends(pagination_params_dep),
-    is_selected: bool = Query(None, description="Filter by selection status (true/false)"),
+    status: PhotoStatus = Query(None, description="Filter by status (origin/selected/edited)"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> ApiResponse:
-    """Get all photos in a project with optional is_selected filter"""
+    """Get all photos in a project with optional status filter"""
     photos, total = photo_service.get_project_photos(
         db=db,
         user=current_user,
         project_id=project_id,
         pagination_params=pagination_params,
-        is_selected=is_selected,
+        status=status,
     )
 
     page = (pagination_params.skip // pagination_params.limit) + 1
@@ -140,7 +182,7 @@ def list_project_photos(
     return ApiResponse(
         success=True,
         message=MessageConstants.PHOTO_LIST_RETRIEVED,
-        data=[PhotoListResponse.model_validate(photo) for photo in photos],
+        data=[PhotoListResponse.model_validate(item["photo"]).model_copy(update={"edited_version": item["edited_version"]}) for item in photos],
         meta=pagination_meta.model_dump(),
     )
 
@@ -200,6 +242,7 @@ async def download_photos(
 
         # Get project name for filename
         from app.crud import project_crud
+
         project = project_crud.get_by_id(db, project_id)
         project_name = project.title.replace(" ", "_") if project else "photos"
 

@@ -128,10 +128,11 @@ def get_user_projects(
         "meta": pagination_meta.model_dump(),
     }
 
+
 # TODO: Add admin permission check if needed
 def get_all_projects(
     db: Session,
-    user: User, # type: ignore  # noqa: ARG001
+    user: User,  # type: ignore  # noqa: ARG001
     pagination_params: PaginationSortSearchSchema,
     status: Optional[str] = None,
 ) -> Dict[str, Any]:
@@ -342,7 +343,7 @@ def count_user_projects(db: Session, user: User, status: Optional[str] = None) -
 
 def get_expired_projects_for_cleanup(
     db: Session,
-    user: User, # type: ignore  # noqa: ARG001
+    user: User,  # type: ignore  # noqa: ARG001
 ) -> List[ProjectResponse]:
     """
     Get expired projects for cleanup (admin only)

@@ -1,4 +1,5 @@
 """CRUD operations for PhotoComment model"""
+
 from typing import List, Optional
 from uuid import UUID
 
@@ -30,14 +31,7 @@ def get_by_photo(
     limit: int = 100,
 ) -> List[PhotoComment]:
     """Get all comments for a photo with pagination"""
-    return (
-        db.query(PhotoComment)
-        .filter(PhotoComment.photo_id == photo_id)
-        .order_by(PhotoComment.created_at.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    return db.query(PhotoComment).filter(PhotoComment.photo_id == photo_id).order_by(PhotoComment.created_at.desc()).offset(skip).limit(limit).all()
 
 
 def count_by_photo(db: Session, photo_id: UUID) -> int:

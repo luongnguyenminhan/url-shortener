@@ -53,11 +53,14 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
         <>
             <AppBar
                 position="sticky"
+                elevation={0}
                 sx={{
                     backgroundColor: 'var(--bg-primary)',
                     color: 'var(--text-primary)',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
                     borderBottom: '1px solid var(--border-primary)',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all var(--transition-normal)',
                 }}
             >
                 <Toolbar
@@ -108,9 +111,14 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                                 sx={{
                                     color: 'var(--text-primary)',
                                     textDecoration: 'none',
-                                    transition: 'color var(--transition-fast)',
+                                    fontWeight: 'var(--font-weight-medium)',
+                                    fontSize: 'var(--font-size-sm)',
+                                    padding: 'var(--spacing-xs) var(--spacing-sm)',
+                                    borderRadius: 'var(--radius-md)',
+                                    transition: 'all var(--transition-fast)',
                                     '&:hover': {
                                         color: 'var(--color-primary)',
+                                        backgroundColor: 'var(--bg-secondary)',
                                     },
                                 }}
                             >
@@ -214,6 +222,8 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                                             backgroundColor: 'var(--bg-primary)',
                                             color: 'var(--text-primary)',
                                             border: '1px solid var(--border-primary)',
+                                            boxShadow: 'var(--shadow-lg)',
+                                            marginTop: 'var(--spacing-sm)',
                                         },
                                     }}
                                 >
@@ -258,7 +268,10 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                             color="inherit"
                             edge="end"
                             onClick={handleDrawerToggle}
-                            sx={{ display: { md: 'none' } }}
+                            sx={{
+                                display: { md: 'none' },
+                                color: 'var(--text-primary)',
+                            }}
                         >
                             <MenuIcon />
                         </IconButton>
@@ -267,20 +280,38 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
             </AppBar>
 
             {/* Mobile Drawer */}
-            <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
+            <Drawer
+                anchor="right"
+                open={mobileOpen}
+                onClose={handleDrawerToggle}
+                PaperProps={{
+                    sx: {
+                        backgroundColor: 'var(--bg-primary)',
+                        color: 'var(--text-primary)',
+                        borderLeft: '1px solid var(--border-primary)',
+                    }
+                }}
+            >
                 <Box
                     sx={{
                         width: 250,
                         padding: 'var(--spacing-lg)',
-                        backgroundColor: 'var(--bg-primary)',
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
                     }}
                 >
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 'var(--spacing-lg)' }}>
-                        <Box sx={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)' }}>{t('header.menu')}</Box>
-                        <IconButton size="small" onClick={handleDrawerToggle}>
+                        <Box sx={{
+                            fontSize: 'var(--font-size-xl)',
+                            fontWeight: 'var(--font-weight-bold)',
+                            color: 'var(--text-primary)'
+                        }}>{t('header.menu')}</Box>
+                        <IconButton
+                            size="small"
+                            onClick={handleDrawerToggle}
+                            sx={{ color: 'var(--text-primary)' }}
+                        >
                             <CloseIcon />
                         </IconButton>
                     </Box>
@@ -295,12 +326,20 @@ export function Header({ onLogin, onSignup }: HeaderProps) {
                                 sx={{
                                     color: 'var(--text-primary)',
                                     textDecoration: 'none',
+                                    borderRadius: 'var(--radius-md)',
+                                    mb: 'var(--spacing-xs)',
+                                    transition: 'all var(--transition-fast)',
                                     '&:hover': {
                                         backgroundColor: 'var(--bg-secondary)',
                                     },
                                 }}
                             >
-                                <ListItemText primary={item.label} />
+                                <ListItemText
+                                    primary={item.label}
+                                    primaryTypographyProps={{
+                                        sx: { color: 'var(--text-primary)' }
+                                    }}
+                                />
                             </ListItem>
                         ))}
                     </List>

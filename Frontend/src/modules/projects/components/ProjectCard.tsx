@@ -13,6 +13,7 @@ import {
     Card,
     ListItemButton,
     Chip,
+    useTheme,
 } from '@mui/material';
 import {
     Folder as FolderIcon,
@@ -33,6 +34,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
     const { t } = useTranslation();
+    const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [isHovered, setIsHovered] = useState(false);
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -109,11 +111,12 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     border: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#4b545c',
+                    bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
                     boxShadow: 'none',
                     '&:hover': {
-                        boxShadow: 2,
-                        borderColor: 'primary.main',
+                        boxShadow: 'var(--shadow-md)',
+                        borderColor: '#1976d2',
                     },
                     borderRadius: 2,
                     p: 2,
@@ -126,9 +129,9 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 {/* Folder Icon */}
                 <Box sx={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
                     {isHovered ? (
-                        <FolderOpenIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+                        <FolderOpenIcon sx={{ fontSize: 64, color: '#1976d2' }} />
                     ) : (
-                        <FolderIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+                        <FolderIcon sx={{ fontSize: 64, color: '#1976d2' }} />
                     )}
 
                     {/* More Menu Button */}
@@ -141,6 +144,10 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                             right: -8,
                             opacity: isHovered ? 1 : 0,
                             transition: 'opacity 0.2s',
+                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                            '&:hover': {
+                                bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                            },
                         }}
                     >
                         <MoreVertIcon fontSize="small" />
@@ -157,6 +164,7 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
+                        color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                     }}
                 >
                     {project.title}
@@ -183,8 +191,7 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 {/* Last Modified */}
                 <Typography
                     variant="caption"
-                    color="text.secondary"
-                    sx={{ textAlign: 'center' }}
+                    sx={{ textAlign: 'center', color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}
                 >
                     {formatDate(project.updated_at)}
                 </Typography>
@@ -195,6 +202,21 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                     onClick={(e) => e.stopPropagation()}
+                    sx={{
+                        '& .MuiPaper-root': {
+                            bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                            boxShadow: 'var(--shadow-lg)',
+                        },
+                        '& .MuiMenuItem-root': {
+                            '&:hover': {
+                                bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                            },
+                        },
+                        '& .MuiListItemIcon-root': {
+                            color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
+                        },
+                    }}
                 >
                     <MenuItem onClick={handleEdit}>
                         <ListItemIcon>
@@ -238,16 +260,16 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 px: 2,
                 borderRadius: 1,
                 '&:hover': {
-                    bgcolor: 'action.hover',
+                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
                 },
             }}
         >
             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
                 {/* Folder Icon */}
                 {isHovered ? (
-                    <FolderOpenIcon sx={{ fontSize: 24, color: 'primary.main' }} />
+                    <FolderOpenIcon sx={{ fontSize: 24, color: '#1976d2' }} />
                 ) : (
-                    <FolderIcon sx={{ fontSize: 24, color: 'primary.main' }} />
+                    <FolderIcon sx={{ fontSize: 24, color: '#1976d2' }} />
                 )}
 
                 {/* Project Title */}
@@ -259,6 +281,7 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
+                        color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
                     }}
                 >
                     {project.title}
@@ -284,8 +307,8 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                         gap: 0.5,
                         minWidth: 80
                     }}>
-                        <ScheduleIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                        <Typography variant="caption" color="text.secondary">
+                        <ScheduleIcon sx={{ fontSize: 16, color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }} />
+                        <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#616161' : '#6c757d' }}>
                             {project.images_count} {t('projects.images', 'images')}
                         </Typography>
                     </Box>
@@ -294,11 +317,11 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                 {/* Last Modified */}
                 <Typography
                     variant="caption"
-                    color="text.secondary"
                     sx={{
                         minWidth: 120,
                         textAlign: 'right',
                         display: { xs: 'none', sm: 'block' },
+                        color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
                     }}
                 >
                     {formatDate(project.updated_at)}
@@ -311,6 +334,10 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                     sx={{
                         opacity: isHovered ? 1 : 0,
                         transition: 'opacity 0.2s',
+                        color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                        '&:hover': {
+                            bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                        },
                     }}
                 >
                     <MoreVertIcon fontSize="small" />
@@ -322,6 +349,21 @@ export function ProjectCard({ project, viewMode, onAction }: ProjectCardProps) {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                     onClick={(e) => e.stopPropagation()}
+                    sx={{
+                        '& .MuiPaper-root': {
+                            bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                            boxShadow: 'var(--shadow-lg)',
+                        },
+                        '& .MuiMenuItem-root': {
+                            '&:hover': {
+                                bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                            },
+                        },
+                        '& .MuiListItemIcon-root': {
+                            color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
+                        },
+                    }}
                 >
                     <MenuItem onClick={handleEdit}>
                         <ListItemIcon>

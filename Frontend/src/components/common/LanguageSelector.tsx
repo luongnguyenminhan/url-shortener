@@ -16,10 +16,23 @@ const LanguageSelector: React.FC = () => {
             size="small"
             sx={{
                 minWidth: 120,
+                color: '#ffffff',
                 '& .MuiSelect-select': {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#ffffff',
+                },
+                '& .MuiSvgIcon-root': {
+                    color: '#ffffff',
                 },
             }}
         >

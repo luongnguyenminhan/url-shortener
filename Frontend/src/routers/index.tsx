@@ -13,6 +13,7 @@ import AuthLayout from "../components/layouts/AuthLayout"
 import { ROUTES } from "../constants"
 import ProjectManagementPage from "@/modules/projects/pages/ProjectManagementPage"
 import { ProjectDetailPage } from "@/modules/projects/pages/ProjectDetailPage"
+import { SharedProjectPage } from "@/modules/projects/pages/SharedProjectPage"
 
 const DevelopmentPage = () => {
     const { t } = useTranslation('admin')
@@ -87,6 +88,11 @@ const router = createBrowserRouter([
                         ),
                     },
                 ],
+            },
+
+            {
+                path: "shared/:id",
+                element: <SharedProjectPage />,
             },
 
             {

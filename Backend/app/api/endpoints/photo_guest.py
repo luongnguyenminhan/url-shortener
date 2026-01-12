@@ -8,6 +8,8 @@ from sqlmodel import Session
 
 from app.core.config import settings
 from app.db import get_db
+from app.models.photo import PhotoStatus
+from app.models.photo_version import VersionType
 from app.schemas.common import (
     ApiResponse,
     PaginationSortSearchSchema,
@@ -34,6 +36,8 @@ async def get_photo_image(
     project_token: str = Query(..., description="Project access token"),
     w: int = Query(None, ge=1, le=2000, description="Width for resizing"),
     h: int = Query(None, ge=1, le=2000, description="Height for resizing"),
+    is_thumbnail: bool = Query(False, description="Get thumbnail version of the photo"),
+    version: VersionType = Query(VersionType.ORIGINAL, description="Photo version to retrieve"),
     db: Session = Depends(get_db),
 ):
     """Get photo image as streaming response with optional resizing using project token"""
@@ -43,6 +47,8 @@ async def get_photo_image(
         project_token=project_token,
         width=w,
         height=h,
+        is_thumbnail=is_thumbnail,
+        version=version,
     )
 
     if not photo_response:
@@ -69,15 +75,15 @@ async def get_photo_image(
 def list_project_photos(
     project_token: str = Query(..., description="Project access token"),
     pagination_params: PaginationSortSearchSchema = Depends(pagination_params_dep),
-    is_selected: bool = Query(None, description="Filter by selection status (true/false)"),
+    status: PhotoStatus = Query(None, description="Filter by status (origin/selected/edited)"),
     db: Session = Depends(get_db),
 ) -> ApiResponse:
-    """Get all photos in a project with optional is_selected filter using project token"""
+    """Get all photos in a project with optional status filter using project token"""
     photos, total = photo_guest_service.get_project_photos_guest(
         db=db,
         project_token=project_token,
         pagination_params=pagination_params,
-        is_selected=is_selected,
+        status=status
     )
 
     page = (pagination_params.skip // pagination_params.limit) + 1
@@ -86,7 +92,7 @@ def list_project_photos(
     return ApiResponse(
         success=True,
         message="Photo list retrieved successfully",
-        data=[PhotoListResponse.model_validate(photo) for photo in photos],
+        data=[PhotoListResponse.model_validate(item["photo"]).model_copy(update={"edited_version": item["edited_version"]}) for item in photos],
         meta=pagination_meta.model_dump(),
     )
 

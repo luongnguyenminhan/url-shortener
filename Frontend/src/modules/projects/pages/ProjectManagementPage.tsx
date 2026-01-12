@@ -19,6 +19,8 @@ import {
     MenuItem,
     ListItemIcon,
     ListItemText,
+    useTheme,
+    Pagination,
 } from '@mui/material';
 import {
     Search as SearchIcon,
@@ -30,14 +32,19 @@ import {
 } from '@mui/icons-material';
 
 export default function ProjectManagementPage() {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['projects', 'admin']);
     const navigate = useNavigate();
+    const theme = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [loading, setLoading] = useState(false);
     const [projects, setProjects] = useState<ProjectResponse[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(12);
+    const [totalPages, setTotalPages] = useState(0);
+    const [total, setTotal] = useState(0);
 
     // Dialog states
     const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -51,19 +58,20 @@ export default function ProjectManagementPage() {
         setError(null);
         try {
             const response = await projectService.getProjects({
-                skip: 0,
-                limit: 100,
+                skip: (page - 1) * pageSize,
+                limit: pageSize,
                 search: searchQuery || undefined,
+                sort_key: 'updated_at',
+                sort_dir: 'desc',
             });
 
-            // Sort by newest first (created_at or updated_at descending)
-            const sortedProjects = (response.data || []).sort((a, b) => {
-                const dateA = new Date(a.updated_at || a.created_at).getTime();
-                const dateB = new Date(b.updated_at || b.created_at).getTime();
-                return dateB - dateA; // Newest first
-            });
+            setProjects(response.data || []);
 
-            setProjects(sortedProjects);
+            // Update pagination info from meta
+            if (response.meta) {
+                setTotal(response.meta.total || 0);
+                setTotalPages(response.meta.total_pages || 0);
+            }
         } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || 'Failed to fetch projects';
             setError(errorMsg);
@@ -73,14 +81,24 @@ export default function ProjectManagementPage() {
         }
     };
 
-    // Load projects on mount and when search changes
+    // Load projects on mount and when search or page changes
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchProjects();
-        }, 300); // Debounce search
+        }, searchQuery ? 300 : 0); // Debounce search only
 
         return () => clearTimeout(timer);
+    }, [searchQuery, page]);
+
+    // Reset to page 1 when search changes
+    useEffect(() => {
+        setPage(1);
     }, [searchQuery]);
+
+    const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleAction = (projectId: string, action: 'open' | 'edit' | 'delete' | 'share') => {
         const project = projects.find(p => p.id === projectId);
@@ -140,7 +158,7 @@ export default function ProjectManagementPage() {
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d' }}>
             <Container maxWidth="xl">
                 {/* Google Drive-style Toolbar */}
                 <Toolbar
@@ -148,12 +166,13 @@ export default function ProjectManagementPage() {
                         px: { xs: 1, sm: 2 },
                         py: 2,
                         gap: 2,
-                        flexWrap: 'wrap'
+                        flexWrap: 'wrap',
+                        bgcolor: 'transparent',
                     }}
                 >
                     {/* Search Bar */}
                     <TextField
-                        placeholder={t('projects.searchPlaceholder', 'Search projects')}
+                        placeholder={t('admin:projects.searchPlaceholder', 'Search projects')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         size="small"
@@ -161,9 +180,26 @@ export default function ProjectManagementPage() {
                             flexGrow: 1,
                             maxWidth: { xs: '100%', sm: 600 },
                             '& .MuiOutlinedInput-root': {
-                                bgcolor: 'background.paper',
+                                bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
                                 borderRadius: 2,
-                            }
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                '& fieldset': {
+                                    borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#4b545c',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: '#1976d2',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: '#1976d2',
+                                },
+                            },
+                            '& .MuiInputBase-input::placeholder': {
+                                color: theme.palette.mode === 'light' ? '#9e9e9e' : '#6c757d',
+                                opacity: 1,
+                            },
+                            '& .MuiSvgIcon-root': {
+                                color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
+                            },
                         }}
                         InputProps={{
                             startAdornment: (
@@ -180,6 +216,12 @@ export default function ProjectManagementPage() {
                         <IconButton
                             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                             size="small"
+                            sx={{
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                '&:hover': {
+                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                                },
+                            }}
                         >
                             {viewMode === 'grid' ? <ViewListIcon /> : <ViewModuleIcon />}
                         </IconButton>
@@ -188,6 +230,12 @@ export default function ProjectManagementPage() {
                         <IconButton
                             size="small"
                             onClick={(e) => setAnchorEl(e.currentTarget)}
+                            sx={{
+                                color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                '&:hover': {
+                                    bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                                },
+                            }}
                         >
                             <MoreVertIcon />
                         </IconButton>
@@ -195,18 +243,33 @@ export default function ProjectManagementPage() {
                             anchorEl={anchorEl}
                             open={Boolean(anchorEl)}
                             onClose={() => setAnchorEl(null)}
+                            sx={{
+                                '& .MuiPaper-root': {
+                                    bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
+                                    color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                    boxShadow: 'var(--shadow-lg)',
+                                },
+                                '& .MuiMenuItem-root': {
+                                    '&:hover': {
+                                        bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                                    },
+                                },
+                                '& .MuiListItemIcon-root': {
+                                    color: theme.palette.mode === 'light' ? '#616161' : '#6c757d',
+                                },
+                            }}
                         >
                             <MenuItem onClick={() => { handleOpenCreateDialog(); setAnchorEl(null); }}>
                                 <ListItemIcon>
                                     <CreateNewFolderIcon fontSize="small" />
                                 </ListItemIcon>
-                                <ListItemText>{t('projects.newProject', 'New Project')}</ListItemText>
+                                <ListItemText>{t('admin:projects.newProject', 'New Project')}</ListItemText>
                             </MenuItem>
                             <MenuItem onClick={() => setAnchorEl(null)}>
                                 <ListItemIcon>
                                     <SortIcon fontSize="small" />
                                 </ListItemIcon>
-                                <ListItemText>{t('projects.sortBy', 'Sort by')}</ListItemText>
+                                <ListItemText>{t('admin:projects.sortBy', 'Sort by')}</ListItemText>
                             </MenuItem>
                         </Menu>
                     </Box>
@@ -236,13 +299,13 @@ export default function ProjectManagementPage() {
                                 <CreateNewFolderIcon sx={{ fontSize: 80, color: 'text.disabled', mb: 2 }} />
                                 <Typography variant="h6" color="text.secondary" gutterBottom>
                                     {searchQuery
-                                        ? t('projects.noProjectsFound', 'No projects found')
-                                        : t('projects.noProjects', 'No projects yet')}
+                                        ? t('admin:projects.noProjectsFound', 'No projects found')
+                                        : t('admin:projects.noProjects', 'No projects yet')}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {searchQuery
-                                        ? t('projects.tryDifferentSearch', 'Try a different search')
-                                        : t('projects.createFirstProject', 'Create your first project to get started')}
+                                        ? t('admin:projects.tryDifferentSearch', 'Try a different search')
+                                        : t('admin:projects.createFirstProject', 'Create your first project to get started')}
                                 </Typography>
                             </Box>
                         ) : (
@@ -267,6 +330,36 @@ export default function ProjectManagementPage() {
                                         onAction={handleAction}
                                     />
                                 ))}
+                            </Box>
+                        )}
+
+                        {/* Pagination */}
+                        {!loading && totalPages > 1 && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                <Pagination
+                                    count={totalPages}
+                                    page={page}
+                                    onChange={handlePageChange}
+                                    color="primary"
+                                    size="large"
+                                    showFirstButton
+                                    showLastButton
+                                    sx={{
+                                        '& .MuiPaginationItem-root': {
+                                            color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0',
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1f2d3d',
+                                            },
+                                            '&.Mui-selected': {
+                                                backgroundColor: '#1976d2',
+                                                color: '#ffffff',
+                                                '&:hover': {
+                                                    backgroundColor: '#1565c0',
+                                                },
+                                            },
+                                        },
+                                    }}
+                                />
                             </Box>
                         )}
                     </>

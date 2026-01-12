@@ -11,5 +11,14 @@
     "development": {
         "title": "Feature Under Development",
         "description": "This feature is currently under development and will be launched soon."
+    },
+    "projects": {
+        "searchPlaceholder": "Search projects",
+        "newProject": "New Project",
+        "sortBy": "Sort by",
+        "noProjectsFound": "No projects found",
+        "noProjects": "No projects yet",
+        "tryDifferentSearch": "Try a different search",
+        "createFirstProject": "Create your first project to get started"
     }
 }

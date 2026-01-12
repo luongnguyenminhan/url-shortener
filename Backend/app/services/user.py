@@ -1,4 +1,5 @@
 """User service for user management operations"""
+
 from sqlalchemy.orm import Session
 
 from app.models.user import User

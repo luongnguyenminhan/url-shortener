@@ -1,4 +1,5 @@
 """Base model with common fields for all tables"""
+
 from datetime import datetime
 from uuid import UUID, uuid4
 
@@ -26,4 +27,5 @@ class BaseModel(SQLModel):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True

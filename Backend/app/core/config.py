@@ -53,9 +53,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "urls_db"
 
     # Firebase Configuration
-    FIREBASE_SERVICE_ACCOUNT_KEY_PATH: str = (
-        '{"type": "service_account", "project_id": ""}'
-    )
+    FIREBASE_SERVICE_ACCOUNT_KEY_PATH: str = '{"type": "service_account", "project_id": ""}'
 
     # Redis Configuration
     REDIS_HOST: str = "redis"

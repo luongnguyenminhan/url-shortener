@@ -1,4 +1,5 @@
 """PhotoVersion model - Original and edited versions"""
+
 from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -39,6 +40,7 @@ class PhotoVersion(BaseModel, table=True):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
     def validate_version_type(self, version_type: str) -> bool:

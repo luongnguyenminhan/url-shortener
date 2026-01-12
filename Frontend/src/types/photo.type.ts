@@ -7,13 +7,14 @@ export type VersionType = typeof VersionType[keyof typeof VersionType];
 
 export interface Photo {
     id: string;
-    project_id: string;
     filename: string;
+    project_id: string;
     is_selected: boolean;
     is_approved: boolean;
     is_rejected: boolean;
     created_at: string;
     updated_at: string;
+    edited_version?: boolean; // Indicates if photo has an edited version
 }
 
 export interface PhotoVersion {
@@ -46,7 +47,9 @@ export interface PhotoUploadResponse {
 
 export interface PhotoListMeta {
     page: number;
-    page_size: number;
+    limit: number;
     total: number;
     total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
 }

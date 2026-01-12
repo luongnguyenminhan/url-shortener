@@ -1,4 +1,5 @@
 """Schemas for Photo operations"""
+
 from datetime import datetime
 from uuid import UUID
 
@@ -33,6 +34,7 @@ class PhotoResponse(BaseModel):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
 
@@ -53,6 +55,7 @@ class PhotoVersionResponse(PhotoVersionBase):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
 
@@ -64,6 +67,7 @@ class PhotoDetailResponse(BaseModel):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
 
@@ -78,9 +82,11 @@ class PhotoListResponse(BaseModel):
     is_rejected: bool = False
     created_at: datetime
     updated_at: datetime
+    edited_version: bool = False
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
 
@@ -102,6 +108,7 @@ class PhotoCommentResponse(BaseModel):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
 
 
@@ -127,4 +134,5 @@ class PhotoMetaResponse(BaseModel):
 
     class Config:
         """Pydantic config"""
+
         from_attributes = True
