@@ -2,7 +2,16 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
@@ -74,6 +83,7 @@ async def upload_photo(
         data=photo_detail,
     )
 
+
 @router.post(
     "/edited",
     response_model=ApiResponse[PhotoDetailResponse],
@@ -110,6 +120,7 @@ async def upload_edited_photo(
         message=MessageConstants.PHOTO_UPLOADED,
         data=photo_detail,
     )
+
 
 @router.get(
     "/{photo_id}",

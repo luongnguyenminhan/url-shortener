@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 class PhotoStatus(str, Enum):
     """Photo status enumeration"""
+
     ORIGIN = "origin"
     SELECTED = "selected"
     EDITED = "edited"

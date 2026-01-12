@@ -106,6 +106,7 @@ def get_by_project(
         query = query.filter(Photo.is_selected == False)
     elif status == PhotoStatus.EDITED:
         from app.models.photo_version import PhotoVersion
+
         query = query.join(PhotoVersion, PhotoVersion.photo_id == Photo.id).filter(PhotoVersion.version_type == VersionType.EDITED.value)
 
     return query.offset(pagination_params.skip).limit(pagination_params.limit).all()
@@ -121,6 +122,7 @@ def count_by_project(db: Session, project_id: UUID, status: Optional[PhotoStatus
         query = query.filter(Photo.is_selected == False)
     elif status == PhotoStatus.EDITED:
         from app.models.photo_version import PhotoVersion
+
         query = query.join(PhotoVersion, PhotoVersion.photo_id == Photo.id).filter(PhotoVersion.version_type == VersionType.EDITED.value)
 
     return query.count()

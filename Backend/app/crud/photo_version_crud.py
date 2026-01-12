@@ -15,9 +15,7 @@ def create_photo_version(
     image_url: str,
 ) -> PhotoVersion:
     """Create a new PhotoVersion"""
-    existed_photo_version = get_by_photo_and_version_type(
-        db, photo_id, version_type
-    )
+    existed_photo_version = get_by_photo_and_version_type(db, photo_id, version_type)
     if existed_photo_version:
         return existed_photo_version
     db_photo_version = PhotoVersion(
@@ -27,6 +25,7 @@ def create_photo_version(
     )
     db.add(db_photo_version)
     return db_photo_version
+
 
 def get_by_photo_and_version_type(
     db: Session,

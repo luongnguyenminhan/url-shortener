@@ -57,11 +57,7 @@ async def _download_and_process_photo_image(
 
     try:
         # Download from MinIO
-        photo_filename = (
-            photo.filename
-            if not is_thumbnail
-            else f"{photo.filename.rsplit('.', 1)[0]}.webp"
-        )
+        photo_filename = photo.filename if not is_thumbnail else f"{photo.filename.rsplit('.', 1)[0]}.webp"
         minio_path = f"{photo.project_id}/{version.value}/{photo_filename}"
         file_bytes = download_file_from_minio(
             bucket_name=settings.MINIO_BUCKET_NAME,
@@ -78,9 +74,7 @@ async def _download_and_process_photo_image(
                 )
                 if not file_bytes:
                     return None
-                file_bytes = convert_to_webp(
-                    file_bytes, quality=85
-                )  # Convert to WebP on-the-fly
+                file_bytes = convert_to_webp(file_bytes, quality=85)  # Convert to WebP on-the-fly
                 # upload webp to minio for future requests
                 webp_path = f"{photo.project_id}/{version.value}/{photo.filename.rsplit('.', 1)[0]}.webp"
                 upload_bytes_to_minio(
@@ -130,9 +124,7 @@ def validate_file(file: UploadFile) -> None:
 
     # Validate file extension
     filename_lower = file.filename.lower() if file.filename else ""
-    has_valid_extension = any(
-        filename_lower.endswith(ext) for ext in ALLOWED_EXTENSIONS
-    )
+    has_valid_extension = any(filename_lower.endswith(ext) for ext in ALLOWED_EXTENSIONS)
     if not has_valid_extension:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -229,9 +221,7 @@ async def upload_photo(
             )
 
         # 6. Create PhotoVersion for original
-        image_url = (
-            f"{settings.MINIO_PUBLIC_URL}/{settings.MINIO_BUCKET_NAME}/{minio_path}"
-        )
+        image_url = f"{settings.MINIO_PUBLIC_URL}/{settings.MINIO_BUCKET_NAME}/{minio_path}"
         photo_version = PhotoVersion(
             photo_id=photo.id,
             version_type=VersionType.ORIGINAL.value,
@@ -302,9 +292,7 @@ async def upload_edited_photo(
         )
 
     # 3. Check filename uniqueness
-    related_photo = photo_crud.get_by_filename_with_variant(
-        db, project_id, file.filename
-    )
+    related_photo = photo_crud.get_by_filename_with_variant(db, project_id, file.filename)
     if not related_photo:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -353,12 +341,8 @@ async def upload_edited_photo(
             )
 
         # 6. Create PhotoVersion for original
-        image_url = (
-            f"{settings.MINIO_PUBLIC_URL}/{settings.MINIO_BUCKET_NAME}/{minio_path}"
-        )
-        photo_version = photo_version_crud.create_photo_version(
-            db, related_photo.id, VersionType.EDITED, image_url
-        )
+        image_url = f"{settings.MINIO_PUBLIC_URL}/{settings.MINIO_BUCKET_NAME}/{minio_path}"
+        photo_version = photo_version_crud.create_photo_version(db, related_photo.id, VersionType.EDITED, image_url)
         db.flush()  # Get the photo.id without committing
 
         # 7. Commit transaction
@@ -425,9 +409,7 @@ def get_photo_by_id(
         return None
 
     # Get original version
-    photo_version = photo_version_crud.get_by_photo_and_version_type(
-        db, photo_id, VersionType.ORIGINAL
-    )
+    photo_version = photo_version_crud.get_by_photo_and_version_type(db, photo_id, VersionType.ORIGINAL)
 
     if not photo_version:
         return None
@@ -534,9 +516,7 @@ async def get_photo_image(
     if not project or project.owner_id != user.id:
         return None
     # Get original version
-    photo_version = photo_version_crud.get_by_photo_and_version_type(
-        db, photo_id, version
-    )
+    photo_version = photo_version_crud.get_by_photo_and_version_type(db, photo_id, version)
 
     if not photo_version:
         return None
@@ -597,8 +577,6 @@ def get_photo_meta_by_id_user(
 
     # 4. Convert to response model
     photo_meta = PhotoMetaResponse.model_validate(photo)
-    photo_meta.comments = [
-        PhotoCommentResponse.model_validate(comment) for comment in comments
-    ]
+    photo_meta.comments = [PhotoCommentResponse.model_validate(comment) for comment in comments]
 
     return photo_meta

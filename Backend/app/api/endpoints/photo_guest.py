@@ -79,12 +79,7 @@ def list_project_photos(
     db: Session = Depends(get_db),
 ) -> ApiResponse:
     """Get all photos in a project with optional status filter using project token"""
-    photos, total = photo_guest_service.get_project_photos_guest(
-        db=db,
-        project_token=project_token,
-        pagination_params=pagination_params,
-        status=status
-    )
+    photos, total = photo_guest_service.get_project_photos_guest(db=db, project_token=project_token, pagination_params=pagination_params, status=status)
 
     page = (pagination_params.skip // pagination_params.limit) + 1
     pagination_meta = create_pagination_meta(page, pagination_params.limit, total)
