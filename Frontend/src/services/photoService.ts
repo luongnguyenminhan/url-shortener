@@ -8,7 +8,7 @@ export const photoService = {
     // Get all photos for a project
     getPhotosByProject: async (
         projectId: string,
-        params?: { page?: number; limit?: number; status?: 'origin' | 'selected' | 'edited'; sort_by?: string; sort_order?: 'asc' | 'desc'; search?: string }
+        params?: { page?: number; limit?: number; skip?: number; status?: 'origin' | 'selected' | 'edited'; sort_by?: string; sort_order?: 'asc' | 'desc'; search?: string }
     ): Promise<{ data: Photo[]; meta: PhotoListMeta }> => {
         const response = await axiosInstance.get<
             ApiResponse<Photo[]> & { meta: PhotoListMeta }
@@ -22,8 +22,8 @@ export const photoService = {
     // Get single photo image (returns blob URL with authentication)
     getPhotoImage: async (photoId: string, params?: { w?: number; h?: number; is_thumbnail?: boolean; version?: 'original' | 'edited' }): Promise<string> => {
         const query = new URLSearchParams();
-        if (params?.w) query.append('w', params.w.toString());
-        if (params?.h) query.append('h', params.h.toString());
+        // if (params?.w) query.append('w', params.w.toString());
+        // if (params?.h) query.append('h', params.h.toString());
         if (params?.is_thumbnail !== undefined) query.append('is_thumbnail', params.is_thumbnail.toString());
         if (params?.version) query.append('version', params.version);
         const queryString = query.toString();
@@ -107,6 +107,15 @@ export const photoService = {
 
     deletePhoto: async (photoId: string): Promise<void> => {
         await axiosInstance.delete(`${BASE_URL}/photos/${photoId}`);
+    },
+
+    // Add comment to photo
+    addComment: async (photoId: string, content: string): Promise<PhotoComment> => {
+        const response = await axiosInstance.post<ApiResponse<PhotoComment>>(
+            `${BASE_URL}/${photoId}/comments`,
+            { content }
+        );
+        return response.data.data!;
     },
 
 };

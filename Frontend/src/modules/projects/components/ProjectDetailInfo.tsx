@@ -18,6 +18,7 @@ import { showSuccessToast } from '@/hooks/useShowToast';
 interface ProjectDetailInfoProps {
     project: ProjectDetailResponse;
     onStatusUpdate?: () => void;
+    variant?: 'card' | 'flat';
 }
 
 const statusColors: Record<string, 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error'> = {
@@ -28,7 +29,7 @@ const statusColors: Record<string, 'default' | 'primary' | 'secondary' | 'succes
     completed: 'success',
 };
 
-export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, onStatusUpdate }) => {
+export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, onStatusUpdate, variant = 'card' }) => {
     const { t } = useTranslation('projects');
     const theme = useTheme();
 
@@ -75,7 +76,9 @@ export const ProjectDetailInfo: React.FC<ProjectDetailInfoProps> = ({ project, o
         <Card sx={{
             height: '100%',
             bgcolor: theme.palette.mode === 'light' ? '#ffffff' : '#343a40',
-            boxShadow: 'var(--shadow-md)',
+            boxShadow: variant === 'card' ? 'var(--shadow-md)' : 'none',
+            border: variant === 'flat' ? 'none' : undefined,
+            borderRadius: variant === 'flat' ? 0 : undefined,
         }}>
             <CardContent>
                 <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ color: theme.palette.mode === 'light' ? '#212121' : '#c2c7d0' }}>

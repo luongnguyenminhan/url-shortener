@@ -15,10 +15,10 @@ export default defineConfig(({ mode }) => {
     },
 
     server: {
-      allowedHosts: ['photo.wc504.io.vn'],
+      allowedHosts: ['meobeo-studio.azurewebsites.net'],
       proxy: {
         '/be/api': {
-          target: 'https://photo.wc504.io.vn',
+          target: 'https://meobeo-studio.azurewebsites.net/',
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path,
@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
     },
 
     preview: {
-      allowedHosts: ['photo.wc504.io.vn'],
+      allowedHosts: ['meobeo-studio.azurewebsites.net'],
     },
   }
 })

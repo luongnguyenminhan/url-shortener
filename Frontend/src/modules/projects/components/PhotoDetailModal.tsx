@@ -42,8 +42,11 @@ interface PhotoDetailModalProps {
     onApprove?: (photoId: string) => void;
     onReject?: (photoId: string) => void;
     onToggleSelect?: (photoId: string, selected: boolean) => void;
+    onPhotoUpdate?: () => void;
     projectStatus?: string;
     projectId?: string;
+    hasMore?: boolean;
+    loadingMore?: boolean;
 }
 
 export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
@@ -56,11 +59,15 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     onApprove,
     onReject,
     onToggleSelect,
+    onPhotoUpdate,
     projectStatus,
     projectId,
+    hasMore,
+    loadingMore,
 }) => {
     const [imageUrl, setImageUrl] = useState<string>('');
     const [loading, setLoading] = useState(false);
+    const [imageLoading, setImageLoading] = useState(true);
     const [comments, setComments] = useState<PhotoComment[]>([]);
     const [loadingComments, setLoadingComments] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -71,11 +78,12 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
 
     const currentIndex = photos.findIndex((p) => p.id === photo?.id);
     const hasPrev = currentIndex > 0;
-    const hasNext = currentIndex < photos.length - 1;
+    const hasNext = currentIndex < photos.length - 1 || (hasMore && !loadingMore); // Allow next if we have more to load
 
     useEffect(() => {
         if (photo && open) {
             loadPhotoData();
+            setImageLoading(true);
         }
 
         return () => {
@@ -153,11 +161,16 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
         }
     };
 
-    const handleSendComment = () => {
-        if (newComment.trim()) {
-            // TODO: Implement send comment API
-            console.log('Sending comment:', newComment);
+    const handleSendComment = async () => {
+        if (!newComment.trim() || !photo) return;
+
+        try {
+            const comment = await photoService.addComment(photo.id, newComment);
+            setComments(prev => [comment, ...prev]);
             setNewComment('');
+        } catch (error) {
+            console.error('Failed to add comment:', error);
+            showErrorToast('Failed to add comment');
         }
     };
 
@@ -173,8 +186,14 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
             await photoService.uploadEditedPhoto(projectId, file);
             // Switch to edited version to show the new photo
             setSelectedVersion('edited');
-            // Reload photo data to update metadata
+            // Start loading new data
             await loadPhotoData();
+
+            // Notify parent to update
+            if (onPhotoUpdate) {
+                onPhotoUpdate();
+            }
+
             // Show success message
             showSuccessToast('Đã tải lên ảnh đã chỉnh sửa thành công');
         } catch (err: any) {
@@ -286,7 +305,7 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                                     bgcolor: 'white',
                                     boxShadow: '0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15)',
                                 },
-                                zIndex: 1,
+                                zIndex: 10,
                             }}
                         >
                             <NavigateBefore />
@@ -294,23 +313,47 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                     )}
 
                     {/* Image */}
-                    {loading ? (
-                        <CircularProgress sx={{ color: '#1a73e8' }} />
-                    ) : error ? (
-                        <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
-                    ) : (
-                        <Box
-                            component="img"
-                            src={imageUrl}
-                            alt={photo.filename}
-                            sx={{
-                                maxWidth: showInfo ? 'calc(100% - 32px)' : 'calc(100% - 32px)',
-                                maxHeight: 'calc(100% - 32px)',
-                                objectFit: 'contain',
-                                borderRadius: 1,
-                            }}
-                        />
-                    )}
+                    <Box
+                        sx={{
+                            position: 'relative',
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        {(loading || imageLoading) && (
+                            <CircularProgress
+                                size={50}
+                                sx={{
+                                    color: '#1a73e8',
+                                    position: 'absolute',
+                                    zIndex: 1,
+                                }}
+                            />
+                        )}
+
+                        {!loading && error ? (
+                            <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
+                        ) : !loading && imageUrl ? (
+                            <Box
+                                component="img"
+                                src={imageUrl}
+                                alt={photo.filename}
+                                onLoad={() => setImageLoading(false)}
+                                onError={() => setImageLoading(false)}
+                                sx={{
+                                    maxWidth: showInfo ? 'calc(100% - 32px)' : 'calc(100% - 32px)',
+                                    maxHeight: 'calc(100% - 32px)',
+                                    objectFit: 'contain',
+                                    borderRadius: 1,
+                                    opacity: imageLoading ? 0.5 : 1,
+                                    transition: 'opacity 0.2s',
+                                }}
+                            />
+                        ) : null}
+                    </Box>
 
                     {/* Next Button */}
                     {hasNext && (
@@ -327,7 +370,7 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                                     bgcolor: 'white',
                                     boxShadow: '0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15)',
                                 },
-                                zIndex: 1,
+                                zIndex: 10,
                             }}
                         >
                             <NavigateNext />

@@ -5,7 +5,6 @@
         "loadPhotosError": "Không thể tải danh sách ảnh",
         "notFound": "Không tìm thấy dự án",
         "goBack": "Quay lại",
-        "uploadPhotos": "Tải lên ảnh",
         "photoList": "Danh sách ảnh",
         "photoSelected": "Đã chọn ảnh",
         "photoDeselected": "Đã bỏ chọn ảnh",
@@ -101,7 +100,8 @@
         "confirm": "Xác nhận",
         "authSuccess": "Xác thực thành công!",
         "loadPhotoError": "Không thể tải ảnh. Vui lòng thử lại sau.",
-        "sentPhotos": "Đã gửi {{count}} ảnh cho Photographer!"
+        "sentPhotos": "Đã gửi {{count}} ảnh cho Photographer!",
+        "loadMore": "Tải thêm"
     },
     "createSuccess": "Tạo dự án thành công",
     "updateSuccess": "Cập nhật dự án thành công",
@@ -123,6 +123,43 @@
         "retry": "Thử lại",
         "clearAll": "Xóa tất cả",
         "uploading": "Đang upload...",
-        "uploadButton": "Upload {{count}} ảnh"
+        "uploadButton": "Upload {{count}} ảnh",
+        "original": "Ảnh gốc",
+        "edited": "Ảnh đã chỉnh sửa"
+    },
+    "overview": "Tổng quan",
+    "tabs": {
+        "overview": "Tổng quan",
+        "photos": "Hình ảnh",
+        "upload": "Tải lên"
+    },
+    "stats": "Thống kê",
+    "expiryInfo": "Dự án hết hạn trong",
+    "updateError": "Không thể cập nhật dự án",
+    "filter": {
+        "all": "Tất cả ảnh",
+        "selected": "Đã chọn",
+        "edited": "Đã chỉnh sửa"
+    },
+    "createProject": "Tạo Dự Án Mới",
+    "editProject": "Chỉnh Sửa Dự Án",
+    "deleteProject": "Xóa Dự Án",
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa dự án: {{title}}?",
+    "shareProject": "Chia Sẻ Dự Án",
+    "shareProjectDescription": "Tạo link chia sẻ cho",
+    "expiresIn": "Hết hạn sau",
+    "linkExpiresAt": "Link này sẽ hết hạn vào",
+    "generateLink": "Tạo Link",
+    "shareLinkGenerated": "Đã tạo link chia sẻ thành công",
+    "shareLinkError": "Không thể tạo link chia sẻ",
+    "tokenAlreadyExists": "Link chia sẻ cho dự án này đã tồn tại. Vui lòng đợi hết hạn hoặc liên hệ hỗ trợ.",
+    "form": {
+        "title": "Tên Dự Án",
+        "status": "Trạng thái",
+        "clientNotes": "Ghi chú khách hàng",
+        "expiredDate": "Ngày hết hạn",
+        "expiredDateHelp": "Đặt ngày hết hạn cho khách hàng truy cập",
+        "expiredDays": "Hạn (ngày)",
+        "expiredDaysHelp": "Số ngày hiệu lực cho khách hàng truy cập (mặc định: 10 ngày)"
     }
 }

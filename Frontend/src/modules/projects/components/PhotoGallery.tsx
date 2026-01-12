@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Box,
     ImageList,
@@ -8,6 +9,7 @@ import {
     Checkbox,
     Chip,
     alpha,
+    Button,
 } from '@mui/material';
 import {
     CheckCircle,
@@ -15,6 +17,7 @@ import {
     ThumbDown,
     ImageOutlined,
     Edit as EditIcon,
+    ExpandMore,
 } from '@mui/icons-material';
 import type { Photo } from '@/types/photo.type';
 import { photoService } from '@/services/photoService';
@@ -27,6 +30,9 @@ interface PhotoGalleryProps {
     onPhotoUpdate?: () => void;
     projectStatus?: string;
     projectId?: string;
+    onLoadMore?: () => void;
+    hasMore?: boolean;
+    loadingMore?: boolean;
 }
 
 export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
@@ -36,7 +42,11 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     onPhotoUpdate,
     projectStatus,
     projectId,
+    onLoadMore,
+    hasMore = false,
+    loadingMore = false,
 }) => {
+    const { t } = useTranslation(['projects', 'translation']);
     const [hoveredPhoto, setHoveredPhoto] = useState<string | null>(null);
     const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
     const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
@@ -45,20 +55,32 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
     // Load thumbnail images
+    const loadedIds = useRef<Set<string>>(new Set());
+
+    // Load thumbnail images
     useEffect(() => {
         const loadImages = async () => {
+            // Find photos that haven't been loaded yet
+            const newPhotos = photos.filter(p => !loadedIds.current.has(p.id));
+
+            if (newPhotos.length === 0) {
+                setLoadingImages(false);
+                return;
+            }
+
             setLoadingImages(true);
-            const urls: Record<string, string> = {};
+            const newUrls: Record<string, string> = {};
 
             // Load images in batches for better performance
             const batchSize = 10;
-            for (let i = 0; i < photos.length; i += batchSize) {
-                const batch = photos.slice(i, i + batchSize);
+            for (let i = 0; i < newPhotos.length; i += batchSize) {
+                const batch = newPhotos.slice(i, i + batchSize);
                 await Promise.all(
                     batch.map(async (photo) => {
                         try {
                             const url = await photoService.getPhotoImage(photo.id, { w: 400, h: 400, is_thumbnail: true });
-                            urls[photo.id] = url;
+                            newUrls[photo.id] = url;
+                            loadedIds.current.add(photo.id);
                         } catch (error) {
                             console.error(`Failed to load image for photo ${photo.id}:`, error);
                         }
@@ -66,7 +88,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                 );
             }
 
-            setImageUrls(urls);
+            setImageUrls(prev => ({ ...prev, ...newUrls }));
             setLoadingImages(false);
         };
 
@@ -76,15 +98,26 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             setLoadingImages(false);
         }
 
-        // Cleanup blob URLs when component unmounts or photos change
-        return () => {
-            Object.values(imageUrls).forEach((url) => {
-                if (url.startsWith('blob:')) {
-                    URL.revokeObjectURL(url);
-                }
-            });
-        };
+        // Cleanup blob URLs when component unmounts - handled separately?
+        // Actually we should clean up based on diff, but for now simple cleanup on unmount is safer.
+        // We can keep the return cleanup below, but we need to be careful not to revoke URLs that are still in use if we re-mount? 
+        // The return cleanup below runs on every photo change if in dependency array, which is bad if we merge state.
     }, [photos]);
+
+    // Separate effect for cleanup
+    useEffect(() => {
+        return () => {
+            setImageUrls(currentUrls => {
+                Object.values(currentUrls).forEach((url) => {
+                    if (url.startsWith('blob:')) {
+                        URL.revokeObjectURL(url);
+                    }
+                });
+                return {};
+            });
+            loadedIds.current.clear();
+        };
+    }, []);
 
     const handlePhotoClick = (photo: Photo) => {
         setDetailPhoto(photo);
@@ -97,8 +130,14 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         const currentIndex = photos.findIndex((p) => p.id === detailPhoto.id);
         if (direction === 'prev' && currentIndex > 0) {
             setDetailPhoto(photos[currentIndex - 1]);
-        } else if (direction === 'next' && currentIndex < photos.length - 1) {
-            setDetailPhoto(photos[currentIndex + 1]);
+        } else if (direction === 'next') {
+            if (currentIndex < photos.length - 1) {
+                setDetailPhoto(photos[currentIndex + 1]);
+            } else if (hasMore && onLoadMore && !loadingMore) {
+                // Trigger auto-load if at the end
+                onLoadMore();
+                // Note: The modal will update when photos prop changes
+            }
         }
     };
 
@@ -135,7 +174,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    if (loading || loadingImages) {
+    if ((loading || loadingImages) && photos.length === 0) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
                 <CircularProgress />
@@ -201,20 +240,37 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                             }}
                         >
                             {/* Image */}
-                            <Box
-                                component="img"
-                                src={getImageUrl(photo)}
-                                alt={photo.filename}
-                                loading="lazy"
-                                onClick={() => handlePhotoClick(photo)}
-                                sx={{
-                                    width: '100%',
-                                    height: 200,
-                                    objectFit: 'cover',
-                                    display: 'block',
-                                    bgcolor: '#f5f5f5',
-                                }}
-                            />
+                            {getImageUrl(photo) ? (
+                                <Box
+                                    component="img"
+                                    src={getImageUrl(photo)}
+                                    alt={photo.filename}
+                                    loading="lazy"
+                                    onClick={() => handlePhotoClick(photo)}
+                                    sx={{
+                                        width: '100%',
+                                        height: 200,
+                                        objectFit: 'cover',
+                                        display: 'block',
+                                        bgcolor: '#f5f5f5',
+                                    }}
+                                />
+                            ) : (
+                                <Box
+                                    onClick={() => handlePhotoClick(photo)}
+                                    sx={{
+                                        width: '100%',
+                                        height: 200,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        bgcolor: '#f5f5f5',
+                                        cursor: 'wait',
+                                    }}
+                                >
+                                    <CircularProgress size={30} />
+                                </Box>
+                            )}
 
                             {/* Overlay on hover */}
                             {isHovered && (
@@ -347,7 +403,21 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                         </ImageListItem>
                     );
                 })}
+
             </ImageList>
+
+            {hasMore && (
+                <Box display="flex" justifyContent="center" mt={4} mb={2}>
+                    <Button
+                        variant="outlined"
+                        onClick={onLoadMore}
+                        disabled={loadingMore}
+                        startIcon={loadingMore ? <CircularProgress size={20} /> : <ExpandMore />}
+                    >
+                        {loadingMore ? t('common.loading') : t('shared.loadMore')}
+                    </Button>
+                </Box>
+            )}
 
             {/* Photo Detail Modal */}
             <PhotoDetailModal
@@ -360,8 +430,11 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                 }}
                 onNavigate={handleNavigate}
                 onDelete={onPhotoDelete}
+                onPhotoUpdate={onPhotoUpdate}
                 projectStatus={projectStatus}
                 projectId={projectId}
+                hasMore={hasMore}
+                loadingMore={loadingMore}
             />
         </>
     );
