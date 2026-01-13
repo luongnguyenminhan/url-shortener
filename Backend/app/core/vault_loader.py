@@ -87,6 +87,7 @@ def load_config_from_api_v2() -> None:
     vault_addr = os.getenv("VAULT_ADDR")
     logger.info(f"[V2] VAULT_ADDR: {vault_addr}")
     vault_token = os.getenv("VAULT_TOKEN")
+    secret_path = os.getenv("VAULT_SECRET_PATH", "secret/data/PhotoHelper")
     service_env = os.getenv("PYTHON_ENVIRONMENT", "development").lower()
     logger.info(f"[V2] PYTHON_ENVIRONMENT: {service_env}")
 
@@ -97,10 +98,10 @@ def load_config_from_api_v2() -> None:
         logger.info("💡 For Docker deployment, ensure VAULT_ADDR and VAULT_TOKEN are set")
         return
 
-    _load_from_vault_api_v2(vault_addr, vault_token, service_env)
+    _load_from_vault_api_v2(vault_addr, vault_token, secret_path, service_env)
 
 
-def _load_from_vault_api_v2(vault_addr: str, vault_token: str, service_env: str) -> None:
+def _load_from_vault_api_v2(vault_addr: str, vault_token: str, secret_path: str, service_env: str) -> None:
     """
     [V2] Load secrets from Vault API and set environment variables.
 
@@ -109,8 +110,8 @@ def _load_from_vault_api_v2(vault_addr: str, vault_token: str, service_env: str)
         vault_token: Vault authentication token
         service_env: Environment name (e.g., development, staging, production)
     """
-    secret_path = f"secret/data/PhotoHelper/{service_env}"
-    vault_url = f"{vault_addr.rstrip('/')}/v1/{secret_path}"
+    token_path = f"{secret_path}/{service_env}"
+    vault_url = f"{vault_addr.rstrip('/')}/v1/{token_path}"
 
     try:
         headers = {
