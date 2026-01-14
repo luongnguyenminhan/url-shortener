@@ -8,7 +8,10 @@ declare module "axios" {
 }
 
 
+import { getApiEndpoint } from "./envConfig";
+
 const options = {
+    baseURL: getApiEndpoint(),
     headers: {
         "Content-Type": "application/json",
     },

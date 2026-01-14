@@ -16,14 +16,6 @@ export default defineConfig(({ mode }) => {
 
     server: {
       allowedHosts: ['meobeo-studio.azurewebsites.net'],
-      proxy: {
-        '/be/api': {
-          target: 'https://meobeo-studio.azurewebsites.net/',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path,
-        },
-      },
     },
 
     preview: {

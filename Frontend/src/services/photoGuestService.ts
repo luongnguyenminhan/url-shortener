@@ -1,5 +1,5 @@
 import axiosInstance from '@/config/axiosInstance';
-import type { PaginatedResponse, PaginationParams, ApiResponse } from '@/types/common.type';
+import type { PaginatedResponse, ApiResponse } from '@/types/common.type';
 import type { Photo } from '@/types/photo.type';
 
 const BASE_URL = '/be/api/v1/photos-guest';
@@ -63,7 +63,8 @@ export const photoGuestService = {
         const params = new URLSearchParams({ project_token: projectToken });
         // if (width) params.append('w', width.toString());
         // if (height) params.append('h', height.toString());
-        if (isThumbnail !== undefined) params.append('is_thumbnail', isThumbnail.toString());
+        // if (isThumbnail !== undefined) params.append('is_thumbnail', isThumbnail.toString());
+        params.append('is_thumbnail', 'true');
         if (version) params.append('version', version);
 
         // Use relative URL that will work with axiosInstance's baseURL
