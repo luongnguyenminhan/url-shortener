@@ -24,7 +24,8 @@ export const photoService = {
         const query = new URLSearchParams();
         // if (params?.w) query.append('w', params.w.toString());
         // if (params?.h) query.append('h', params.h.toString());
-        if (params?.is_thumbnail !== undefined) query.append('is_thumbnail', params.is_thumbnail.toString());
+        // if (params?.is_thumbnail !== undefined) query.append('is_thumbnail', params.is_thumbnail.toString());
+        query.append('is_thumbnail', 'true');
         if (params?.version) query.append('version', params.version);
         const queryString = query.toString();
 

@@ -19,6 +19,26 @@ const theme = createTheme({
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
   },
+  components: {
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          // Reset global button styles
+          backgroundColor: 'transparent',
+          color: 'inherit',
+          borderRadius: 0,
+          '&:hover': {
+            backgroundColor: 'rgba(25, 118, 210, 0.04)', // Light primary wash on hover
+            color: 'inherit',
+          },
+          '&.Mui-selected': {
+            backgroundColor: 'transparent',
+            color: '#1976d2', // Primary color for selected state
+          },
+        },
+      },
+    },
+  },
 })
 
 function App() {

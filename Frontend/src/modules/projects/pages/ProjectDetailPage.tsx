@@ -292,7 +292,7 @@ export const ProjectDetailPage = () => {
                                         {t('stats', 'Statistics')}
                                     </Typography>
                                     <Grid container spacing={2}>
-                                        <Grid item xs={6} sm={3}>
+                                        <Grid size={{ xs: 6, sm: 3 }}>
                                             <Stack alignItems="center">
                                                 <ImageIcon color="primary" fontSize="large" />
                                                 <Typography variant="h4">{project.images_count}</Typography>
